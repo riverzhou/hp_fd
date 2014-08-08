@@ -4,6 +4,7 @@ from fd_global          import global_info
 from fd_channel         import channel_center
 from fd_redis           import redis_worker
 
+from pp_baseclass       import pp_thread
 from pp_sslproto        import *
 
 class fd_login():
@@ -34,7 +35,7 @@ class fd_login():
                         self.client.name_login  = ack_val['name']
                         break
 
-class fd_image(pp_subthread):
+class fd_image(pp_thread):
         image_timeout = 5 
         def __init__(self, client, count, price):
                 self.client = client
@@ -89,7 +90,7 @@ class fd_image(pp_subthread):
         def close(self):
                 pass
 
-class fd_price(pp_subthread):
+class fd_price(pp_thread):
         def __init__(self, client, count, price, group):
                 self.client = client
                 self.count  = count
@@ -133,7 +134,7 @@ class fd_price(pp_subthread):
         def close(self):
                 pass
 
-class fd_decode(pp_subthread):
+class fd_decode(pp_thread):
         image_timeout = 20 
 
         def __init__(self, client, count, sid, picture):
@@ -164,7 +165,7 @@ class fd_decode(pp_subthread):
                 waittime = timeout if timeout != None else self.image_timeout
                 return self.event_finish.wait(waittime)
 
-class fd_bid(pp_subthread):
+class fd_bid(pp_thread):
         bid_timeout = 2
 
         def __init__(self, client, count):
@@ -214,7 +215,7 @@ class fd_bid(pp_subthread):
                                 continue
                         break
 
-class fd_client(pp_subthread):
+class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
                 self.machine        = proto_machine()
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)

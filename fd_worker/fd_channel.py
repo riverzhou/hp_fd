@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+from threading          import Thread, Event, Lock, Semaphore
+from queue              import Queue, LifoQueue
+
+from pp_baseclass       import pp_thread
 
 class fd_channel():
         def __init__(self):
@@ -84,7 +88,7 @@ class pp_login_channel_manager(pp_thread):
         def main(self):
                 while True:
                         self.manager()
-                        sleep(getsleeptime(self.time_interval)
+                        sleep(getsleeptime(self.time_interval))
 
         def manage_chanel(self):
                 global channel_center
@@ -124,7 +128,7 @@ class pp_toubiao_channel_manager(pp_thread):
         def main(self):
                 while True:
                         self.manager()
-                        sleep(getsleeptime(self.time_interval)
+                        sleep(getsleeptime(self.time_interval))
 
         def manage_chanel(self):
                 global channel_center

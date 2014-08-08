@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
+from threading          import Thread, Event, Lock, Semaphore
 
-class fd_global()
+class fd_global():
         def __init__(self):
                 self.flag_gameover  = False
                 self.flag_gamebegin = False
