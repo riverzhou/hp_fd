@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
+from threading          import Event
+from time               import sleep
+from traceback          import print_exc
+
 from fd_global          import global_info
-from fd_channel         import channel_center
+from fd_channel         import channel_center, print_channel_number, channel_test
 from fd_redis           import redis_worker
 
 from pp_baseclass       import pp_thread
 from pp_sslproto        import *
+from pp_server          import server_dict
 
 class fd_login():
         def __init__(self, client):
@@ -16,28 +21,31 @@ class fd_login():
                 proto   = self.client.proto
                 req     = proto.make_login_req()
                 while True:
-                        channel = channel_center.get_channel()
-                        if channel == None :
+                        channel_center.login_request_increase()
+                        group, channel = channel_center.get_channel('login')
+                        channel_center.login_request_decrease()
+                        if channel == None:
                                 continue
-                        head = proto.make_ssl_head(server_dict[channel.group]['login'])
-                        if channel.https_write(req, head) == False :
+                        head = proto.make_ssl_head(server_dict[group]['login']['name'])
+                        info_val = channel_center.pyget(channel, req, head)
+                        if info_val == None:
                                 continue
-                        info_val  = channel.https_read()
-                        if info_val == None :
+                        if info_val['status'] != 200 :
+                                print('fd_login status', info_val['status'])
                                 continue
-                        if info_val['status'] != '200' :
-                                continue
-                        #ack_sid   = proto.get_sid_from_head(info_val['head'])
                         ack_val   = proto.parse_login_ack(info_val['body'])
-                        if 'pid' not in ack_val :
+                        if 'pid' not in ack_val or 'name' not in ack_val:
                                 continue
                         self.client.pid_login   = ack_val['pid']
                         self.client.name_login  = ack_val['name']
+                        print('fd_login', ack_val['pid'], ack_val['name'])
                         break
 
 class fd_image(pp_thread):
         image_timeout = 5 
+
         def __init__(self, client, count, price):
+                super().__init__()
                 self.client = client
                 self.count  = count
                 self.price  = price
@@ -50,6 +58,7 @@ class fd_image(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
+                                print_exc()
                                 continue
                         else:
                                 break
@@ -59,27 +68,27 @@ class fd_image(pp_thread):
                 proto   = self.client.proto
                 req     = proto.make_image_req(self.price)
                 while True:
-                        channel = channel_center.get_channel()
+                        group, channel = channel_center.get_channel('toubiao')
                         if channel == None :
                                 continue
-                        head = proto.make_ssl_head(server_dict[channel.group]['toubiao'])
-                        if channel.https_write(req, head) == False :
-                                continue
-                        info_val  = channel.https_read()
+                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
+                        info_val = channel_center.pyget(channel, req, head)
                         if info_val == None :
                                 continue
-                        if info_val['status'] != '200' :
+                        if info_val['status'] != 200 :
+                                print('fd_image status', info_val['status'])
                                 continue
-                        ack_sid   = proto.get_sid_from_head(info_val['head'])
-                        ack_val   = proto.parse_image_ack(info_val['body'])
-                        if ack_sid == None or ack_sid == '' :
+                        ack_sid  = proto.get_sid_from_head(info_val['head'])
+                        ack_val  = proto.parse_image_ack(info_val['body'])
+                        if ack_sid == None or ack_sid == '':
                                 continue
-                        if 'image' not in ack_val :
+                        if 'image' not in ack_val:
                                 continue
-                        if ack_val['image'] == None or ack_val['image'] == '' :
+                        if ack_val['image'] == None or ack_val['image'] == '':
                                 continue
                         self.client.sid_bid[self.count]     = ack_sid
                         self.client.picture_bid[self.count] = ack_val['image']
+                        print('fd_image', self.count, ack_val['image'])
                         break
                 self.event_finish.set()
 
@@ -87,11 +96,9 @@ class fd_image(pp_thread):
                 waittime = timeout if timeout != None else self.image_timeout
                 return self.event_finish.wait(waittime)
 
-        def close(self):
-                pass
-
 class fd_price(pp_thread):
         def __init__(self, client, count, price, group):
+                super().__init__()
                 self.client = client
                 self.count  = count
                 self.price  = price
@@ -104,6 +111,7 @@ class fd_price(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
+                                print_exc()
                                 continue
                         else:
                                 break
@@ -115,33 +123,32 @@ class fd_price(pp_thread):
                 number  = self.client.number_bid[self.count]
                 req     = proto.make_price_req(self.price, number)
                 while True:
-                        channel = channel_center.get_channel()
+                        group, channel = channel_center.get_channel('toubiao')
                         if channel == None :
                                 continue
-                        head = proto.make_ssl_head(server_dict[channel.group]['toubiao'], sid)
-                        if channel.https_write(req, head) == False :
-                                continue
-                        info_val  = channel.https_read()
+                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
+                        info_val = channel_center.pyget(channel, req, head)
                         if info_val == None :
                                 continue
-                        if info_val['status'] != '200' :
+                        if info_val['status'] != 200 :
+                                print('fd_price status', info_val['status'])
                                 continue
-                        ack_val   = proto.parse_price_ack(info_val['body'])
+                        ack_val = proto.parse_price_ack(info_val['body'])
                         if 'price' in ack_val :
                                 self.client.price_bid[self.count] = ack_val['price']
+                        print('fd_price', self.count, self.group, ack_val)
                         break
 
-        def close(self):
-                pass
-
 class fd_decode(pp_thread):
-        image_timeout = 20 
+        decode_timeout = 30
 
         def __init__(self, client, count, sid, picture):
+                super().__init__()
                 self.client     = client
                 self.count      = count
                 self.sid        = sid
                 self.picture    = picture
+                self.event_finish = Event()
 
         def main(self):
                 while True :
@@ -150,37 +157,39 @@ class fd_decode(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
+                                print_exc()
                                 continue
                         else:
                                 break
 
         def do_decode(self):
                 global redis_worker
-                redis_worker.write_picture(sid, picture)
-                number = redis_worker.read_number(sid)
-                self.client.number_bid[self.count] = number
+                redis_worker.write_picture(self.sid, self.picture)
+                self.client.number_bid[self.count] = redis_worker.read_number(self.sid)
+                print('fd_decode', self.client.number_bid[self.count])
                 self.event_finish.set()
 
         def wait_for_finish(self, timeout = None):
-                waittime = timeout if timeout != None else self.image_timeout
+                waittime = timeout if timeout != None else self.decode_timeout
                 return self.event_finish.wait(waittime)
 
 class fd_bid(pp_thread):
         bid_timeout = 2
 
         def __init__(self, client, count):
+                super().__init__()
                 self.client = client
                 self.count  = count
 
         def main(self):
-                while True :
-                        try :
+                while True:
+                        try:
                                 self.do_bid()
                         except  KeyboardInterrupt:
                                 break
-                        except :
-                                pass
-                        else :
+                        except:
+                                print_exc()
+                        else:
                                 break
 
         def do_bid(self):
@@ -192,14 +201,16 @@ class fd_bid(pp_thread):
                         self.client.picture_bid[self.count] = None
                         image = fd_image(self.client, self.count, price)
                         image.start()
-                        if image.wait_for_finish() != True or self.client.sid_bid[self.count] == None or self.client.picture_bid[self.count] == None :
-                                #image.close()
+                        if image.wait_for_finish() != True :
+                                continue
+                        if self.client.sid_bid[self.count] == None or self.client.picture_bid[self.count] == None :
                                 continue
                         self.client.number_bid[self.count] = None
                         decode = fd_decode(self.client, self.count, self.client.sid_bid[self.count], self.client.picture_bid[self.count])
                         decode.start()
-                        if decode.wait_for_finish() != True or self.client.number_bid[self.count] == None:
-                                #decode.close()
+                        if decode.wait_for_finish() != True :
+                                continue
+                        if self.client.number_bid[self.count] == None :
                                 continue
                         break
 
@@ -217,6 +228,7 @@ class fd_bid(pp_thread):
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
+                super().__init__()
                 self.machine        = proto_machine()
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)
 
@@ -231,10 +243,7 @@ class fd_client(pp_thread):
                 self.price_bid      = [None, None, None]
 
         def main(self):
-                while True :
-                        if self.login.do_login() == True :
-                                break
-                        sleep(1)
+                self.login.do_login()
 
                 self.bid[0].start()
                 self.bid[0].wait_for_start()
@@ -245,6 +254,38 @@ class fd_client(pp_thread):
                 self.bid[2].start()
                 self.bid[2].wait_for_start()
 
-                self.event_stop.wait()
+                self.bid[0].wait_for_stop()
+                self.bid[1].wait_for_stop()
+                self.bid[2].wait_for_stop()
+
+#================================================
+
+if __name__ == '__main__':
+        global global_info
+        channel_test()
+        client = fd_client('12345678','1234')
+        client.start()
+        client.wait_for_start()
+        print_channel_number()
+
+        sleep(3)
+        global_info.price_bid[0] = 72600
+        global_info.event_image[0].set()
+        global_info.event_price[0].set()
+        print_channel_number()
+
+        sleep(20)
+        global_info.price_bid[1] = 73000
+        global_info.event_image[1].set()
+        global_info.event_price[1].set()
+        print_channel_number()
+
+        sleep(20)
+        global_info.price_bid[2] = 74000
+        global_info.event_image[2].set()
+        global_info.event_price[2].set()
+        print_channel_number()
+
+        client.wait_for_stop()
 
 
