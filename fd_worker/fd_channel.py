@@ -9,6 +9,8 @@ from traceback          import print_exc
 from pp_baseclass       import pp_thread
 from pp_server          import server_dict
 
+from pp_log             import logger, printer
+
 class fd_channel():
         def __init__(self):
                 #self.max_queue = = [{},{}]
@@ -60,6 +62,8 @@ class fd_channel():
                 self.lock_login_request.release()
 
         def pyget(self, handler, req, headers = {}):
+                printer.info(req)
+
                 try:
                         handler.request('GET', req, headers = headers)
                 except  KeyboardInterrupt:
@@ -81,6 +85,7 @@ class fd_channel():
                 key_val['head']    = str(ack.msg)
                 key_val['status']  = ack.status
 
+                printer.info(key_val['body'])
                 return key_val
 
 #-----------------------------------
