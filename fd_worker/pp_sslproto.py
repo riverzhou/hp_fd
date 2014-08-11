@@ -234,7 +234,8 @@ class proto_ssl():
                         key_val['errstring']= info_val['ERRORSTRING']
                         printer.error(string)
                 else:
-                        key_val['image']    = self.image_decode(info_val['IMAGE_CONTENT'])
+                        #key_val['image']    = self.image_decode(info_val['IMAGE_CONTENT'])
+                        key_val['image']    = info_val['IMAGE_CONTENT']
                 return key_val
 
         def make_price_req(self, price, image):
