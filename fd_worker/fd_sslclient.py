@@ -88,7 +88,6 @@ class fd_image(pp_thread):
                                 continue
                         self.client.sid_bid[self.count]     = ack_sid
                         self.client.picture_bid[self.count] = ack_val['image']
-                        print('fd_image', self.count, ack_val['image'])
                         break
                 self.event_finish.set()
 
@@ -136,7 +135,6 @@ class fd_price(pp_thread):
                         ack_val = proto.parse_price_ack(info_val['body'])
                         if 'price' in ack_val :
                                 self.client.price_bid[self.count] = ack_val['price']
-                        print('fd_price', self.count, self.group, ack_val)
                         break
 
 class fd_decode(pp_thread):
@@ -166,7 +164,6 @@ class fd_decode(pp_thread):
                 global redis_worker
                 redis_worker.put_request(self.sid, self.picture)
                 self.client.number_bid[self.count] = redis_worker.get_result(self.sid)
-                print('fd_decode', self.client.number_bid[self.count])
                 self.event_finish.set()
 
         def wait_for_finish(self, timeout = None):
@@ -213,6 +210,7 @@ class fd_bid(pp_thread):
                         if self.client.number_bid[self.count] == None :
                                 continue
                         break
+                print('do_bid image', self.count, self.client.sid_bid[self.count], self.client.number_bid[self.count])
 
                 global_info.event_price[self.count].wait()
                 while True:
@@ -225,6 +223,7 @@ class fd_bid(pp_thread):
                         if self.client.price_bid[self.count] == None:
                                 continue
                         break
+                print('do_bid price', self.count, self.client.price_bid[self.count])
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
@@ -266,25 +265,25 @@ if __name__ == '__main__':
         client = fd_client('12345678','1234')
         client.start()
         client.wait_for_start()
-        print_channel_number()
+        #print_channel_number()
 
         sleep(3)
         global_info.price_bid[0] = 72600
         global_info.event_image[0].set()
         global_info.event_price[0].set()
-        print_channel_number()
+        #print_channel_number()
 
-        sleep(20)
+        sleep(3)
         global_info.price_bid[1] = 73000
         global_info.event_image[1].set()
         global_info.event_price[1].set()
-        print_channel_number()
+        #print_channel_number()
 
-        sleep(20)
+        sleep(3)
         global_info.price_bid[2] = 74000
         global_info.event_image[2].set()
         global_info.event_price[2].set()
-        print_channel_number()
+        #print_channel_number()
 
         client.wait_for_stop()
 

@@ -79,10 +79,11 @@ class fd_redis_reader(pp_thread):
                         if val == None:
                                 sleep(0)
                                 continue
+                        #print('fd_redis_reader',val)
                         self.manager.put_number(val)
 
         def read(self):
-                return self.redis.blk_get_one(self.key_number)
+                return self.redis.blk_get_one(self.key_number).decode()
 
 
 class fd_redis_writer(pp_thread):
@@ -103,7 +104,7 @@ class fd_redis_writer(pp_thread):
                         self.write(val)
 
         def write(self, val):
-                return self.redis.put_one(self.key_image, val)
+                return self.redis.put_one(self.key_image, val.encode())
 
 
 class fd_dama_result():
@@ -117,9 +118,6 @@ class fd_dama_result():
 
         def get_number(self):
                 self.event.wait()
-                #self.event.wait(10)
-                #self.number = '111111'
-                print('fd_dama_result get_number', self.number)
                 return self.number
 
 
@@ -166,16 +164,15 @@ class fd_redis_manager(pp_thread):
                 return  ret
 
         def put_number(self, val):
-                return  self.queue_number.put(val)
+                ret = self.queue_number.put(val)
+                return  ret
 
         def get_result(self, sid):
-                print('get_result sid', sid)
                 if sid not in self.dict_result:
                         return None
                 return  self.dict_result[sid].get_number()
 
         def put_request(self, sid, image):
-                print('put_request sid', sid)
                 self.lock_result.acquire()
                 if sid not in self.dict_result:
                         self.dict_result[sid] = fd_dama_result()
@@ -193,12 +190,14 @@ class fd_redis_manager(pp_thread):
                         print_exc()
                 if ret == None:
                         return None, None
-                sid, number = info.split(',')
+                sid, number = ret.split(',')
                 return  sid, number
 
 #---------------------------------------------------
 
 redis_worker = fd_redis_manager()
+redis_worker.start()
+redis_worker.wait_for_start()
 
 #sleep(5)
 
