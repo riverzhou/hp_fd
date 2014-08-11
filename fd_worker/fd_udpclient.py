@@ -9,11 +9,13 @@ from time           import time, sleep, localtime, mktime, strptime, strftime
 from pp_baseclass   import pp_thread
 from pp_udpproto    import udp_proto
 from pp_server      import server_dict
+from fd_global      import global_info
 
 #=================================================
 
 def time_sub(end, begin):
         return int(mktime(strptime('1970-01-01 '+end, '%Y-%m-%d %H:%M:%S'))) - int(mktime(strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S')))
+
 
 def getsleeptime(interval):
         return  interval - time()%interval
@@ -51,20 +53,23 @@ class udp_worker(pp_thread):
 
         def __init__(self, acount, group):
                 global server_dict
-                super.__init__()
+                super().__init__()
 
-                self.bidno       = acount['bidno']
-                self.pid         = acount['pid']
-                self.group       = group
+                self.bidno          = acount['bidno']
+                self.pid            = acount['pid']
+                self.group          = group
 
-                self.server_addr = server_dict[group]['udp']['ip'], server_dict[group]['udp']['port']
+                self.server_addr    = server_dict[group]['udp']['ip'], server_dict[group]['udp']['port']
 
-                self.sock        = socket(AF_INET, SOCK_DGRAM)
+                self.sock           = socket(AF_INET, SOCK_DGRAM)
                 self.sock.settimeout(self.udp_timeout)
                 self.sock.bind(('',0))
 
-                self.proto       = udp_proto()
-                self.udp_format  = udp_format(self)
+                self.proto          = udp_proto()
+                self.udp_format     = udp_format(self)
+
+                self.current_code   = None
+                self.last_code      = None
 
         def stop(self):
                 if self.udp_format != None : self.udp_format.stop()
@@ -74,11 +79,7 @@ class udp_worker(pp_thread):
                                 self.sock.close()
                         except:
                                 pass
-                self.sock       = None
-                self.event_shot = None
-                self.price_shot = 0
-                self.flag_stop  = True
-                self.event_stop.set()
+                supper().stop()
 
         def logoff_udp(self):
                 try:
@@ -98,38 +99,53 @@ class udp_worker(pp_thread):
                 except:
                         print_exc()
 
-
-        def check_shot_price(self, cur_price):
-                if self.price_shot != 0 and self.event_shot != None and self.price_shot <= cur_price + 300 and self.price_shot >= cur_price - 300:
-                        try:
-                                self.event_shot.set()
-                        except:
-                                print_exc()
-
-        def check_image_price(self, cur_price, cur_time):
-                if self.list_trigger_time == None or self.list_trigger_event == None : return
-                list_t = list(map(lambda t: time_sub(cur_time, t), self.list_trigger_time))
-                for n in range(len(list_t)):
-                        if list_t[n] > 0 and list_t[n] <= 3 :
-                                self.list_trigger_event[n] = True
-
         def recv_udp(self):
                 while True:
                         try:
-                                if self.sock != None : udp_result = self.sock.recvfrom(1500)
+                                if self.sock != None:
+                                        udp_result = self.sock.recvfrom(1500)
                         except  (TimeoutError, OSError):
                                 return None
                         except :
                                 print_exc()
                                 return None
-
                         if self.flag_stop == True:
                                 return None
-
                         if udp_result[1] == self.server_addr:
                                 return udp_result[0]
 
+        def check_shot_price(self, cur_price):
+                global global_info
+
+                price = global_info.trigger_price[1]
+                if price != None and price <= cur_price + 300 and price >= cur_price - 300:
+                        global_info.event_price[1].set()
+
+                price = global_info.trigger_price[2]
+                if price != None and price <= cur_price + 300 and price >= cur_price - 300:
+                        global_info.event_price[2].set()
+
+        def check_image_time(self, cur_time, cur_price):
+                global global_info
+
+                time, price = global_info.trigger_image[0]
+                if time != None and price != None and time_sub(cur_time, time) > 0:
+                        global_info.set_trigger_price(0, price)
+                        global_info.event_price[0].set()
+                        global_info.event_image[0].set()
+
+                time, delta_price = global_info.trigger_image[1]
+                if time != None and delta_price != None and time_sub(cur_time, time) > 0:
+                        global_info.set_trigger_price(1, cur_price + delta_price)
+                        global_info.event_image[1].set()
+
+                time, delta_price = global_info.trigger_image[2]
+                if time != None and delta_price != None and time_sub(cur_time, time) > 0:
+                        global_info.set_trigger_price(2, cur_price + delta_price)
+                        global_info.event_image[2].set()
+
         def update_status(self):
+                global global_info
                 udp_recv = self.recv_udp()
                 if udp_recv == None:
                         return
@@ -144,9 +160,13 @@ class udp_worker(pp_thread):
                 if code == 'F':
                         return
 
+                self.current_code = code
                 if code == 'C':
-                        '''set gameover'''
+                        if self.last_code == 'A' or self.last_code == 'B':
+                                self.last_code = code
+                                global_info.flag_gameover = True
                         return
+                self.last_code = code
 
                 ctime = info_val['ltime']
                 stime = info_val['systime']
@@ -157,11 +177,8 @@ class udp_worker(pp_thread):
                 except:
                         return
 
-                global global_info
-                global_info.set_current_price(int_price)
-
                 self.check_shot_price(int_price)
-                self.check_image_price(int_price, stime)
+                self.check_image_time(stime, int_price)
 
         def main(self):
                 self.udp_format.start()
@@ -178,12 +195,18 @@ class udp_manager():
                 group = 0
                 for account in self.list_acount :
                         group = 1 if group == 0 else 0
-                        worker = udp_worker(acount, group)
+                        worker = udp_worker(account, group)
                         worker.start()
                         self.list_worker.append(worker)
 
-class fd_client(pp_thread):
-        pass
 
+udp_accounts = [
+        {'bidno':'12345678', 'pid':'123456789012345678'},
+        {'bidno':'12345677', 'pid':'123456789012345677'},
+        {'bidno':'12345676', 'pid':'123456789012345676'},
+        {'bidno':'12345675', 'pid':'123456789012345675'},
+        ]
 
+fd_udp = udp_manager(udp_accounts)
 
+sleep(100)
