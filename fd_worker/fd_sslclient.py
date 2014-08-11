@@ -164,8 +164,8 @@ class fd_decode(pp_thread):
 
         def do_decode(self):
                 global redis_worker
-                redis_worker.write_picture(self.sid, self.picture)
-                self.client.number_bid[self.count] = redis_worker.read_number(self.sid)
+                redis_worker.put_request(self.sid, self.picture)
+                self.client.number_bid[self.count] = redis_worker.get_result(self.sid)
                 print('fd_decode', self.client.number_bid[self.count])
                 self.event_finish.set()
 
