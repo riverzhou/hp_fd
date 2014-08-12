@@ -21,6 +21,7 @@ def test(redis):
         ack = ','.join([sid, number])
         redis.put_one(key_number, ack.encode())
         print('sid number', sid, number)
+        sleep(0)
 
 
 if __name__ == '__main__':

@@ -6,3 +6,5 @@
 bad.jpg
 __pycache__
 core
+*.exe
+
