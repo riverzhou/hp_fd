@@ -109,8 +109,8 @@ class pp_channel_maker(pp_thread):
                 global channel_center, server_dict
                 self.manager.maker_in()
                 host    = server_dict[self.group][self.server]['ip']
-                #handler = HTTPSConnection(host)
-                handler = HTTPConnection(host)
+                handler = HTTPSConnection(host)
+                #handler = HTTPConnection(host)
                 handler._http_vsn = 10
                 handler._http_vsn_str = 'HTTP/1.0'
                 try:
