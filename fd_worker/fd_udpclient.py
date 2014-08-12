@@ -4,6 +4,7 @@
 from datetime       import datetime
 from socket         import socket, AF_INET, SOCK_DGRAM
 from threading      import Lock
+from queue          import Queue, LifoQueue
 from time           import time, sleep, localtime, mktime, strptime, strftime
 
 from pp_baseclass   import pp_thread
@@ -25,7 +26,7 @@ class udp_format(pp_thread):
         interval = 20
 
         def __init__(self, worker):
-                pp_thread.__init__(self, 'udp_format')
+                super().__init__()
                 self.worker = worker
 
         def main(self):
@@ -55,8 +56,8 @@ class udp_worker(pp_thread):
                 global server_dict
                 super().__init__()
 
-                self.bidno          = acount['bidno']
-                self.pid            = acount['pid']
+                self.bidno          = acount[0]
+                self.pid            = acount[1]
                 self.group          = group
 
                 self.server_addr    = server_dict[group]['udp']['ip'], server_dict[group]['udp']['port']
@@ -187,26 +188,34 @@ class udp_worker(pp_thread):
                         if self.flag_stop == True: break
                         self.update_status()
 
-class udp_manager():
-        def __init__(self, list_acount):
-                self.list_acount = list_acount
+class udp_manager(pp_thread):
+        max_count_worker = 4
+
+        def __init__(self):
+                super().__init__()
+                self.lock_worker = Lock()
+                self.queue_worker = Queue()
                 self.list_worker = []
 
+        def main(self):
                 group = 0
-                for account in self.list_acount :
+                while True:
+                        account = self.queue_worker.get()
                         group = 1 if group == 0 else 0
                         worker = udp_worker(account, group)
                         worker.start()
                         self.list_worker.append(worker)
 
+        def add(self, account):
+                if self.queue_worker.qsize() >= self.max_count_worker:
+                        return
+                self.queue_worker.put(account)
 
-udp_accounts = [
-        {'bidno':'12345678', 'pid':'123456789012345678'},
-        {'bidno':'12345677', 'pid':'123456789012345677'},
-        {'bidno':'12345676', 'pid':'123456789012345676'},
-        {'bidno':'12345675', 'pid':'123456789012345675'},
-        ]
+#------------------------------------------------------
 
-fd_udp = udp_manager(udp_accounts)
+daemon_udp = udp_manager()
 
-sleep(100)
+def fd_udp_init():
+        daemon_udp.start()
+        daemon_udp.wait_for_start()
+

@@ -163,16 +163,34 @@ class redis_logger():
 
 #-----------------------------------------------------------------------------------------
 
+class console_logger():
+        def debug(self, log):
+                print('debug:    ',log)
+
+        def info(self, log):
+                print('info:     ',log)
+
+        def warning(self, log):
+                print('warning:  ',log)
+
+        def error(self, log):
+                print('error:    ',log)
+
+        def critical(self, log):
+                print('critical: ',log)
+
+#-----------------------------------------------------------------------------------------
+
 printer = redis_logger()
-logger  = printer
+logger  = console_logger()
 
 #================================ for test ===============================================
 
 if __name__ == "__main__":
-        printer.debug('test logger debug')
-        printer.info('test logger info')
-        printer.warning('test logger warning')
-        printer.error('test logger error')
-        printer.critical('test logger critical')
-        printer.wait_for_flush()
+        logger.debug('test logger debug')
+        logger.info('test logger info')
+        logger.warning('test logger warning')
+        logger.error('test logger error')
+        logger.critical('test logger critical')
+        #logger.wait_for_flush()
 

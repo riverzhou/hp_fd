@@ -5,8 +5,9 @@ from time               import sleep
 from traceback          import print_exc
 
 from fd_global          import global_info
-from fd_channel         import channel_center, print_channel_number, channel_test
+from fd_channel         import channel_center
 from fd_redis           import redis_worker
+from fd_udpclient       import daemon_udp
 
 from pp_baseclass       import pp_thread
 from pp_sslproto        import *
@@ -193,7 +194,7 @@ class fd_bid(pp_thread):
                 global global_info
 
                 global_info.event_image[self.count].wait()
-                price = global_info.price_bid[self.count]
+                price = global_info.trigger_price[self.count]
                 while True:
                         self.client.picture_bid[self.count] = None
                         image = fd_image(self.client, self.count, price)
@@ -227,7 +228,10 @@ class fd_bid(pp_thread):
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
-                super().__init__()
+                super().__init__(bidno)
+                self.bidno          = bidno
+                self.passwd         = passwd
+
                 self.machine        = proto_machine()
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)
 
@@ -242,7 +246,9 @@ class fd_client(pp_thread):
                 self.price_bid      = [None, None, None]
 
         def main(self):
+                global daemon_udp
                 self.login.do_login()
+                daemon_udp.add((self.bidno, self.pid_login))
 
                 self.bid[0].start()
                 self.bid[0].wait_for_start()
@@ -260,27 +266,36 @@ class fd_client(pp_thread):
 #================================================
 
 if __name__ == '__main__':
+        from fd_channel import fd_channel_init, fd_channel_test, print_channel_number
+        from fd_redis   import fd_redis_init
         global global_info
-        channel_test()
+
+        fd_redis_init()
+
+        fd_channel_init()
+        fd_channel_test()
+
         client = fd_client('12345678','1234')
         client.start()
         client.wait_for_start()
         #print_channel_number()
 
+        print('client started')
+
         sleep(3)
-        global_info.price_bid[0] = 72600
+        global_info.trigger_price[0] = 72600
         global_info.event_image[0].set()
         global_info.event_price[0].set()
         #print_channel_number()
 
         sleep(3)
-        global_info.price_bid[1] = 73000
+        global_info.trigger_price[1] = 73000
         global_info.event_image[1].set()
         global_info.event_price[1].set()
         #print_channel_number()
 
         sleep(3)
-        global_info.price_bid[2] = 74000
+        global_info.trigger_price[2] = 74000
         global_info.event_image[2].set()
         global_info.event_price[2].set()
         #print_channel_number()

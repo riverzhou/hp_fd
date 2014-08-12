@@ -6,10 +6,10 @@ from time               import sleep, time
 from http.client        import HTTPSConnection, HTTPConnection
 from traceback          import print_exc
 
+from pp_log             import logger, printer
 from pp_baseclass       import pp_thread
 from pp_server          import server_dict
-
-from pp_log             import logger, printer
+from fd_global          import global_info
 
 class fd_channel():
         def __init__(self):
@@ -24,12 +24,6 @@ class fd_channel():
                 self.queue[1]['login']          = Queue()
                 self.queue[0]['toubiao']        = Queue()
                 self.queue[1]['toubiao']        = Queue()
-
-                self.flag_create_login          = False
-                self.lock_create_login          = Lock()
-
-                self.flag_create_toubiao        = False
-                self.lock_create_toubiao        = Lock()
 
                 self.count_login_request        = 0
                 self.lock_login_request         = Lock()
@@ -99,7 +93,7 @@ def getsleeptime(interval):
 
 class pp_channel_maker(pp_thread):
         def __init__(self, manager, server, group):
-                super().__init__()
+                super().__init__(None)
                 self.manager = manager
                 self.server  = server
                 self.group   = group
@@ -141,8 +135,8 @@ class pp_login_channel_manager(pp_thread):
                         sleep(getsleeptime(self.time_interval))
 
         def manage_channel(self):
-                global channel_center
-                if channel_center.flag_create_login != True:
+                global channel_center, global_info
+                if global_info.flag_create_login != True:
                         return
                 if channel_center.count_login_request <= 0: 
                         return
@@ -181,8 +175,8 @@ class pp_toubiao_channel_manager(pp_thread):
                         sleep(getsleeptime(self.time_interval))
 
         def manage_channel(self):
-                global channel_center
-                if channel_center.flag_create_toubiao != True:
+                global channel_center, global_info
+                if global_info.flag_create_toubiao != True:
                         return
                 if self.number_onway >= self.max_onway:
                         return
@@ -205,44 +199,26 @@ class pp_toubiao_channel_manager(pp_thread):
                 self.lock_onway.release()
 
 #================================================
+
+login   = pp_login_channel_manager()
+toubiao = pp_toubiao_channel_manager()
+
+def fd_channel_init():
+        global login, toubiao
+        login.start()
+        toubiao.start()
+        login.wait_for_start()
+        toubiao.wait_for_start()
+
 def print_channel_number():
         print('login 0', channel_center.queue[0]['login'].qsize())
         print('login 1', channel_center.queue[1]['login'].qsize())
         print('toubiao 0', channel_center.queue[0]['toubiao'].qsize())
         print('toubiao 1', channel_center.queue[1]['toubiao'].qsize())
 
-def channel_test():
-        channel_center.flag_create_login   = True
-        channel_center.flag_create_toubiao = True
-
-        login_chm   = pp_login_channel_manager()
-        toubiao_chm = pp_toubiao_channel_manager()
-
-        login_chm.start()
-        toubiao_chm.start()
-
-        login_chm.wait_for_start()
-        toubiao_chm.wait_for_start()
-
-#================================================
-if __name__ == '__main__':
-        channel_center.count_login_request = 20
-
-        channel_center.flag_create_login   = True
-        channel_center.flag_create_toubiao = True
-
-        login_chm   = pp_login_channel_manager()
-        toubiao_chm = pp_toubiao_channel_manager()
-
-        login_chm.start()
-        toubiao_chm.start()
-
-        login_chm.wait_for_start()
-        toubiao_chm.wait_for_start()
-        
-        while True:
-                print_channel_number()
-                channel_center.login_request_decrease()
-                sleep(1)
+def fd_channel_test():
+        global global_info
+        global_info.flag_create_login   = True
+        global_info.flag_create_toubiao = True
 
 
