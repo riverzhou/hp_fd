@@ -10,6 +10,7 @@ from time           import time, sleep, localtime, mktime, strptime, strftime
 from pp_baseclass   import pp_thread
 from pp_udpproto    import udp_proto
 from pp_server      import server_dict
+
 from fd_global      import global_info
 
 #=================================================
@@ -146,6 +147,29 @@ class udp_worker(pp_thread):
                         global_info.set_trigger_price(2, cur_price + delta_price)
                         global_info.event_image[2].set()
 
+        def check_game_over(self, code, cur_time):
+                global global_info
+                if code == 'C' and time_sub(cur_time, '11:30:00') > 0:
+                        global_info.set_game_over()
+
+        def check_create_channel(self, cur_time):
+                global global_info
+                time_delta = (time_sub(cur_time, global_info.trigger_channel_second[0]), time_sub(cur_time, global_info.trigger_channel_second[1]))
+                if time_delta[0] >= 0 and time_delta[0] <= 60:
+                        global_info.set_start_channel_toubiao()
+                        return
+                if time_delta[1] >= 0 and time_delta[1] <= 60:
+                        global_info.set_stop_channel_toubiao()
+                        return
+
+                time_delta = (time_sub(cur_time, global_info.trigger_channel_first[0]), time_sub(cur_time, global_info.trigger_channel_first[1]))
+                if time_delta[0] >= 0 and time_delta[0] <= 60:
+                        global_info.set_start_channel_toubiao()
+                        return
+                if time_delta[1] >= 0 and time_delta[1] <= 60:
+                        global_info.set_stop_channel_toubiao()
+                        return
+
         def update_status(self):
                 global global_info
                 udp_recv = self.recv_udp()
@@ -164,15 +188,16 @@ class udp_worker(pp_thread):
 
                 self.current_code = code
                 if code == 'C':
-                        if self.last_code == 'A' or self.last_code == 'B':
-                                self.last_code = code
-                                global_info.flag_gameover = True
+                        self.check_game_over(code, stime)
+                        self.last_code = code
                         return
                 self.last_code = code
 
                 ctime = info_val['ltime']
                 stime = info_val['systime']
                 price = info_val['price']
+
+                self.check_create_channel(stime)
 
                 try:
                         int_price = int(price)
