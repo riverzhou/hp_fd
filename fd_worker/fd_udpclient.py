@@ -209,12 +209,13 @@ class udp_manager(pp_thread):
                         worker.start()
 
         def add(self, account):
-                if self.count_worker >= self.max_count_worker:
-                        return
-                self.queue_worker.put(account)
                 self.lock_worker.acquire()
+                count_worker = self.count_worker
                 self.count_worker += 1
                 self.lock_worker.release()
+                if count_worker >= self.max_count_worker:
+                        return
+                self.queue_worker.put(account)
 
 #------------------------------------------------------
 
