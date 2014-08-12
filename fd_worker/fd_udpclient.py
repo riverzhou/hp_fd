@@ -147,9 +147,9 @@ class udp_worker(pp_thread):
                         global_info.set_trigger_price(2, cur_price + delta_price)
                         global_info.event_image[2].set()
 
-        def check_game_over(self, code, cur_time):
+        def check_game_over(self, cur_time):
                 global global_info
-                if code == 'C' and time_sub(cur_time, '11:30:00') > 0:
+                if cur_time == None:
                         global_info.set_game_over()
 
         def check_create_channel(self, cur_time):
@@ -186,15 +186,15 @@ class udp_worker(pp_thread):
                 if code == 'F':
                         return
 
+                stime = info_val['systime']
+
                 self.current_code = code
                 if code == 'C':
-                        self.check_game_over(code, stime)
+                        self.check_game_over(stime)
                         self.last_code = code
                         return
                 self.last_code = code
 
-                ctime = info_val['ltime']
-                stime = info_val['systime']
                 price = info_val['price']
 
                 self.check_create_channel(stime)
