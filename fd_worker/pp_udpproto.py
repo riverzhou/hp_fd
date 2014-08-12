@@ -39,9 +39,17 @@ class udp_proto():
                 return  key_val
 
         def parse_info_c(self, info):
+                p1 = info.find('<INFO>') + len('<INFO>')
+                p2 = info.find('</INFO>')
+                info = info[p1:p2]
+                if '系统目前时间' not in info:
+                        time = None
+                else :
+                        time = info.split('：')[-1]
                 key_val = {}
                 key_val['code']         = 'C'
                 key_val['bidinfo']      = '无拍卖会'
+                key_val['systime']      = time
                 return  key_val
 
         def parse_info_f(self, info):
