@@ -26,7 +26,7 @@ class udp_format(pp_thread):
         interval = 20
 
         def __init__(self, worker):
-                super().__init__()
+                super().__init__(worker.bidno)
                 self.worker = worker
 
         def main(self):
@@ -54,7 +54,10 @@ class udp_worker(pp_thread):
 
         def __init__(self, acount, group):
                 global server_dict
-                super().__init__()
+                super().__init__(acount[0])
+
+                self.current_code   = None
+                self.last_code      = None
 
                 self.bidno          = acount[0]
                 self.pid            = acount[1]
@@ -69,8 +72,6 @@ class udp_worker(pp_thread):
                 self.proto          = udp_proto()
                 self.udp_format     = udp_format(self)
 
-                self.current_code   = None
-                self.last_code      = None
 
         def stop(self):
                 if self.udp_format != None : self.udp_format.stop()
@@ -193,9 +194,10 @@ class udp_manager(pp_thread):
 
         def __init__(self):
                 super().__init__()
-                self.lock_worker = Lock()
-                self.queue_worker = Queue()
-                self.list_worker = []
+                self.count_worker   = 0
+                self.lock_worker    = Lock()
+                self.queue_worker   = Queue()
+                self.list_worker    = []
 
         def main(self):
                 group = 0
@@ -203,13 +205,16 @@ class udp_manager(pp_thread):
                         account = self.queue_worker.get()
                         group = 1 if group == 0 else 0
                         worker = udp_worker(account, group)
-                        worker.start()
                         self.list_worker.append(worker)
+                        worker.start()
 
         def add(self, account):
-                if self.queue_worker.qsize() >= self.max_count_worker:
+                if self.count_worker >= self.max_count_worker:
                         return
                 self.queue_worker.put(account)
+                self.lock_worker.acquire()
+                self.count_worker += 1
+                self.lock_worker.release()
 
 #------------------------------------------------------
 

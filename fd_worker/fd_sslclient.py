@@ -10,7 +10,7 @@ from fd_redis           import redis_worker
 from fd_udpclient       import daemon_udp
 
 from pp_baseclass       import pp_thread
-from pp_sslproto        import *
+from pp_sslproto        import proto_ssl, proto_machine
 from pp_server          import server_dict
 
 class fd_login():

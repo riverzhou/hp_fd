@@ -38,6 +38,8 @@ class fd_channel():
                         pass
                 except:
                         print_exc()
+                print('fd_channel login[0] %d login[1] %d toubiao[0] %d toubiao[1] %d'
+                        % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['toubiao'].qsize(), self.queue[0]['toubiao'].qsize()))
                 return  group, channel
 
         def put_channel(self, server, group, channel):
@@ -46,6 +48,7 @@ class fd_channel():
         def login_request_increase(self):
                 self.lock_login_request.acquire()
                 self.count_login_request += 1
+                #print('fd_channel login_request_increase', self.count_login_request)
                 self.lock_login_request.release()
 
         def login_request_decrease(self):
@@ -53,6 +56,7 @@ class fd_channel():
                 self.count_login_request -= 1
                 if self.count_login_request < 0 : 
                         self.count_login_request = 0
+                #print('fd_channel login_request_decrease', self.count_login_request)
                 self.lock_login_request.release()
 
         def pyget(self, handler, req, headers = {}):
