@@ -11,13 +11,6 @@ from fd_config              import redis_passwd, redis_port, redis_ip, redis_num
 
 #------------------------------------------
 
-#redis_passwd  = 'river'
-#redis_port    = 6379
-#redis_ip      = '192.168.1.90'
-#redis_number      = 5
-
-#------------------------------------------
-
 class redis_db():
         redis_default_db    = 0
         global redis_ip, redis_port, redis_pass

@@ -10,7 +10,7 @@ class fd_global():
 
         def __init__(self):
                 self.flag_create_login   = True
-                self.flag_create_toubiao = False
+                self.flag_create_toubiao = [False, False]
 
                 self.flag_gameover  = False
                 self.event_gameover = Event()
@@ -26,12 +26,6 @@ class fd_global():
                 if self.trigger_price[count] == None:
                         self.trigger_price[count] = price
                 self.lock_trigger.release()
-
-        def set_start_channel_toubiao(self):
-                self.flag_create_toubiao = True
-
-        def set_stop_channel_toubiao(self):
-                self.flag_create_toubiao = False
 
         def set_game_over(self):
                 self.flag_gameover  = True

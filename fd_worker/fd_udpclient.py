@@ -16,9 +16,9 @@ from fd_global              import global_info
 #=================================================
 
 def time_sub(end, begin):
-        end = end.split(':')
-        begin = begin.split(':')
-        return (int(end[0])*3600 + int(end[1])*60 + int(end[2])) - (int(begin[0])*3600 + int(begin[1])*60 + int(begin[2]))
+        e = end.split(':')
+        b = begin.split(':')
+        return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
 
 
 def getsleeptime(interval):
@@ -158,18 +158,18 @@ class udp_worker(pp_thread):
                 global global_info
                 time_delta = (time_sub(cur_time, global_info.trigger_channel_second[0]), time_sub(cur_time, global_info.trigger_channel_second[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
-                        global_info.set_start_channel_toubiao()
+                        global_info.flag_create_toubiao[1] = True
                         return
                 if time_delta[1] >= 0 and time_delta[1] <= 60:
-                        global_info.set_stop_channel_toubiao()
+                        global_info.flag_create_toubiao[1] = False
                         return
 
                 time_delta = (time_sub(cur_time, global_info.trigger_channel_first[0]), time_sub(cur_time, global_info.trigger_channel_first[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
-                        global_info.set_start_channel_toubiao()
+                        global_info.flag_create_toubiao[0] = True
                         return
                 if time_delta[1] >= 0 and time_delta[1] <= 60:
-                        global_info.set_stop_channel_toubiao()
+                        global_info.flag_create_toubiao[0] = False
                         return
 
         def update_status(self):

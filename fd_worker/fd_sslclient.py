@@ -68,12 +68,16 @@ class fd_image(pp_thread):
                 global  channel_center
                 proto   = self.client.proto
                 req     = proto.make_image_req(self.price)
+                if self.count == 0:
+                        channel = 'tb0'
+                else:
+                        channel = 'tb1'
                 while True:
-                        group, channel = channel_center.get_channel('toubiao')
-                        if channel == None :
+                        group, handle = channel_center.get_channel(channel)
+                        if handle == None :
                                 continue
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
-                        info_val = channel_center.pyget(channel, req, head)
+                        info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 continue
                         if info_val['status'] != 200 :
@@ -122,12 +126,16 @@ class fd_price(pp_thread):
                 sid     = self.client.sid_bid[self.count]
                 number  = self.client.number_bid[self.count]
                 req     = proto.make_price_req(self.price, number)
+                if self.count == 0:
+                        channel = 'tb0'
+                else:
+                        channel = 'tb1'
                 while True:
-                        group, channel = channel_center.get_channel('toubiao')
-                        if channel == None :
+                        group, handle = channel_center.get_channel(channel)
+                        if handle == None :
                                 continue
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
-                        info_val = channel_center.pyget(channel, req, head)
+                        info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 continue
                         if info_val['status'] != 200 :
