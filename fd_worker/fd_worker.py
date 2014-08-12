@@ -26,7 +26,7 @@ def main():
 
         global_info.event_gameover.wait()
 
-        sleep(60)
+        sleep(30)
 
 if __name__ == '__main__':
         try:
