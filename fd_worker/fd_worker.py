@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from traceback      import print_exc
+from time           import sleep
 
 from fd_config      import list_account
 from fd_global      import global_info
@@ -26,7 +27,7 @@ def main():
 
         global_info.event_gameover.wait()
 
-        sleep(30)
+        sleep(90)
 
 if __name__ == '__main__':
         try:
