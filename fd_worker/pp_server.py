@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from  socket    import gethostbyname
+from  socket                import gethostbyname
 
 #==================================================================================================================
 

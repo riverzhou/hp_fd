@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 
 import  logging
-from    threading       import Thread, Event, Lock, Semaphore
-from    queue           import Queue, LifoQueue
-from    datetime        import datetime
-from    redis           import StrictRedis
-from    traceback       import print_exc
-from    pickle          import dumps, loads
+from    threading           import Thread, Event, Lock, Semaphore
+from    queue               import Queue, LifoQueue
+from    datetime            import datetime
+from    redis               import StrictRedis
+from    traceback           import print_exc
+from    pickle              import dumps, loads
+
+from    fd_config           import redis_passwd, redis_port, redis_ip, redis_number
 
 #------------------------------------------
 
-redis_passwd  = 'river'
-redis_port    = 6379
-redis_ip      = '192.168.1.90'
-redis_db      = 5
+#redis_passwd  = 'river'
+#redis_port    = 6379
+#redis_ip      = '192.168.1.90'
+#redis_number   = 5
 
 #------------------------------------------
 
@@ -154,9 +156,9 @@ class redis_logger():
                 self.redis_sender.queue.join()
 
         def connect_redis(self):
-                global redis_ip, redis_port, redis_passwd, redis_db
+                global redis_ip, redis_port, redis_passwd, redis_number
                 try:
-                        return StrictRedis(host = redis_ip, port = redis_port, password = redis_passwd, db = redis_db)
+                        return StrictRedis(host = redis_ip, port = redis_port, password = redis_passwd, db = redis_number)
                 except:
                         print_exc()
                         return None

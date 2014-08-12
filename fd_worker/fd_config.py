@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-
-db_number = 5 
+redis_passwd    = 'river'
+redis_port      = 6379
+redis_ip        = '192.168.1.90'
+redis_number    = 5
 
 list_account = [
         ('12345678', '1234'),   # 风风

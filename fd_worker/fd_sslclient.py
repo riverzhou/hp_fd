@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-from threading          import Event
-from time               import sleep
-from traceback          import print_exc
+from threading              import Event
+from time                   import sleep
+from traceback              import print_exc
 
-from fd_global          import global_info
-from fd_channel         import channel_center
-from fd_redis           import redis_worker
-from fd_udpclient       import daemon_udp
+from fd_global              import global_info
+from fd_channel             import channel_center
+from fd_redis               import redis_worker
+from fd_udpclient           import daemon_udp
 
-from pp_baseclass       import pp_thread
-from pp_sslproto        import proto_ssl, proto_machine
-from pp_server          import server_dict
+from pp_baseclass           import pp_thread
+from pp_sslproto            import proto_ssl, proto_machine
+from pp_server              import server_dict
 
 class fd_login():
         def __init__(self, client):
@@ -208,7 +208,7 @@ class fd_bid(pp_thread):
                         decode.start()
                         if decode.wait_for_finish() != True :
                                 continue
-                        if self.client.number_bid[self.count] == None :
+                        if self.client.number_bid[self.count] == None or self.client.number_bid[self.count] == '000000':
                                 continue
                         break
                 print('do_bid image', self.count, self.client.sid_bid[self.count], self.client.number_bid[self.count])

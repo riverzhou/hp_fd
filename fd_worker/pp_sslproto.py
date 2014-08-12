@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-from hashlib                    import md5
-from xml.etree                  import ElementTree
-from collections                import OrderedDict
 import random, string
 
-from pp_log                     import logger, printer
+from hashlib                import md5
+from xml.etree              import ElementTree
+from collections            import OrderedDict
+
+from pp_log                 import logger, printer
 
 #==================================================================================================================
 

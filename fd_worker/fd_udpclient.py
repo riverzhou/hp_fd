@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 
 
-from datetime       import datetime
-from socket         import socket, AF_INET, SOCK_DGRAM
-from threading      import Lock
-from queue          import Queue, LifoQueue
-from time           import time, sleep, localtime, mktime, strptime, strftime
+from datetime               import datetime
+from socket                 import socket, AF_INET, SOCK_DGRAM, timeout
+from threading              import Lock
+from queue                  import Queue, LifoQueue
+from time                   import time, sleep, localtime, mktime, strptime, strftime
 
-from pp_baseclass   import pp_thread
-from pp_udpproto    import udp_proto
-from pp_server      import server_dict
+from pp_baseclass           import pp_thread
+from pp_udpproto            import udp_proto
+from pp_server              import server_dict
 
-from fd_global      import global_info
+from fd_global              import global_info
 
 #=================================================
 
 def time_sub(end, begin):
-        return int(mktime(strptime('1970-01-01 '+end, '%Y-%m-%d %H:%M:%S'))) - int(mktime(strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S')))
+        end = end.split(':')
+        begin = begin.split(':')
+        return (int(end[0])*3600 + int(end[1])*60 + int(end[2])) - (int(begin[0])*3600 + int(begin[1])*60 + int(begin[2]))
 
 
 def getsleeptime(interval):
@@ -107,7 +109,7 @@ class udp_worker(pp_thread):
                         try:
                                 if self.sock != None:
                                         udp_result = self.sock.recvfrom(1500)
-                        except  (TimeoutError, OSError):
+                        except  (timeout, OSError):
                                 return None
                         except :
                                 print_exc()

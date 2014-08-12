@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 
-from time           import sleep
-from traceback      import print_exc
-from redis          import StrictRedis
-from threading      import Event, Lock
-from queue          import Queue
+from time                   import sleep
+from traceback              import print_exc
+from redis                  import StrictRedis
+from threading              import Event, Lock
+from queue                  import Queue
 
-from pp_baseclass   import pp_thread
-from fd_config      import db_number
+from pp_baseclass           import pp_thread
+from fd_config              import redis_passwd, redis_port, redis_ip, redis_number
 
-from datetime       import datetime
+#------------------------------------------
 
-redis_ip            = '192.168.1.90'
-redis_port          = 6379
-redis_pass          = 'river'
-redis_default_db    = 0
+#redis_passwd  = 'river'
+#redis_port    = 6379
+#redis_ip      = '192.168.1.90'
+#redis_number      = 5
+
+#------------------------------------------
 
 class redis_db():
+        redis_default_db    = 0
         global redis_ip, redis_port, redis_pass
         ip      = redis_ip
         port    = redis_port
-        passwd  = redis_pass
+        passwd  = redis_passwd
 
         def connect_redis(self):
                 try:
@@ -84,7 +87,7 @@ class fd_redis_reader(pp_thread):
                                 continue
                         #print('fd_redis_reader',val)
                         self.manager.put_number(val)
-                        print('fd_redis_reader',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
+                        #print('fd_redis_reader',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
 
         def read(self):
                 return self.redis.blk_get_one(self.key_number).decode()
@@ -106,7 +109,7 @@ class fd_redis_writer(pp_thread):
                                 sleep(0)
                                 continue
                         self.write(val)
-                        print('fd_redis_writer',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
+                        #print('fd_redis_writer',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
 
         def write(self, val):
                 return self.redis.put_one(self.key_image, val.encode())
@@ -127,8 +130,8 @@ class fd_dama_result():
 
 
 class fd_redis_manager(pp_thread):
-        global db_number
-        image_db    = db_number
+        global redis_number
+        image_db    = redis_number
         image_key   = 'image_req'
         number_key  = 'number_ack'
 

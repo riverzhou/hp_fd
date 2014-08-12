@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 
-from threading          import Thread, Event, Lock, Semaphore
-from queue              import Queue, LifoQueue
-from time               import sleep, time
-from http.client        import HTTPSConnection, HTTPConnection
-from traceback          import print_exc
+from threading              import Thread, Event, Lock, Semaphore
+from queue                  import Queue, LifoQueue
+from time                   import sleep, time
+from http.client            import HTTPSConnection, HTTPConnection
+from traceback              import print_exc
 
-from pp_log             import logger, printer
-from pp_baseclass       import pp_thread
-from pp_server          import server_dict
-from fd_global          import global_info
+from pp_log                 import logger, printer
+from pp_baseclass           import pp_thread
+from pp_server              import server_dict
+from fd_global              import global_info
 
 class fd_channel():
         def __init__(self):
-                #self.max_queue = = [{},{}]
-                #self.max_queue[0]['login']     = 20
-                #self.max_queue[1]['login']     = 20
-                #self.max_queue[0]['toubiao']   = 150
-                #self.max_queue[1]['toubiao']   = 150
-
                 self.queue = [{},{}]
                 self.queue[0]['login']          = Queue()
                 self.queue[1]['login']          = Queue()
