@@ -8,7 +8,7 @@ files = fd_base64.c  fd_dama.c  fd_ocr.c  fd_redis.c
 
 
 all:
-	$(CC) 		$(log_level) -O2 -Wall -std=gnu99 ${files} -o fd_dama.exe
+	$(CC) 		$(log_level) -O2 -Wall -std=gnu99 ${files} -o fd_dama.exe -L. -lhiredis_static -lws2_32 -mthreads 
 	$(STRIP)	fd_dama.exe
 
 

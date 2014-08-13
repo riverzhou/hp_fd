@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "hiredis.h"
+
 #include "fd_redis.h"
 
 
