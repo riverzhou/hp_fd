@@ -212,7 +212,7 @@ class fd_bid(pp_thread):
                         if self.client.sid_bid[self.count] == None or self.client.picture_bid[self.count] == None :
                                 continue
                         self.client.number_bid[self.count] = None
-                        decode = fd_decode(self.client, self.count, self.client.sid_bid[self.count], self.client.picture_bid[self.count])
+                        decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
                         decode.start()
                         if decode.wait_for_finish() != True :
                                 continue
