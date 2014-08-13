@@ -80,7 +80,9 @@ int redis_get(char* buff)
 	strcpy(buff, reply->element[1]->str);
 	freeReplyObject(reply);
 
+#ifdef _DEBUG_
 	printf("%s\r\n", buff);
+#endif
 	return 0;
 }
 
@@ -95,7 +97,9 @@ int redis_put(char* buff)
 	}
 	freeReplyObject(reply);
 
+#ifdef _DEBUG_
 	printf("%s\r\n", buff);
+#endif
 	return 0;
 }
 
