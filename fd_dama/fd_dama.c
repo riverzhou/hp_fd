@@ -105,7 +105,6 @@ int main(void)
 		}
 		make_result(redis_outbuff, dama_sid, dama_code);
 		redis_put(redis_outbuff);
-		break;
 	}
 
 	return 0;

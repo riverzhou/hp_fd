@@ -12,14 +12,13 @@
    char test_sid[] = "9E547C5BF6FF532C8F0A6093BAF6D7A2";
    */
 
-
 char server_ip[] = "192.168.1.90";
 int  server_port = 6379;
 char password[]  = "river";
 int  redis_dbid  = 5;
 
-char req_key[] = "req_image";
-char ack_key[] = "ack_number";
+char req_key[] 	 = "req_image";
+char ack_key[] 	 = "ack_number";
 
 //=====================================================================================
 
@@ -27,9 +26,6 @@ redisContext *redis_connect;
 
 int redis_init(void)
 {
-	//struct timeval timeout = { 2, 500000 }; // 2.5 seconds
-	//redis_connect = redisConnectWithTimeout((char*)server_ip, server_port, timeout);
-
 	redis_connect = redisConnect((char*)server_ip, server_port);
 	if (redis_connect->err) {
 		printf("Connection error: %s\n", redis_connect->errstr);
@@ -40,7 +36,7 @@ int redis_init(void)
 	redisReply *reply = NULL;
 	reply= redisCommand(redis_connect, "AUTH %s", password);
 	if (reply->type == REDIS_REPLY_ERROR) {
-		printf("Password error: %s\n", password);
+		printf("AUTH error: %s\n", password);
 		freeReplyObject(reply);
 		redisFree(redis_connect);
 		return -1;
@@ -48,6 +44,12 @@ int redis_init(void)
 	freeReplyObject(reply);
 
 	reply = redisCommand(redis_connect, "SELECT %d", redis_dbid);
+	if (reply->type == REDIS_REPLY_ERROR) {
+		printf("SELECT error: %d\n", redis_dbid);
+		freeReplyObject(reply);
+		redisFree(redis_connect);
+		return -1;
+	}
 	freeReplyObject(reply);
 
 	return 0;
@@ -62,26 +64,25 @@ int redis_clean(void)
 int redis_get(char* buff)
 {
 	redisReply *reply = NULL;
-	reply = redisCommand(redis_connect, "LPOP %s", req_key);
-	//reply = redisCommand(redis_connect, "BLPOP req_image 0");
+	reply = redisCommand(redis_connect, "BLPOP %s 0", req_key);
 	if (reply == NULL || reply->type == REDIS_REPLY_ERROR) {
 		buff[0] = 0;
 		printf("redis_get error\r\n");
 		freeReplyObject(reply);
 		return -1;
 	}
-	if(reply->str == NULL) {
-		printf("redis_get reply->str == NULL \r\n");
+	if(reply->element[1]->str == NULL) {
+		buff[0] = 0;
+		printf("redis_get reply->element[1]->str == NULL \r\n");
 		freeReplyObject(reply);
 		return -1;
 	}
-	strcpy(buff, reply->str);
+	strcpy(buff, reply->element[1]->str);
 	freeReplyObject(reply);
 
 	printf("%s\r\n", buff);
 	return 0;
 }
-
 
 int redis_put(char* buff)
 {
