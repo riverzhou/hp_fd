@@ -1,10 +1,6 @@
 *.swp
-*.pyo
-*.pyc
 *.log
 *.dump
-bad.jpg
-__pycache__
 core
 *.exe
 
