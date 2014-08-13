@@ -86,16 +86,26 @@ int main(void)
 		memset(dama_code,      0, sizeof(dama_code));
 
 		int buff_len = 0;
-		bool ret = false;
 
-		redis_get(redis_inbuff);
-		get_image(redis_inbuff, dama_sid, base64_inbuff);
+		if (redis_get(redis_inbuff) < 0)
+			continue;
+		if (get_image(redis_inbuff, dama_sid, base64_inbuff) < 0)
+			continue;
+		if (dama_sid[0] == 0)
+			continue;
 		buff_len = Base64Decode(base64_outbuff, base64_inbuff, strlen(base64_inbuff));
-		ret = GetVcode(1, base64_outbuff, buff_len, dama_code);
-		if (ret == false) 		strcpy(dama_code, "000000");
-		else if (dama_code[5] == 0) 	strcpy(dama_code, "000000");
+		if (buff_len <= 0 || base64_outbuff[0] == 0){
+			strcpy(dama_code, "000000");
+		}
+		else {
+			if (GetVcode(1, base64_outbuff, buff_len, dama_code) == false)
+				strcpy(dama_code, "000000");
+			else if (dama_code[5] == 0)
+				strcpy(dama_code, "000000");
+		}
 		make_result(redis_outbuff, dama_sid, dama_code);
 		redis_put(redis_outbuff);
+		break;
 	}
 
 	return 0;
