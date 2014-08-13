@@ -1,49 +1,63 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <windows.h>
 
+#include "fd_ocr.h"
+#include "fd_base64.h"
+#include "fd_redis.h"
+
 /******************************************************************************************************
-CaptchaOCR.dll导出函数说明：
-
-int VcodeInit(		//失败返回-1
-char[] Password);
-paasword ="XSE"
-
--------以上函数用于初始化识别----------
-
 bool GetVcode(  	//能识别返回真，否则返回假
 int Index,		//值为1。
 char* ImgBuffer, 	//验证码图像二进制数据
 int ImgBufLen,		//验证码图像尺寸
 char[] Vcode);		//返回的已识别验证码文本
 
--------以上函数用于识别验证码----------
-
+//char result[7] = {0};						//定义一个字符串以接收验证码，这里验证码字符数是6，所以取7.
 ******************************************************************************************************/
 
-//char result[7] = {0};						//定义一个字符串以接收验证码，这里验证码字符数是6，所以取7.
-
-typedef int  (CALLBACK* LPInit)(char[]);
-typedef bool (CALLBACK* LPGetVcode)(int,char*,int,char[]);
-LPGetVcode GetVcode = NULL;					//识别函数
+/******************************************************************************************************
+int Base64Decode(char * buf, const char * base64code, int src_len );
+******************************************************************************************************/
 
 int init(void)
 {
-	HINSTANCE hInst = LoadLibraryA("CaptchaOCR.dll");	//载入CaptchaOCR.dll
-	if (!hInst){
-		printf("无法加载 CaptchaOCR.Dll !!");
+	if (ocr_init()   < 0)
 		return -1;
-	}
 
-	LPInit VcodeInit = (LPInit)GetProcAddress(hInst, "VcodeInit");
-	int index = VcodeInit ("XSE");				//初始化 仅需调用此函数一次 切勿重复调用！
-	if (index == -1){					//返回-1说明初始化失败
-		printf("初始化失败 !");
+	if (redis_init() < 0)
 		return -1;
-	}
 
-	GetVcode = (LPGetVcode)GetProcAddress(hInst, "GetVcode");
+	return 0;
+}
+
+int get_image(char* buff, char* sid, char* image)
+{
+	int i   = 0;
+	int len = strlen(buff);
+
+	for(i = 0; i < len; i++) {
+		if (buff[i] == ',') {
+			break;
+		}
+	}
+	
+	if (i == len)
+		return -1;
+
+	memcpy(sid, buff, i);
+	memcpy(image, &(buff[i+1]), len - i - 1);
+
+	return 0;
+}
+
+int make_result(char* buff, char* sid, char* code)
+{
+	strcat(buff, sid);
+	strcat(buff, ",");
+	strcat(buff, code);
 
 	return 0;
 }
@@ -54,7 +68,36 @@ int main(void)
 		return -1;	
 	}
 
-	printf("dll load ok");
+	printf("init ok\r\n");
+
+	char redis_inbuff[4096]   = {0};
+	char redis_outbuff[256]   = {0};
+	char base64_inbuff[4096]  = {0};
+	char base64_outbuff[4096] = {0};
+	char dama_sid[128]	  = {0};
+	char dama_code[8] 	  = {0};
+
+	while(true){
+		memset(redis_inbuff,   0, sizeof(redis_inbuff));
+		memset(redis_outbuff,  0, sizeof(redis_outbuff));
+		memset(base64_inbuff,  0, sizeof(base64_inbuff));
+		memset(base64_outbuff, 0, sizeof(base64_outbuff));
+		memset(dama_sid,       0, sizeof(dama_sid));
+		memset(dama_code,      0, sizeof(dama_code));
+
+		int buff_len = 0;
+		bool ret = false;
+
+		redis_get(redis_inbuff);
+		get_image(redis_inbuff, dama_sid, base64_inbuff);
+		buff_len = Base64Decode(base64_outbuff, base64_inbuff, strlen(base64_inbuff));
+		ret = GetVcode(1, base64_outbuff, buff_len, dama_code);
+		if (ret == false) 		strcpy(dama_code, "000000");
+		else if (dama_code[5] == 0) 	strcpy(dama_code, "000000");
+		make_result(redis_outbuff, dama_sid, dama_code);
+		redis_put(redis_outbuff);
+	}
+
 	return 0;
 }
 
