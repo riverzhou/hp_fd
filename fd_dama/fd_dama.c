@@ -26,10 +26,10 @@
 
 int init(void)
 {
-	if (ocr_init()   < 0)
+	if (redis_init() < 0)
 		return -1;
 
-	if (redis_init() < 0)
+	if (ocr_init()   < 0)
 		return -1;
 
 	return 0;
