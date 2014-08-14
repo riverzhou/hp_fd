@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from threading              import Thread, Event, Lock, Semaphore
-from queue                  import Queue, LifoQueue
+from threading              import Event, Lock
+from queue                  import Queue, Empty
 from time                   import sleep, time
 from http.client            import HTTPSConnection, HTTPConnection
 from traceback              import print_exc
@@ -11,42 +11,58 @@ from pp_baseclass           import pp_thread
 from pp_server              import server_dict
 from fd_global              import global_info
 
+#=============================================================================
+
 class fd_channel():
+        timeout_find_channel = 1
+
         def __init__(self):
                 self.queue = [{},{}]
-                self.queue[0]['login']          = Queue()
-                self.queue[1]['login']          = Queue()
-                self.queue[0]['tb0']            = Queue()
-                self.queue[1]['tb0']            = Queue()
-                self.queue[0]['tb1']            = Queue()
-                self.queue[1]['tb1']            = Queue()
+                self.queue[0]['login']      = Queue()
+                self.queue[1]['login']      = Queue()
+                self.queue[0]['tb0']        = Queue()
+                self.queue[1]['tb0']        = Queue()
+                self.queue[0]['tb1']        = Queue()
+                self.queue[1]['tb1']        = Queue()
 
-                self.count_login_request        = 0
-                self.lock_login_request         = Lock()
+                self.count_login_request    = 0
+                self.lock_login_request     = Lock()
 
-        def get_channel(self, channel, group = -1):
+        def find_channel(self, channel, group, timeout = None):
                 if group == -1:
-                        group = 0 if self.queue[0][channel].qsize() >= self.queue[1][channel].qsize() else 1
-                handle = None
+                        channel_group = 0 if self.queue[0][channel].qsize() >= self.queue[1][channel].qsize() else 1
+                else:
+                        channel_group = group
+                channel_handle = None
                 try:
-                        handle = self.queue[group][channel].get()
+                        channel_handle = self.queue[channel_group][channel].get(True, timeout)
                 except  KeyboardInterrupt:
-                        pass
+                        return channel_group, None
+                except  Empty:
+                        return channel_group, None
                 except:
                         print_exc()
+                        return channel_group, None
                 print   (
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
                         % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['tb0'].qsize(), self.queue[1]['tb0'].qsize(), self.queue[0]['tb1'].qsize(), self.queue[1]['tb1'].qsize())
                         )
-                return  group, handle 
+                return  channel_group, channel_handle
 
+        def get_channel(self, channel, group = -1):
+                while True:
+                        channel_group, channel_handle = self.find_channel(channel, group, self.timeout_find_channel)
+                        if channel_handle != None:
+                                break
+                        sleep(0)
+                return  channel_group, channel_handle
+                                
         def put_channel(self, channel, group, handle):
                 return self.queue[group][channel].put(handle)
 
         def login_request_increase(self):
                 self.lock_login_request.acquire()
                 self.count_login_request += 1
-                #print('fd_channel login_request_increase', self.count_login_request)
                 self.lock_login_request.release()
 
         def login_request_decrease(self):
@@ -54,10 +70,10 @@ class fd_channel():
                 self.count_login_request -= 1
                 if self.count_login_request < 0 : 
                         self.count_login_request = 0
-                #print('fd_channel login_request_decrease', self.count_login_request)
                 self.lock_login_request.release()
 
         def pyget(self, handler, req, headers = {}):
+                printer.info(str(headers))
                 printer.info(req)
 
                 try:
@@ -66,6 +82,7 @@ class fd_channel():
                         return None
                 except:
                         print_exc()
+                        #是否记录异常到日志 XXX XXX XXX
                         return None
                 try:
                         ack  = handler.getresponse()
@@ -74,6 +91,7 @@ class fd_channel():
                         return None
                 except:
                         print_exc()
+                        #是否记录异常到日志 XXX XXX XXX
                         return None
 
                 key_val = {}
@@ -81,12 +99,9 @@ class fd_channel():
                 key_val['head']    = str(ack.msg)
                 key_val['status']  = ack.status
 
+                printer.info(key_val['head'])
                 printer.info(key_val['body'])
                 return key_val
-
-#-----------------------------------
-
-channel_center = fd_channel()
 
 #===================================
 
@@ -207,18 +222,21 @@ class pp_toubiao_channel_manager(pp_thread):
 
 #================================================
 
+channel_center = fd_channel()
+
 login   = pp_login_channel_manager()
-tb0     = pp_toubiao_channel_manager(0)
-tb1     = pp_toubiao_channel_manager(1)
+toubiao = [pp_toubiao_channel_manager(0), pp_toubiao_channel_manager(1)]
 
 def fd_channel_init():
         global login, toubiao
+
         login.start()
-        tb0.start()
-        tb1.start()
+        toubiao[0].start()
+        toubiao[1].start()
+
         login.wait_for_start()
-        tb0.wait_for_start()
-        tb1.wait_for_start()
+        toubiao[0].wait_for_start()
+        toubiao[1].wait_for_start()
 
 def print_channel_number():
         print('login 0', channel_center.queue[0]['login'].qsize())

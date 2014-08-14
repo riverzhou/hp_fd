@@ -6,6 +6,7 @@ from time                   import sleep
 from fd_config              import list_account, redis_dbid
 from fd_global              import global_info
 
+from pp_server              import pp_dns_init
 from fd_redis               import fd_redis_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
@@ -16,6 +17,7 @@ list_client = []
 def main():
         global list_account, list_client, global_info
 
+        pp_dns_init()
         fd_redis_init()
         fd_channel_init()
         fd_udp_init()
@@ -25,7 +27,8 @@ def main():
                 client.start()
                 list_client.append(client)
 
-        print('fd_worker %d started' % redis_dbid)
+        print('worker \t[%d] started' % redis_dbid)
+        print('client \t%d initted' % len(list_client))
         global_info.event_gameover.wait()
 
         sleep(90)

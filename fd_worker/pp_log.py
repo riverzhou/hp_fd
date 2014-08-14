@@ -36,7 +36,7 @@ class redis_sender(Thread):
                                 self.event_started.wait(timeout)
 
         def run(self):
-                print("redis_sender started")
+                print("pp_log \tredis_sender started")
                 self.event_started.set()
                 try:
                         self.main()

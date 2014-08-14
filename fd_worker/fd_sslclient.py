@@ -11,7 +11,7 @@ from fd_udpclient           import daemon_udp
 
 from pp_baseclass           import pp_thread
 from pp_sslproto            import proto_ssl, proto_machine
-from pp_server              import server_dict
+from pp_server              import server_dict, pp_dns_init
 
 class fd_login():
         def __init__(self, client):
@@ -278,6 +278,7 @@ if __name__ == '__main__':
         from fd_redis   import fd_redis_init
         global global_info
 
+        pp_dns_init()
         fd_redis_init()
 
         fd_channel_init()
@@ -288,7 +289,7 @@ if __name__ == '__main__':
         client.wait_for_start()
         #print_channel_number()
 
-        print('client started')
+        print('client \tstarted')
 
         sleep(3)
         global_info.trigger_price[0] = 72600

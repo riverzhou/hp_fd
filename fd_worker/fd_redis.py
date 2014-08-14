@@ -20,11 +20,12 @@ class redis_db():
         passwd  = redis_passwd
         default_db = 0
 
-        def __init__(self, db = None):
+        def __init__(self, db = None, info = ''):
+                self.info   = info
                 self.db     = db if db != None else self.default_db
                 self.redis  = self.connect_redis()
                 if self.redis == None : return None
-                print('redis connect succeed')
+                print('redis \t%s connect succeed' % self.info)
 
         def connect_redis(self):
                 try:
@@ -70,7 +71,7 @@ class fd_redis_reader(pp_thread):
         def __init__(self, manager, db):
                 super().__init__()
                 self.db      = db
-                self.redis   = redis_db(self.db)
+                self.redis   = redis_db(self.db, 'reader')
                 self.manager = manager
 
         def main(self):
@@ -92,7 +93,7 @@ class fd_redis_writer(pp_thread):
         def __init__(self, manager, db):
                 super().__init__()
                 self.db      = db
-                self.redis   = redis_db(self.db)
+                self.redis   = redis_db(self.db, 'writer')
                 self.manager = manager
 
         def main(self):
