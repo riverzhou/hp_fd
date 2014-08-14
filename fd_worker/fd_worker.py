@@ -11,6 +11,9 @@ from fd_redis               import fd_redis_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
 from fd_sslclient           import fd_client
+from pp_log                 import logger, printer
+
+#==============================================================
 
 list_client = []
 
@@ -27,9 +30,10 @@ def main():
                 client.start()
                 list_client.append(client)
 
-        print('worker \t[%d] started' % redis_dbid)
-        print('client \t%d initted' % len(list_client))
+        printer.debug('worker [%d] started' % redis_dbid)
+        printer.debug('client %d initted' % len(list_client))
         global_info.event_gameover.wait()
+        printer.debug('worker [%d] stopping' % redis_dbid)
 
         sleep(90)
 

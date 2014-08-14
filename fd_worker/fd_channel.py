@@ -4,7 +4,7 @@ from threading              import Event, Lock
 from queue                  import Queue, Empty
 from time                   import sleep, time
 from http.client            import HTTPSConnection, HTTPConnection
-from traceback              import print_exc
+from traceback              import print_exc, format_exc
 
 from pp_log                 import logger, printer
 from pp_baseclass           import pp_thread
@@ -41,7 +41,7 @@ class fd_channel():
                 except  Empty:
                         return channel_group, None
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                         return channel_group, None
                 printer.debug(
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
@@ -81,8 +81,7 @@ class fd_channel():
                 except  KeyboardInterrupt:
                         return None
                 except:
-                        print_exc()
-                        #是否记录异常到日志 XXX XXX XXX
+                        printer.critical(format_exc())
                         return None
                 try:
                         ack  = handler.getresponse()
@@ -90,8 +89,7 @@ class fd_channel():
                 except  KeyboardInterrupt:
                         return None
                 except:
-                        print_exc()
-                        #是否记录异常到日志 XXX XXX XXX
+                        printer.critical(format_exc())
                         return None
 
                 key_val = {}
@@ -132,7 +130,7 @@ class pp_channel_maker(pp_thread):
                 except  KeyboardInterrupt:
                         pass
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                 else:
                         channel_center.put_channel(self.channel, self.group, handler)
                 self.manager.maker_out()
@@ -162,7 +160,7 @@ class pp_login_channel_manager(pp_thread):
                 try:
                         maker = [pp_channel_maker(self, 'login', 0, 'login'), pp_channel_maker(self, 'login', 1, 'login')]
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                         return
                 maker[0].start()
                 maker[1].start()
@@ -205,7 +203,7 @@ class pp_toubiao_channel_manager(pp_thread):
                 try:
                         maker = [pp_channel_maker(self, 'toubiao', 0, channel), pp_channel_maker(self, 'toubiao', 1, channel)]
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                         return
                 maker[0].start()
                 maker[1].start()
@@ -238,18 +236,9 @@ def fd_channel_init():
         toubiao[0].wait_for_start()
         toubiao[1].wait_for_start()
 
-def print_channel_number():
-        print('login 0', channel_center.queue[0]['login'].qsize())
-        print('login 1', channel_center.queue[1]['login'].qsize())
-        print('tb0 0', channel_center.queue[0]['tb0'].qsize())
-        print('tb0 1', channel_center.queue[1]['tb0'].qsize())
-        print('tb1 0', channel_center.queue[0]['tb1'].qsize())
-        print('tb1 1', channel_center.queue[1]['tb1'].qsize())
-
 def fd_channel_test():
         global global_info
         global_info.flag_create_login       = True
         global_info.flag_create_toubiao[0]  = True
         global_info.flag_create_toubiao[1]  = True
-
 

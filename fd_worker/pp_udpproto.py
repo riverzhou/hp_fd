@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from struct                 import pack, unpack, pack_into, unpack_from
-from traceback              import print_exc
 from hashlib                import md5
 
 #==================================================================================================================

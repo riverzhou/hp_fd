@@ -2,7 +2,7 @@
 
 from threading              import Event
 from time                   import sleep
-from traceback              import print_exc
+from traceback              import print_exc, format_exc
 
 from fd_global              import global_info
 from fd_channel             import channel_center
@@ -62,7 +62,7 @@ class fd_image(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
-                                print_exc()
+                                printer.critical(format_exc())
                                 continue
                         else:
                                 break
@@ -119,7 +119,7 @@ class fd_price(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
-                                print_exc()
+                                printer.critical(format_exc())
                                 continue
                         else:
                                 break
@@ -170,7 +170,7 @@ class fd_decode(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
-                                print_exc()
+                                printer.critical(format_exc())
                                 continue
                         else:
                                 break
@@ -200,7 +200,7 @@ class fd_bid(pp_thread):
                         except  KeyboardInterrupt:
                                 break
                         except:
-                                print_exc()
+                                printer.critical(format_exc())
                         else:
                                 break
 
@@ -294,7 +294,6 @@ if __name__ == '__main__':
         client = fd_client('12345678','1234')
         client.start()
         client.wait_for_start()
-        #print_channel_number()
 
         print('client \tstarted')
 
@@ -302,19 +301,16 @@ if __name__ == '__main__':
         global_info.trigger_price[0] = 72600
         global_info.event_image[0].set()
         global_info.event_price[0].set()
-        #print_channel_number()
 
         sleep(3)
         global_info.trigger_price[1] = 73000
         global_info.event_image[1].set()
         global_info.event_price[1].set()
-        #print_channel_number()
 
         sleep(3)
         global_info.trigger_price[2] = 74000
         global_info.event_image[2].set()
         global_info.event_price[2].set()
-        #print_channel_number()
 
         client.wait_for_stop()
 

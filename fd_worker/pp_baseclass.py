@@ -4,7 +4,7 @@ from threading              import Thread, Event, Lock, Semaphore
 from queue                  import Queue, LifoQueue
 from traceback              import print_exc
 
-#from pp_log                 import logger
+from pp_log                 import logger, printer
 
 #============================================================================================
 
@@ -29,7 +29,7 @@ class pp_thread(Thread):
                         except  KeyboardInterrupt:
                                 pass
                         except:
-                                print_exc()
+                                printer.critical(format_exc())
                                 self.event_started.wait(self.default_start_timeout)
                         else:
                                 self.event_started.wait(timeout)
@@ -40,7 +40,7 @@ class pp_thread(Thread):
                 except  KeyboardInterrupt:
                         pass
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
 
         def stop(self):
                 self.flag_stop = True

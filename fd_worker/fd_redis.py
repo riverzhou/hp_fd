@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from time                   import sleep
-from traceback              import print_exc
+from traceback              import print_exc, format_exc
 from redis                  import StrictRedis
 from threading              import Event, Lock
 from queue                  import Queue
@@ -25,7 +25,7 @@ class redis_db():
                 self.db     = db if db != None else self.default_db
                 self.redis  = self.connect_redis()
                 if self.redis == None : return None
-                print('redis \t%s connect succeed' % self.info)
+                printer.debug('redis %s connect succeed' % self.info)
 
         def connect_redis(self):
                 try:
@@ -33,7 +33,7 @@ class redis_db():
                 except  KeyboardInterrupt:
                         return None
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                         return None
 
         def get_list(self, key):
@@ -55,7 +55,7 @@ class redis_db():
                 except  KeyboardInterrupt:
                         pass
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                 return ret
 
         def get_one(self, key):
@@ -125,7 +125,7 @@ class fd_dama_result():
                 except  KeyboardInterrupt:
                         return None
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                         return None
                 return self.number
 
@@ -158,7 +158,7 @@ class fd_redis_manager(pp_thread):
                 except  KeyboardInterrupt:
                         pass
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                 if ret == None:
                         return None, None
                 sid, number = ret.split(',')
@@ -182,7 +182,7 @@ class fd_redis_manager(pp_thread):
                 except  KeyboardInterrupt:
                         pass
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
                 return  ret
 
         #子线程回调接口
