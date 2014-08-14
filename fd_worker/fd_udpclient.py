@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+from traceback              import print_exc, format_exc
 from datetime               import datetime
 from socket                 import socket, AF_INET, SOCK_DGRAM, timeout
 from threading              import Lock
@@ -10,6 +10,7 @@ from time                   import time, sleep, localtime, mktime, strptime, str
 from pp_baseclass           import pp_thread
 from pp_udpproto            import udp_proto
 from pp_server              import server_dict
+from pp_log                 import logger, printer
 
 from fd_global              import global_info
 
@@ -39,7 +40,7 @@ class udp_format(pp_thread):
                                 try:
                                         self.worker.format_udp()
                                 except:
-                                        print_exc()
+                                        printer.critical(format_exc())
                         if self.event_stop.wait(1) == True: return
 
                 while True:
@@ -48,7 +49,7 @@ class udp_format(pp_thread):
                                 try:
                                         self.worker.format_udp()
                                 except:
-                                        print_exc()
+                                        printer.critical(format_exc())
                         if self.event_stop.wait(self.interval) == True: return
 
 
@@ -90,19 +91,19 @@ class udp_worker(pp_thread):
                 try:
                         self.sock.sendto(self.proto.make_logoff_req(self.bidno, self.pid), self.server_addr)
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
 
         def client_udp(self):
                 try:
                         self.sock.sendto(self.proto.make_client_req(self.bidno, self.pid), self.server_addr)
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
 
         def format_udp(self):
                 try:
                         self.sock.sendto(self.proto.make_format_req(self.bidno, self.pid), self.server_addr)
                 except:
-                        print_exc()
+                        printer.critical(format_exc())
 
         def recv_udp(self):
                 while True:
@@ -111,8 +112,8 @@ class udp_worker(pp_thread):
                                         udp_result = self.sock.recvfrom(1500)
                         except  (timeout, OSError):
                                 return None
-                        except :
-                                print_exc()
+                        except:
+                                printer.critical(format_exc())
                                 return None
                         if self.flag_stop == True:
                                 return None
@@ -190,21 +191,15 @@ class udp_worker(pp_thread):
 
                 stime = info_val['systime']
 
-                self.current_code = code
                 if code == 'C':
                         self.check_game_over(stime)
-                        self.last_code = code
                         return
-                self.last_code = code
 
                 price = info_val['price']
 
                 self.check_create_channel(stime)
 
-                try:
-                        int_price = int(price)
-                except:
-                        return
+                int_price = int(price)
 
                 self.check_shot_price(int_price)
                 self.check_image_time(stime, int_price)
@@ -214,7 +209,13 @@ class udp_worker(pp_thread):
                 self.udp_format.wait_for_start()
                 while True:
                         if self.flag_stop == True: break
-                        self.update_status()
+                        try:
+                                self.update_status()
+                        except  KeyboardInterrupt:
+                                break
+                        except:
+                                printer.critical(format_exc())
+                                sleep(0)
 
 class udp_manager(pp_thread):
         max_count_worker = 4
@@ -252,3 +253,7 @@ def fd_udp_init():
         daemon_udp.start()
         daemon_udp.wait_for_start()
 
+
+if __name__ == '__main__':
+        fd_udp_init()
+        daemon_udp.wait_for_stop()
