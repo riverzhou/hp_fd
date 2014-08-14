@@ -3,9 +3,10 @@
 redis_passwd    = 'river'
 redis_port      = 6379
 redis_ip        = '192.168.1.90'
-redis_number    = 5
+redis_dbid      = 5
 
 list_account = [
+        ('12345679', '1234'),   # 大浪
         ('12345678', '1234'),   # 风风
         ('12345677', '1234'),   # 雨雨
         ('12345676', '1234'),   # 雷雷

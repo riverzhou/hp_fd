@@ -4,8 +4,6 @@ from struct                 import pack, unpack, pack_into, unpack_from
 from traceback              import print_exc
 from hashlib                import md5
 
-from pp_log                 import logger, printer
-
 #==================================================================================================================
 
 class udp_proto():
@@ -81,7 +79,6 @@ class udp_proto():
                         bidno,
                         self.get_vcode(pid, bidno)
                         ))
-                #printer.debug(format_req)
                 return format_req.encode('gb18030')
 
         def do_logoff_req(self, bidno, pid):
@@ -93,7 +90,6 @@ class udp_proto():
                         bidno,
                         self.get_vcode(pid, bidno)
                         ))
-                #printer.debug(logoff_req)
                 return logoff_req.encode('gb18030')
 
         def do_client_req(self, bidno, pid):
@@ -105,7 +101,6 @@ class udp_proto():
                         bidno,
                         self.get_vcode(pid, bidno)
                         ))
-                #printer.debug(client_req)
                 return client_req.encode('gb18030')
 
         def make_format_req(self, bidno, pid):

@@ -7,7 +7,7 @@ from threading              import Event, Lock
 from queue                  import Queue
 
 from pp_baseclass           import pp_thread
-from fd_config              import redis_passwd, redis_port, redis_ip, redis_number
+from fd_config              import redis_passwd, redis_port, redis_ip, redis_dbid
 
 #------------------------------------------
 
@@ -123,8 +123,8 @@ class fd_dama_result():
 
 
 class fd_redis_manager(pp_thread):
-        global redis_number
-        image_db    = redis_number
+        global redis_dbid
+        image_db    = redis_dbid
         image_key   = 'image_req'
         number_key  = 'number_ack'
 

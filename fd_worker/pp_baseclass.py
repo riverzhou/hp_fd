@@ -4,7 +4,7 @@ from threading              import Thread, Event, Lock, Semaphore
 from queue                  import Queue, LifoQueue
 from traceback              import print_exc
 
-from pp_log                 import logger
+#from pp_log                 import logger
 
 #============================================================================================
 

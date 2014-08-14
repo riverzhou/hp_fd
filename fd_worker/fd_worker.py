@@ -3,7 +3,7 @@
 from traceback              import print_exc
 from time                   import sleep
 
-from fd_config              import list_account
+from fd_config              import list_account, redis_dbid
 from fd_global              import global_info
 
 from fd_redis               import fd_redis_init
@@ -25,6 +25,7 @@ def main():
                 client.start()
                 list_client.append(client)
 
+        print('fd_worker %d started' % redis_dbid)
         global_info.event_gameover.wait()
 
         sleep(90)
