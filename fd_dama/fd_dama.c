@@ -8,19 +8,21 @@
 #include "fd_base64.h"
 #include "fd_redis.h"
 
+#define MAX_BUFLEN	4096
+
 /******************************************************************************************************
-bool GetVcode(  	//能识别返回真，否则返回假
-int Index,		//值为1。
-char* ImgBuffer, 	//验证码图像二进制数据
-int ImgBufLen,		//验证码图像尺寸
-char[] Vcode);		//返回的已识别验证码文本
+  bool GetVcode(  	//能识别返回真，否则返回假
+  int Index,		//值为1。
+  char* ImgBuffer, 	//验证码图像二进制数据
+  int ImgBufLen,		//验证码图像尺寸
+  char[] Vcode);		//返回的已识别验证码文本
 
 //char result[7] = {0};						//定义一个字符串以接收验证码，这里验证码字符数是6，所以取7.
-******************************************************************************************************/
+ ******************************************************************************************************/
 
 /******************************************************************************************************
-int Base64Decode(char * buf, const char * base64code, int src_len );
-******************************************************************************************************/
+  int Base64Decode(char * buf, const char * base64code, int src_len );
+ ******************************************************************************************************/
 
 int init(void)
 {
@@ -43,7 +45,7 @@ int get_image(char* buff, char* sid, char* image)
 			break;
 		}
 	}
-	
+
 	if (i == len)
 		return -1;
 
@@ -70,12 +72,12 @@ int main(void)
 
 	printf("init ok\r\n");
 
-	char redis_inbuff[4096]   = {0};
-	char redis_outbuff[256]   = {0};
-	char base64_inbuff[4096]  = {0};
-	char base64_outbuff[4096] = {0};
-	char dama_sid[128]	  = {0};
-	char dama_code[8] 	  = {0};
+	char redis_inbuff[MAX_BUFLEN]   = {0};
+	char redis_outbuff[MAX_BUFLEN]  = {0};
+	char base64_inbuff[MAX_BUFLEN]  = {0};
+	char base64_outbuff[MAX_BUFLEN] = {0};
+	char dama_sid[MAX_BUFLEN]	= {0};
+	char dama_code[MAX_BUFLEN]	= {0};
 
 	while(true){
 		memset(redis_inbuff,   0, sizeof(redis_inbuff));
