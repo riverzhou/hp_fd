@@ -9,14 +9,22 @@ from queue                  import Queue
 from pp_baseclass           import pp_thread
 from fd_config              import redis_passwd, redis_port, redis_ip, redis_dbid
 
+from pp_log                 import logger, printer
+
 #------------------------------------------
 
 class redis_db():
-        redis_default_db    = 0
         global redis_ip, redis_port, redis_pass
         ip      = redis_ip
         port    = redis_port
         passwd  = redis_passwd
+        default_db = 0
+
+        def __init__(self, db = None):
+                self.db     = db if db != None else self.default_db
+                self.redis  = self.connect_redis()
+                if self.redis == None : return None
+                print('redis connect succeed')
 
         def connect_redis(self):
                 try:
@@ -26,13 +34,6 @@ class redis_db():
                 except:
                         print_exc()
                         return None
-
-        def __init__(self, db = None):
-                global redis_default_db
-                self.db = db if db != None else redis_default_db
-                self.redis  = self.connect_redis()
-                if self.redis == None : return None
-                print('redis connect succeed')
 
         def get_list(self, key):
                 return self.redis.lrange(key, 0, -1)
@@ -68,9 +69,9 @@ class fd_redis_reader(pp_thread):
 
         def __init__(self, manager, db):
                 super().__init__()
+                self.db      = db
+                self.redis   = redis_db(self.db)
                 self.manager = manager
-                self.db = db
-                self.redis = redis_db(self.db)
 
         def main(self):
                 while True:
@@ -78,9 +79,8 @@ class fd_redis_reader(pp_thread):
                         if val == None:
                                 sleep(0)
                                 continue
-                        #print('fd_redis_reader',val)
                         self.manager.put_number(val)
-                        #print('fd_redis_reader',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
+                        printer.debug('fd_redis_reader %s' % val)
 
         def read(self):
                 return self.redis.blk_get_one(self.key_number).decode()
@@ -91,9 +91,9 @@ class fd_redis_writer(pp_thread):
 
         def __init__(self, manager, db):
                 super().__init__()
+                self.db      = db
+                self.redis   = redis_db(self.db)
                 self.manager = manager
-                self.db = db
-                self.redis = redis_db(self.db)
 
         def main(self):
                 while True:
@@ -102,7 +102,7 @@ class fd_redis_writer(pp_thread):
                                 sleep(0)
                                 continue
                         self.write(val)
-                        #print('fd_redis_writer',datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'))
+                        printer.debug('fd_redis_writer %s' % val)
 
         def write(self, val):
                 return self.redis.put_one(self.key_image, val.encode())
@@ -116,17 +116,22 @@ class fd_dama_result():
         def put_number(self, number):
                 self.number = number
                 self.event.set()
+                return True
 
         def get_number(self):
-                self.event.wait()
+                try:
+                        self.event.wait()
+                except  KeyboardInterrupt:
+                        return None
+                except:
+                        print_exc()
+                        return None
                 return self.number
 
 
 class fd_redis_manager(pp_thread):
         global redis_dbid
         image_db    = redis_dbid
-        image_key   = 'image_req'
-        number_key  = 'number_ack'
 
         def __init__(self):
                 super().__init__()
@@ -145,44 +150,6 @@ class fd_redis_manager(pp_thread):
                 self.dict_result = {}
                 self.lock_result = Lock()
 
-        def main(self):
-                while True:
-                        sid, number = self.get_number()
-                        #print('fd_redis_manager', sid, number)
-                        if sid == None or number == None:
-                                sleep(0)
-                                continue
-                        if sid not in self.dict_result:
-                                continue
-                        self.dict_result[sid].put_number(number)
-
-        def get_image(self):
-                ret = None
-                try:
-                        ret = self.queue_image.get()
-                except  KeyboardInterrupt:
-                        pass
-                except:
-                        print_exc()
-                return  ret
-
-        def put_number(self, val):
-                ret = self.queue_number.put(val)
-                return  ret
-
-        def get_result(self, sid):
-                if sid not in self.dict_result:
-                        return None
-                return  self.dict_result[sid].get_number()
-
-        def put_request(self, sid, image):
-                self.lock_result.acquire()
-                if sid not in self.dict_result:
-                        self.dict_result[sid] = fd_dama_result()
-                self.lock_result.release()
-                val = ','.join([sid, image])
-                return  self.queue_image.put(val)
-
         def get_number(self):
                 ret = None
                 try:
@@ -195,6 +162,46 @@ class fd_redis_manager(pp_thread):
                         return None, None
                 sid, number = ret.split(',')
                 return  sid, number
+
+        def main(self):
+                while True:
+                        sid, number = self.get_number()
+                        if sid == None or number == None:
+                                sleep(0)
+                                continue
+                        if sid not in self.dict_result:
+                                continue
+                        self.dict_result[sid].put_number(number)
+
+        #子线程回调接口
+        def get_image(self):
+                ret = None
+                try:
+                        ret = self.queue_image.get()
+                except  KeyboardInterrupt:
+                        pass
+                except:
+                        print_exc()
+                return  ret
+
+        #子线程回调接口
+        def put_number(self, val):
+                return  self.queue_number.put(val)
+
+        #外部调用接口
+        def get_result(self, sid):
+                if sid not in self.dict_result:
+                        return None
+                return  self.dict_result[sid].get_number()
+
+        #外部调用接口
+        def put_request(self, sid, image):
+                self.lock_result.acquire()
+                if sid not in self.dict_result:
+                        self.dict_result[sid] = fd_dama_result()
+                self.lock_result.release()
+                val = ','.join([sid, image])
+                return  self.queue_image.put(val)
 
 #---------------------------------------------------
 
