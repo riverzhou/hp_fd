@@ -8,7 +8,7 @@
 
 #define MAX_BUFLEN	4096
 
-char server_ip[] = "192.168.1.90";
+char server_ip[] = "172.18.1.26";
 int  server_port = 6379;
 char password[]  = "river";
 int  redis_dbid  = 9;
