@@ -11,7 +11,9 @@ from fd_udpclient           import daemon_udp
 
 from pp_baseclass           import pp_thread
 from pp_sslproto            import proto_ssl, proto_machine
-from pp_server              import server_dict, pp_dns_init
+from pp_server              import server_dict
+
+from pp_log                 import logger, printer
 
 class fd_login():
         def __init__(self, client):
@@ -32,14 +34,15 @@ class fd_login():
                         if info_val == None:
                                 continue
                         if info_val['status'] != 200 :
-                                print('fd_login status', info_val['status'])
+                                printer.error('client %s fd_login status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_val   = proto.parse_login_ack(info_val['body'])
                         if 'pid' not in ack_val or 'name' not in ack_val:
+                                printer.error('client %s fd_login ack error %s' % (self.client.bidno, str(info_val)))
                                 continue
                         self.client.pid_login   = ack_val['pid']
                         self.client.name_login  = ack_val['name']
-                        print('fd_login', ack_val['pid'], ack_val['name'])
+                        printer.warning('client %s login %s %s' % (self.client.bidno, ack_val['name'], ack_val['pid']))
                         break
 
 class fd_image(pp_thread):
@@ -47,10 +50,10 @@ class fd_image(pp_thread):
 
         def __init__(self, client, count, price):
                 super().__init__()
-                self.client = client
-                self.count  = count
-                self.price  = price
-                self.event_finish = Event()
+                self.client         = client
+                self.count          = count
+                self.price          = price
+                self.event_finish   = Event()
 
         def main(self):
                 while True :
@@ -81,13 +84,14 @@ class fd_image(pp_thread):
                         if info_val == None :
                                 continue
                         if info_val['status'] != 200 :
-                                print('fd_image status', info_val['status'])
+                                printer.error('client %s fd_image status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_sid  = proto.get_sid_from_head(info_val['head'])
                         ack_val  = proto.parse_image_ack(info_val['body'])
                         if ack_sid == None or ack_sid == '':
                                 continue
                         if 'image' not in ack_val:
+                                printer.error('client %s fd_image ack error %s' % (self.client.bidno, str(info_val)))
                                 continue
                         if ack_val['image'] == None or ack_val['image'] == '':
                                 continue
@@ -103,10 +107,10 @@ class fd_image(pp_thread):
 class fd_price(pp_thread):
         def __init__(self, client, count, price, group):
                 super().__init__()
-                self.client = client
-                self.count  = count
-                self.price  = price
-                self.group  = group
+                self.client     = client
+                self.count      = count
+                self.price      = price
+                self.group      = group
 
         def main(self):
                 while True :
@@ -131,7 +135,7 @@ class fd_price(pp_thread):
                 else:
                         channel = 'tb1'
                 while True:
-                        group, handle = channel_center.get_channel(channel)
+                        group, handle = channel_center.get_channel(channel, self.group)
                         if handle == None :
                                 continue
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
@@ -139,11 +143,13 @@ class fd_price(pp_thread):
                         if info_val == None :
                                 continue
                         if info_val['status'] != 200 :
-                                print('fd_price status', info_val['status'])
+                                printer.error('client %s fd_price status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_val = proto.parse_price_ack(info_val['body'])
                         if 'price' in ack_val :
                                 self.client.price_bid[self.count] = ack_val['price']
+                        else:
+                                printer.error('client %s fd_price ack error %s' % (self.client.bidno, str(info_val)))
                         break
 
 class fd_decode(pp_thread):
@@ -151,11 +157,11 @@ class fd_decode(pp_thread):
 
         def __init__(self, client, count, sid, picture):
                 super().__init__()
-                self.client     = client
-                self.count      = count
-                self.sid        = sid
-                self.picture    = picture
-                self.event_finish = Event()
+                self.client         = client
+                self.count          = count
+                self.sid            = sid
+                self.picture        = picture
+                self.event_finish   = Event()
 
         def main(self):
                 while True :
@@ -219,9 +225,10 @@ class fd_bid(pp_thread):
                         if self.client.number_bid[self.count] == None or self.client.number_bid[self.count] == '000000':
                                 continue
                         break
-                print('do_bid image', self.count, self.client.sid_bid[self.count], self.client.number_bid[self.count])
+                printer.warning('client %s bid %s image %s %s ' % (self.client.bidno, self.count, self.client.sid_bid[self.count], self.client.number_bid[self.count]))
 
                 global_info.event_price[self.count].wait()
+                self.client.price_bid[self.count] = None
                 while True:
                         price = [fd_price(self.client, self.count, price, 0), fd_price(self.client, self.count, price, 1)]
                         price[0].start()
@@ -232,14 +239,13 @@ class fd_bid(pp_thread):
                         if self.client.price_bid[self.count] == None:
                                 continue
                         break
-                print('do_bid price', self.count, self.client.price_bid[self.count])
+                printer.warning('client %s bid %s price %s %s %s' % (self.client.bidno, self.count, self.client.price_bid[self.count], self.client.name_login, self.client.pid_login))
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
                 super().__init__(bidno)
                 self.bidno          = bidno
                 self.passwd         = passwd
-
                 self.machine        = proto_machine()
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)
 
@@ -276,12 +282,13 @@ class fd_client(pp_thread):
 if __name__ == '__main__':
         from fd_channel import fd_channel_init, fd_channel_test, print_channel_number
         from fd_redis   import fd_redis_init
+        from pp_server  import pp_dns_init
         global global_info
 
         pp_dns_init()
         fd_redis_init()
-
         fd_channel_init()
+
         fd_channel_test()
 
         client = fd_client('12345678','1234')

@@ -43,7 +43,7 @@ class fd_channel():
                 except:
                         print_exc()
                         return channel_group, None
-                print   (
+                printer.critical(
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
                         % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['tb0'].qsize(), self.queue[1]['tb0'].qsize(), self.queue[0]['tb1'].qsize(), self.queue[1]['tb1'].qsize())
                         )
