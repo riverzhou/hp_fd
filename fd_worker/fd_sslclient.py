@@ -66,6 +66,7 @@ class fd_image(pp_thread):
                                 break
                         except:
                                 printer.critical(format_exc())
+                                sleep(0.1)
                                 continue
                         else:
                                 break
@@ -125,6 +126,7 @@ class fd_price(pp_thread):
                                 break
                         except:
                                 printer.critical(format_exc())
+                                sleep(0.1)
                                 continue
                         else:
                                 break
@@ -177,6 +179,7 @@ class fd_decode(pp_thread):
                                 break
                         except:
                                 printer.critical(format_exc())
+                                sleep(0.1)
                                 continue
                         else:
                                 break
@@ -208,6 +211,7 @@ class fd_bid(pp_thread):
                                 break
                         except:
                                 printer.critical(format_exc())
+                                sleep(0.1)
                                 continue
                         else:
                                 break
