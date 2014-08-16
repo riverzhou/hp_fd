@@ -211,16 +211,16 @@ class fd_bid(pp_thread):
                 price = global_info.trigger_price[self.count]
                 while True:
                         self.client.picture_bid[self.count] = None
-                        image = fd_image(self.client, self.count, price)
-                        image.start()
-                        if image.wait_for_finish() != True :
+                        thread_image = fd_image(self.client, self.count, price)
+                        thread_image.start()
+                        if thread_image.wait_for_finish() != True :
                                 continue
                         if self.client.sid_bid[self.count] == None or self.client.picture_bid[self.count] == None :
                                 continue
                         self.client.number_bid[self.count] = None
-                        decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
-                        decode.start()
-                        if decode.wait_for_finish() != True :
+                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
+                        thread_decode.start()
+                        if thread_decode.wait_for_finish() != True :
                                 continue
                         if self.client.number_bid[self.count] == None or self.client.number_bid[self.count] == '000000':
                                 continue
@@ -230,9 +230,9 @@ class fd_bid(pp_thread):
                 global_info.event_price[self.count].wait()
                 self.client.price_bid[self.count] = None
                 while True:
-                        price = [fd_price(self.client, self.count, price, 0), fd_price(self.client, self.count, price, 1)]
-                        price[0].start()
-                        price[1].start()
+                        thread_price = [fd_price(self.client, self.count, price, 0), fd_price(self.client, self.count, price, 1)]
+                        thread_price[0].start()
+                        thread_price[1].start()
                         sleep(self.bid_timeout)
                         if global_info.flag_gameover == True:
                                 break
