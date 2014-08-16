@@ -199,7 +199,10 @@ class udp_worker(pp_thread):
 
                 self.check_create_channel(stime)
 
-                int_price = int(price)
+                try:
+                        int_price = int(price)
+                except:
+                        return
 
                 self.check_shot_price(int_price)
                 self.check_image_time(stime, int_price)

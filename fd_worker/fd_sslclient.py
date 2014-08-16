@@ -16,6 +16,8 @@ from pp_server              import server_dict
 from pp_log                 import logger, printer
 
 class fd_login():
+        max_retry       = 10
+
         def __init__(self, client):
                 self.client = client
 
@@ -23,7 +25,7 @@ class fd_login():
                 global  channel_center
                 proto   = self.client.proto
                 req     = proto.make_login_req()
-                while True:
+                for i in range(self.max_retry):
                         channel_center.login_request_increase()
                         group, channel = channel_center.get_channel('login')
                         channel_center.login_request_decrease()
@@ -46,7 +48,8 @@ class fd_login():
                         break
 
 class fd_image(pp_thread):
-        image_timeout = 5 
+        max_retry       = 10
+        image_timeout   = 5
 
         def __init__(self, client, count, price):
                 super().__init__()
@@ -56,7 +59,7 @@ class fd_image(pp_thread):
                 self.event_finish   = Event()
 
         def main(self):
-                while True :
+                for i in range(self.max_retry):
                         try:
                                 self.do_image()
                         except  KeyboardInterrupt:
@@ -75,7 +78,7 @@ class fd_image(pp_thread):
                         channel = 'tb0'
                 else:
                         channel = 'tb1'
-                while True:
+                for i in range(self.max_retry):
                         group, handle = channel_center.get_channel(channel)
                         if handle == None :
                                 continue
@@ -83,7 +86,7 @@ class fd_image(pp_thread):
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 continue
-                        if info_val['status'] != 200 :
+                        if info_val['status'] != 200:
                                 printer.error('client %s fd_image status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_sid  = proto.get_sid_from_head(info_val['head'])
@@ -105,6 +108,8 @@ class fd_image(pp_thread):
                 return self.event_finish.wait(waittime)
 
 class fd_price(pp_thread):
+        max_retry       = 10
+
         def __init__(self, client, count, price, group):
                 super().__init__()
                 self.client     = client
@@ -113,7 +118,7 @@ class fd_price(pp_thread):
                 self.group      = group
 
         def main(self):
-                while True :
+                for i in range(self.max_retry):
                         try:
                                 self.do_price()
                         except  KeyboardInterrupt:
@@ -134,7 +139,7 @@ class fd_price(pp_thread):
                         channel = 'tb0'
                 else:
                         channel = 'tb1'
-                while True:
+                for i in range(self.max_retry):
                         group, handle = channel_center.get_channel(channel, self.group)
                         if handle == None :
                                 continue
@@ -153,7 +158,8 @@ class fd_price(pp_thread):
                         break
 
 class fd_decode(pp_thread):
-        decode_timeout = 30
+        max_retry       = 10
+        decode_timeout  = 30
 
         def __init__(self, client, count, sid, picture):
                 super().__init__()
@@ -164,7 +170,7 @@ class fd_decode(pp_thread):
                 self.event_finish   = Event()
 
         def main(self):
-                while True :
+                for i in range(self.max_retry):
                         try:
                                 self.do_decode()
                         except  KeyboardInterrupt:
@@ -186,7 +192,8 @@ class fd_decode(pp_thread):
                 return self.event_finish.wait(waittime)
 
 class fd_bid(pp_thread):
-        bid_timeout = 2
+        max_retry       = 10
+        bid_timeout     = 2
 
         def __init__(self, client, count):
                 super().__init__()
@@ -194,13 +201,14 @@ class fd_bid(pp_thread):
                 self.count  = count
 
         def main(self):
-                while True:
+                for i in range(self.max_retry):
                         try:
                                 self.do_bid()
                         except  KeyboardInterrupt:
                                 break
                         except:
                                 printer.critical(format_exc())
+                                continue
                         else:
                                 break
 
@@ -209,7 +217,7 @@ class fd_bid(pp_thread):
 
                 global_info.event_image[self.count].wait()
                 price = global_info.trigger_price[self.count]
-                while True:
+                for i in range(self.max_retry):
                         self.client.picture_bid[self.count] = None
                         thread_image = fd_image(self.client, self.count, price)
                         thread_image.start()
@@ -229,7 +237,7 @@ class fd_bid(pp_thread):
 
                 global_info.event_price[self.count].wait()
                 self.client.price_bid[self.count] = None
-                while True:
+                for i in range(self.max_retry):
                         thread_price = [fd_price(self.client, self.count, price, 0), fd_price(self.client, self.count, price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
