@@ -59,17 +59,12 @@ class fd_image(pp_thread):
                 self.event_finish   = Event()
 
         def main(self):
-                for i in range(self.max_retry):
-                        try:
-                                self.do_image()
-                        except  KeyboardInterrupt:
-                                break
-                        except:
-                                printer.critical(format_exc())
-                                sleep(0.1)
-                                continue
-                        else:
-                                break
+                try:
+                        self.do_image()
+                except  KeyboardInterrupt:
+                        pass
+                except:
+                        printer.critical(format_exc())
 
         def do_image(self):
                 global  channel_center
@@ -93,12 +88,12 @@ class fd_image(pp_thread):
                         ack_sid  = proto.get_sid_from_head(info_val['head'])
                         ack_val  = proto.parse_image_ack(info_val['body'])
                         if ack_sid == None or ack_sid == '':
-                                continue
+                                break
                         if 'image' not in ack_val:
                                 printer.error('client %s fd_image ack error %s' % (self.client.bidno, str(info_val)))
-                                continue
+                                break
                         if ack_val['image'] == None or ack_val['image'] == '':
-                                continue
+                                break
                         self.client.sid_bid[self.count]     = ack_sid
                         self.client.picture_bid[self.count] = ack_val['image']
                         break
@@ -119,17 +114,12 @@ class fd_price(pp_thread):
                 self.group      = group
 
         def main(self):
-                for i in range(self.max_retry):
-                        try:
-                                self.do_price()
-                        except  KeyboardInterrupt:
-                                break
-                        except:
-                                printer.critical(format_exc())
-                                sleep(0.1)
-                                continue
-                        else:
-                                break
+                try:
+                        self.do_price()
+                except  KeyboardInterrupt:
+                        pass
+                except:
+                        printer.critical(format_exc())
 
         def do_price(self):
                 global channel_center
@@ -153,10 +143,14 @@ class fd_price(pp_thread):
                                 printer.error('client %s fd_price status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_val = proto.parse_price_ack(info_val['body'])
+                        if 'errcode' in ack_val:
+                                printer.error('client %s fd_price ack error %s' % (self.client.bidno, str(ack_val)))
+                                if ack_val['errcode'] == '112':
+                                        self.client.err_112[self.count] = True
+                                break
                         if 'price' in ack_val :
                                 self.client.price_bid[self.count] = ack_val['price']
-                        else:
-                                printer.error('client %s fd_price ack error %s' % (self.client.bidno, str(info_val)))
+                                break
                         break
 
 class fd_decode(pp_thread):
@@ -172,17 +166,12 @@ class fd_decode(pp_thread):
                 self.event_finish   = Event()
 
         def main(self):
-                for i in range(self.max_retry):
-                        try:
-                                self.do_decode()
-                        except  KeyboardInterrupt:
-                                break
-                        except:
-                                printer.critical(format_exc())
-                                sleep(0.1)
-                                continue
-                        else:
-                                break
+                try:
+                        self.do_decode()
+                except  KeyboardInterrupt:
+                        pass
+                except:
+                        printer.critical(format_exc())
 
         def do_decode(self):
                 global redis_worker
@@ -196,6 +185,7 @@ class fd_decode(pp_thread):
 
 class fd_bid(pp_thread):
         max_retry       = 10
+        max_loop        = 3
         bid_timeout     = 2
 
         def __init__(self, client, count):
@@ -204,7 +194,7 @@ class fd_bid(pp_thread):
                 self.count  = count
 
         def main(self):
-                for i in range(self.max_retry):
+                for i in range(self.max_loop):
                         try:
                                 self.do_bid()
                         except  KeyboardInterrupt:
@@ -248,6 +238,9 @@ class fd_bid(pp_thread):
                         sleep(self.bid_timeout)
                         if global_info.flag_gameover == True:
                                 break
+                        if self.client.err_112[self.count] == True:
+                                printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, price, self.client.name_login, self.client.pid_login))
+                                return
                         if self.client.price_bid[self.count] == None:
                                 continue
                         break
@@ -263,6 +256,7 @@ class fd_client(pp_thread):
 
                 self.login          = fd_login(self)
                 self.bid            = [fd_bid(self,0), fd_bid(self,1), fd_bid(self,2)]
+                self.err_112        = [False, False, False]
 
                 self.name_login     = None
                 self.pid_login      = None
