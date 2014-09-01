@@ -45,7 +45,9 @@ class fd_login():
                         self.client.pid_login   = ack_val['pid']
                         self.client.name_login  = ack_val['name']
                         printer.warning('client %s login %s %s' % (self.client.bidno, ack_val['name'], ack_val['pid']))
-                        break
+                        return True
+                printer.warning('client %s login failed !!!')
+                return False
 
 class fd_image(pp_thread):
         max_retry       = 10
@@ -267,7 +269,8 @@ class fd_client(pp_thread):
 
         def main(self):
                 global daemon_udp
-                self.login.do_login()
+                if self.login.do_login() == False:
+                        return
                 daemon_udp.add((self.bidno, self.pid_login))
 
                 self.bid[0].start()
