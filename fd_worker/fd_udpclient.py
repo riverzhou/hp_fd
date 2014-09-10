@@ -179,7 +179,7 @@ class udp_worker(pp_thread):
 
         def check_time(self, stime):
                 try:
-                        if len(stime) != 8 or stime[2] != ':' or stime[5] != ':'
+                        if len(stime) != 8 or stime[2] != ':' or stime[5] != ':' :
                                 printer.critical('udp systime error !!! ------ ' + str(stime))
                                 return False
                         x = int(stime[0:2])
