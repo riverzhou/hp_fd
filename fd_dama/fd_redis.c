@@ -58,9 +58,17 @@ int redis_init(void)
 
 int redis_clean(void)
 {
-	redisFree(redis_connect);
+	if (redis_connect != NULL)
+		redisFree(redis_connect);
 	return 0;
 }
+
+int redis_reinit(void)
+{
+	redis_clean();
+	return redis_init();
+}
+
 int redis_get(char* buff)
 {
 	redisReply *reply = NULL;

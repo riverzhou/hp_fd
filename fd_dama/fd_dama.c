@@ -89,8 +89,13 @@ int main(void)
 
 		int buff_len = 0;
 
-		if (redis_get(redis_inbuff) < 0)
+		if (redis_get(redis_inbuff) < 0){
+			if (redis_reinit() < 0)
+				break;
+			Sleep(1000);	// 1秒
 			continue;
+		}
+
 		if (get_image(redis_inbuff, dama_sid, base64_inbuff) < 0)
 			continue;
 		if (dama_sid[0] == 0)
@@ -106,7 +111,15 @@ int main(void)
 				strcpy(dama_code, "000000");
 		}
 		make_result(redis_outbuff, dama_sid, dama_code);
-		redis_put(redis_outbuff);
+
+		if (redis_put(redis_outbuff) < 0){
+			if (redis_reinit() < 0)
+				break;
+			Sleep(1000);	// 1秒
+			continue;
+		}
+
+		Sleep(1);		// 1毫秒
 	}
 
 	return 0;

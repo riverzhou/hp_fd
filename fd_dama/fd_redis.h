@@ -3,6 +3,7 @@
 #define _REDIS_INCLUDE__H__
 
 int redis_init(void);
+int redis_reinit(void);
 int redis_clean(void);
 
 int redis_get(char* buff);
