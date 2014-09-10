@@ -7,17 +7,17 @@
 /******************************************************************************************************
 CaptchaOCR.dll导出函数说明：
 
-int VcodeInit(		//失败返回-1
-char[] Password);
-paasword ="XSE"
+int VcodeInit(//失败返回-1
+char[] //lib文件路径
+);
 
 -------以上函数用于初始化识别----------
 
-bool GetVcode(  	//能识别返回真，否则返回假
-int Index,		//值为1。
-char* ImgBuffer, 	//验证码图像二进制数据
-int ImgBufLen,		//验证码图像尺寸
-char[] Vcode);		//返回的已识别验证码文本
+bool GetVcode(          //能识别返回真，否则返回假
+int Index,              //值为1。
+char* ImgBuffer,        //验证码图像二进制数据
+int ImgBufLen,          //验证码图像尺寸
+char[] Vcode);          //返回的已识别验证码文本
 
 -------以上函数用于识别验证码----------
 
