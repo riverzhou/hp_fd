@@ -3,6 +3,7 @@
 *.pyc
 *.log
 *.dump
+.coverage
 bad.jpg
 __pycache__
 core
