@@ -6,7 +6,7 @@ from traceback              import print_exc, format_exc
 
 from fd_global              import global_info
 from fd_channel             import channel_center
-from fd_redis               import redis_worker
+from fd_image               import redis_worker
 from fd_udpclient           import daemon_udp
 
 from pp_baseclass           import pp_thread

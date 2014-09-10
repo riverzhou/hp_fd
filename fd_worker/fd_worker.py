@@ -9,7 +9,7 @@ from pp_server              import pp_dns_init
 from fd_config              import list_account, redis_dbid
 from fd_global              import global_info
 
-from fd_redis               import fd_redis_init
+from fd_image               import fd_image_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
 from fd_synctime            import fd_timer_init
@@ -23,7 +23,7 @@ def main():
         global list_account, list_client, global_info
 
         pp_dns_init()
-        fd_redis_init()
+        fd_image_init()
         fd_channel_init()
         fd_udp_init()
         fd_timer_init()
