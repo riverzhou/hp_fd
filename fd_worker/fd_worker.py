@@ -10,6 +10,7 @@ from pp_server              import pp_dns_init
 from fd_redis               import fd_redis_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
+from fd_synctime            import fd_timer_init
 from fd_sslclient           import fd_client
 from pp_log                 import logger, printer
 
@@ -24,6 +25,7 @@ def main():
         fd_redis_init()
         fd_channel_init()
         fd_udp_init()
+        fd_timer_init()
 
         for account in list_account:
                 client = fd_client(account[0], account[1])
