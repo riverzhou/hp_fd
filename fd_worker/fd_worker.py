@@ -3,16 +3,17 @@
 from traceback              import print_exc
 from time                   import sleep
 
+from pp_log                 import logger, printer
+from pp_server              import pp_dns_init
+
 from fd_config              import list_account, redis_dbid
 from fd_global              import global_info
 
-from pp_server              import pp_dns_init
 from fd_redis               import fd_redis_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
 from fd_synctime            import fd_timer_init
 from fd_sslclient           import fd_client
-from pp_log                 import logger, printer
 
 #==============================================================
 
