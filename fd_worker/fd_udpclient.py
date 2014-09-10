@@ -214,12 +214,12 @@ class udp_worker(pp_thread):
                 if code == 'F':
                         return
 
-                stime = self.check_time(info_val['systime'])
-                if stime == False:
+                if code == 'C':
+                        self.check_game_over(info_val['systime'])
                         return
 
-                if code == 'C':
-                        self.check_game_over(stime)
+                stime = self.check_time(info_val['systime'])
+                if stime == False:
                         return
 
                 self.check_create_channel(stime)
