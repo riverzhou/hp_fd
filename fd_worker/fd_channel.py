@@ -14,7 +14,7 @@ from fd_global              import global_info
 #=============================================================================
 
 class fd_channel():
-        timeout_find_channel = 1
+        timeout_find_channel = 0.5
 
         def __init__(self):
                 self.queue = [{},{}]
@@ -137,7 +137,7 @@ class pp_channel_maker(pp_thread):
 
 class pp_login_channel_manager(pp_thread):
         time_interval   = 1
-        max_onway       = 30
+        max_onway       = 20
 
         def __init__(self):
                 super().__init__()
@@ -146,8 +146,8 @@ class pp_login_channel_manager(pp_thread):
 
         def main(self):
                 while True:
-                        self.manage_channel()
                         sleep(getsleeptime(self.time_interval))
+                        self.manage_channel()
 
         def manage_channel(self):
                 global channel_center, global_info
@@ -176,8 +176,8 @@ class pp_login_channel_manager(pp_thread):
                 self.lock_onway.release()
 
 class pp_toubiao_channel_manager(pp_thread):
-        time_interval   = 1
-        max_onway       = 200
+        time_interval   = 2
+        max_onway       = 100
 
         def __init__(self, id):
                 super().__init__()
@@ -187,8 +187,8 @@ class pp_toubiao_channel_manager(pp_thread):
 
         def main(self):
                 while True:
-                        self.manage_channel()
                         sleep(getsleeptime(self.time_interval))
+                        self.manage_channel()
 
         def manage_channel(self):
                 global global_info
