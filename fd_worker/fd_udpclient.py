@@ -127,9 +127,11 @@ class udp_worker(pp_thread):
                 if price != None and price <= cur_price + 300 and price >= cur_price - 300:
                         global_info.event_price[1].set()
 
+                '''
                 price = global_info.trigger_price[2]
                 if price != None and price <= cur_price + 300 and price >= cur_price - 300:
                         global_info.event_price[2].set()
+                '''
 
         def check_image_time(self, cur_time, cur_price):
                 global global_info
@@ -145,10 +147,12 @@ class udp_worker(pp_thread):
                         global_info.set_trigger_price(1, cur_price + delta_price)
                         global_info.event_image[1].set()
 
+                '''
                 time, delta_price = global_info.trigger_image[2]
                 if time != None and delta_price != None and time_sub(cur_time, time) > 0:
                         global_info.set_trigger_price(2, cur_price + delta_price)
                         global_info.event_image[2].set()
+                '''
 
         def check_game_over(self, cur_time):
                 global global_info
