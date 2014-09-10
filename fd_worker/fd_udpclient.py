@@ -173,6 +173,27 @@ class udp_worker(pp_thread):
                         global_info.flag_create_toubiao[0] = False
                         return
 
+        def check_time(self, stime):
+                try:
+                        if len(stime) != 8 or stime[2] != ':' or stime[5] != ':'
+                                printer.critical('udp systime error !!! ------ ' + str(stime))
+                                return False
+                        x = int(stime[0:2])
+                        y = int(stime[3:5])
+                        z = int(stime[6:8])
+                except:
+                        printer.critical('udp systime error !!! ------ ' + str(stime))
+                        return False
+                return stime
+
+        def check_price(self, price):
+                try:
+                        int_price = int(price)
+                except:
+                        printer.critical('udp price error !!! ------ ' + str(price))
+                        return False
+                return int_price
+
         def update_status(self):
                 global global_info
                 udp_recv = self.recv_udp()
@@ -189,23 +210,29 @@ class udp_worker(pp_thread):
                 if code == 'F':
                         return
 
-                stime = info_val['systime']
+                stime = self.check_time(info_val['systime'])
+                if stime == False:
+                        return
 
                 if code == 'C':
                         self.check_game_over(stime)
                         return
 
-                price = info_val['price']
-
                 self.check_create_channel(stime)
 
-                try:
-                        int_price = int(price)
-                except:
+                int_price = self.check_price(info_val['price'])
+                if int_price == False:
                         return
 
                 self.check_shot_price(int_price)
+
                 self.check_image_time(stime, int_price)
+
+                self.update_systime(stime)
+
+        def update_systime(self, stime):
+                global global_info
+                global_info.update_systime(stime)
 
         def main(self):
                 self.udp_format.start()
@@ -218,7 +245,7 @@ class udp_worker(pp_thread):
                                 break
                         except:
                                 printer.critical(format_exc())
-                                sleep(0)
+                                sleep(1)
 
 class udp_manager(pp_thread):
         max_count_worker = 4
@@ -260,3 +287,5 @@ def fd_udp_init():
 if __name__ == '__main__':
         fd_udp_init()
         daemon_udp.wait_for_stop()
+
+
