@@ -1,0 +1,11 @@
+*.swp
+*.pyo
+*.pyc
+*.log
+*.dump
+log
+bad.jpg
+__pycache__
+core
+*.exe
+
