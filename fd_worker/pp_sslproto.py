@@ -115,6 +115,8 @@ class proto_ssl():
         def parse_ssl_ack(self, string):
                 xml_string = string.strip()
                 key_val = {}
+                if len(xml_string) == 0 :
+                        return None
                 try:
                         root = ElementTree.fromstring(xml_string)
                         for child in root:
@@ -200,6 +202,8 @@ class proto_ssl():
         def parse_login_ack(self, buff):
                 string   = buff.decode('gb18030')
                 info_val = self.parse_ssl_ack(string)
+                if info_val == None:
+                        return None
                 key_val  = {}
                 if 'ERRORCODE' in info_val :
                         key_val['errcode']  = info_val['ERRORCODE']
@@ -229,6 +233,8 @@ class proto_ssl():
         def parse_image_ack(self, buff):
                 string   = buff.decode('gb18030')
                 info_val = self.parse_ssl_ack(string)
+                if info_val == None:
+                        return None
                 key_val  = {}
                 if info_val['ERRORCODE'] != '0' :
                         key_val['errcode']  = info_val['ERRORCODE']
@@ -262,6 +268,8 @@ class proto_ssl():
         def parse_price_ack(self, buff):
                 string   = buff.decode('gb18030')
                 info_val = self.parse_ssl_ack(string)
+                if info_val == None:
+                        return None
                 key_val  = {}
                 if 'ERRORCODE' in info_val :
                         key_val['errcode']  = info_val['ERRORCODE']
