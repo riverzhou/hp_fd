@@ -29,7 +29,7 @@ class fd_global():
                 self.lock_trigger   = Lock()
 
                 self.lock_systime   = Lock()
-                self.sys_time       = None
+                self.sys_time       = '10:30:00'
 
         def set_trigger_price(self, count, price):
                 self.lock_trigger.acquire()
@@ -43,9 +43,7 @@ class fd_global():
 
         def update_systime(self, stime):
                 self.lock_systime.acquire()
-                if self.sys_time == None:
-                        self.sys_time = stime
-                elif time_sub(stime, self.sys_time) > 0:
+                if time_sub(stime, self.sys_time) > 0:
                         self.sys_time = stime
                 self.lock_systime.release()
 

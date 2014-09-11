@@ -32,8 +32,7 @@ class fd_synctime(pp_thread):
                 self.redis.set(self.key_dead, global_info.decode_deadline)
                 while True:
                         sleep(getsleeptime(self.time_interval))
-                        if global_info.sys_time != None:
-                                self.redis.set(self.key_time, global_info.sys_time)
+                        self.redis.set(self.key_time, global_info.sys_time)
 
 
 #------------------------------------------------------
