@@ -4,6 +4,7 @@
 *.log
 *.dump
 .coverage
+.coverage.*
 bad.jpg
 __pycache__
 core
