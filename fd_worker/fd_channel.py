@@ -98,7 +98,11 @@ class fd_channel():
                 key_val['status']  = ack.status
 
                 printer.info(key_val['head'])
-                printer.info(key_val['body'])
+                try:
+                        printer.info(key_val['body'].decode('gb18030'))
+                except:
+                        printer.info(key_val['body'])
+
                 return key_val
 
 #===================================
