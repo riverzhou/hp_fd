@@ -38,7 +38,7 @@ def main():
         global_info.event_gameover.wait()
         printer.debug('worker [%d] stopping' % redis_dbid)
 
-        sleep(90)
+        sleep(30)
 
 if __name__ == '__main__':
         try:
