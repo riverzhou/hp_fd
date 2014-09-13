@@ -299,7 +299,7 @@ class fd_bid():
                         return False
                 printer.warning('client %s bid %s image %s %s ' % (self.client.bidno, self.count, self.client.sid_bid[self.count], self.client.number_bid[self.count]))
 
-                if self.proc_bid() != True:
+                if self.proc_price() != True:
                         printer.warning('client %s bid %s price Failed' % (self.client.bidno, self.count))
                         return False
                 printer.warning('client %s bid %s price %s %s %s' % (self.client.bidno, self.count, self.client.price_bid[self.count], self.client.name_login, self.client.pid_login))
