@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from threading              import Event
+from threading              import Event, Lock
 from time                   import sleep
 from traceback              import print_exc, format_exc
 
@@ -39,6 +39,8 @@ class fd_login():
                                 printer.error('client %s fd_login status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_val   = proto.parse_login_ack(info_val['body'])
+                        if ack_val == None:
+                                continue
                         if 'pid' not in ack_val or 'name' not in ack_val:
                                 printer.error('client %s fd_login ack error %s' % (self.client.bidno, str(info_val)))
                                 continue
@@ -59,6 +61,9 @@ class fd_image(pp_thread):
                 self.count          = count
                 self.price          = price
                 self.event_finish   = Event()
+                self.flag_timeout   = False
+                self.lock_timeout   = Lock()
+                self.flag_error     = False
 
         def main(self):
                 try:
@@ -89,6 +94,8 @@ class fd_image(pp_thread):
                                 continue
                         ack_sid  = proto.get_sid_from_head(info_val['head'])
                         ack_val  = proto.parse_image_ack(info_val['body'])
+                        if ack_val == None:
+                                break
                         if ack_sid == None or ack_sid == '':
                                 break
                         if 'image' not in ack_val:
@@ -96,14 +103,29 @@ class fd_image(pp_thread):
                                 break
                         if ack_val['image'] == None or ack_val['image'] == '':
                                 break
-                        self.client.sid_bid[self.count]     = ack_sid
-                        self.client.picture_bid[self.count] = ack_val['image']
-                        break
+                        self.lock_timeout.acquire()
+                        if self.flag_timeout == False:
+                                self.client.sid_bid[self.count]     = ack_sid
+                                self.client.picture_bid[self.count] = ack_val['image']
+                        self.lock_timeout.release()
+                        self.event_finish.set()
+                        return
+                self.flag_error = True
                 self.event_finish.set()
 
         def wait_for_finish(self, timeout = None):
                 waittime = timeout if timeout != None else self.image_timeout
-                return self.event_finish.wait(waittime)
+                if self.event_finish.wait(waittime) == True:
+                        if self.flag_error == False:
+                                return True
+                        else:
+                                return False
+                else:
+                        self.lock_timeout.acquire()
+                        self.flag_timeout = True
+                        self.lock_timeout.release()
+                        sleep(0)
+                        return False
 
 class fd_price(pp_thread):
         max_retry       = 10
@@ -145,6 +167,8 @@ class fd_price(pp_thread):
                                 printer.error('client %s fd_price status %s' % (self.client.bidno, info_val['status']))
                                 continue
                         ack_val = proto.parse_price_ack(info_val['body'])
+                        if ack_val == None:
+                                break
                         if 'errcode' in ack_val:
                                 printer.error('client %s fd_price ack error %s' % (self.client.bidno, str(ack_val)))
                                 if ack_val['errcode'] == '112':
@@ -157,7 +181,7 @@ class fd_price(pp_thread):
 
 class fd_decode(pp_thread):
         max_retry       = 10
-        decode_timeout  = 30
+        decode_timeout  = 15
 
         def __init__(self, client, count, sid, picture):
                 super().__init__()
@@ -166,6 +190,8 @@ class fd_decode(pp_thread):
                 self.sid            = sid
                 self.picture        = picture
                 self.event_finish   = Event()
+                self.flag_timeout   = False
+                self.lock_timeout   = Lock()
 
         def main(self):
                 try:
@@ -178,12 +204,22 @@ class fd_decode(pp_thread):
         def do_decode(self):
                 global redis_worker
                 redis_worker.put_request(self.sid, self.picture)
-                self.client.number_bid[self.count] = redis_worker.get_result(self.sid)
+                self.lock_timeout.acquire()
+                if self.flag_timeout == False:
+                        self.client.number_bid[self.count] = redis_worker.get_result(self.sid)
+                self.lock_timeout.release()
                 self.event_finish.set()
 
         def wait_for_finish(self, timeout = None):
                 waittime = timeout if timeout != None else self.decode_timeout
-                return self.event_finish.wait(waittime)
+                if self.event_finish.wait(waittime) == True:
+                        return True
+                else:
+                        self.lock_timeout.acquire()
+                        self.flag_timeout = True
+                        self.lock_timeout.release()
+                        sleep(0)
+                        return False
 
 class fd_bid(pp_thread):
         max_retry       = 10
@@ -279,12 +315,12 @@ class fd_client(pp_thread):
                 self.bid[1].start()
                 self.bid[1].wait_for_start()
 
-                self.bid[2].start()
-                self.bid[2].wait_for_start()
+                #self.bid[2].start()
+                #self.bid[2].wait_for_start()
 
                 self.bid[0].wait_for_stop()
                 self.bid[1].wait_for_stop()
-                self.bid[2].wait_for_stop()
+                #self.bid[2].wait_for_stop()
 
 #================================================
 
