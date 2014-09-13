@@ -199,8 +199,7 @@ class proto_ssl():
                         self.login_image
                         ))
 
-        def parse_login_ack(self, buff):
-                string   = buff.decode('gb18030')
+        def parse_login_ack(self, string):
                 info_val = self.parse_ssl_ack(string)
                 if info_val == None:
                         return None
@@ -230,8 +229,7 @@ class proto_ssl():
                         self.get_image_checkcode(price)
                         ))
 
-        def parse_image_ack(self, buff):
-                string   = buff.decode('gb18030')
+        def parse_image_ack(self, string):
                 info_val = self.parse_ssl_ack(string)
                 if info_val == None:
                         return None
@@ -265,8 +263,7 @@ class proto_ssl():
                         image
                         ))
 
-        def parse_price_ack(self, buff):
-                string   = buff.decode('gb18030')
+        def parse_price_ack(self, string):
                 info_val = self.parse_ssl_ack(string)
                 if info_val == None:
                         return None

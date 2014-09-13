@@ -93,15 +93,16 @@ class fd_channel():
                         return None
 
                 key_val = {}
-                key_val['body']    = body
                 key_val['head']    = str(ack.msg)
                 key_val['status']  = ack.status
+                try:
+                        key_val['body'] = body.decode('gb18030')
+                except:
+                        printer.error(body)
+                        key_val['body'] = ''
 
                 printer.info(key_val['head'])
-                try:
-                        printer.info(key_val['body'].decode('gb18030'))
-                except:
-                        printer.info(key_val['body'])
+                printer.info(key_val['body'])
 
                 return key_val
 
