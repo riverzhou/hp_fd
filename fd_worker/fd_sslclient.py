@@ -28,6 +28,7 @@ class fd_login():
                                         return True
                         return False
                 except:
+                        printer.critical(format_exc())
                         return False
 
         def proc_login(self):
@@ -288,6 +289,7 @@ class fd_bid():
                 try:
                         return self.proc_bid()
                 except:
+                        printer.critical(format_exc())
                         return False
 
         def proc_bid(self):
