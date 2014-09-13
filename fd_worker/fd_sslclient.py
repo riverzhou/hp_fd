@@ -361,7 +361,6 @@ class fd_client(pp_thread):
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)
 
                 self.err_112        = [False, False]
-
                 self.name_login     = None
                 self.pid_login      = None
                 self.sid_bid        = [None, None]
@@ -372,6 +371,7 @@ class fd_client(pp_thread):
         def main(self):
                 global daemon_udp
 
+                login = fd_login(self)
                 if login.do_login() != True:
                         printer.error('client %s login failed. Abort' % self.bidno)
                         return
