@@ -49,10 +49,7 @@ class pp_thread(Thread):
         def run(self):
                 #if self.thread_info != None : logger.debug('Thread %s : Id %s : %s : started' % (self.__class__.__name__, self.ident, self.thread_info))
                 self.event_started.set()
-                try:
-                        self.main()
-                except  KeyboardInterrupt:
-                        pass
+                self.main()
                 self.event_stopped.set()
                 #if self.thread_info != None : logger.debug('Thread %s : Id %s : %s : stoped' % (self.__class__.__name__, self.ident, self.thread_info))
 
