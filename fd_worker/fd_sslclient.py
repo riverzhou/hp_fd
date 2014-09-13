@@ -285,6 +285,7 @@ class fd_bid():
         def __init__(self, client, count):
                 self.client = client
                 self.count  = count
+                self.price  = None
 
         def do_bid(self):
                 try:
@@ -310,11 +311,13 @@ class fd_bid():
                 global global_info
 
                 global_info.event_image[self.count].wait()
-                price = global_info.trigger_price[self.count]
+                self.price = global_info.trigger_price[self.count]
+                if self.price == None:
+                        return False
                 for i in range(self.max_retry_image):
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
-                        thread_image = fd_image(self.client, self.count, price)
+                        thread_image = fd_image(self.client, self.count, self.price)
                         thread_image.start()
                         if thread_image.wait_for_finish() != True :
                                 continue
@@ -336,15 +339,17 @@ class fd_bid():
 
                 global_info.event_price[self.count].wait()
                 self.client.price_bid[self.count] = None
+                if self.price == None:
+                        return False
                 for i in range(self.max_retry_price):
-                        thread_price = [fd_price(self.client, self.count, price, 0), fd_price(self.client, self.count, price, 1)]
+                        thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
                         sleep(self.bid_timeout)
                         if global_info.flag_gameover == True:
                                 break
                         if self.client.err_112[self.count] == True:
-                                printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, price, self.client.name_login, self.client.pid_login))
+                                printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
                                 sleep(self.bid_timeout)
                                 break
                         if self.client.price_bid[self.count] != None:
