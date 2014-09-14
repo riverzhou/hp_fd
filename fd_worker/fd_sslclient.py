@@ -70,7 +70,7 @@ class fd_login():
 
 class fd_image(pp_thread):
         max_retry       = 2
-        image_timeout   = 5
+        image_timeout   = 8
 
         def __init__(self, client, count, price):
                 super().__init__()
