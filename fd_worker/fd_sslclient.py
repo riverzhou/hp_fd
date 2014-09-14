@@ -381,22 +381,23 @@ class fd_client(pp_thread):
 
                 login = fd_login(self)
                 if login.do_login() != True:
-                        printer.warning('client %s login failed. Abort' % self.bidno)
+                        printer.warning('client %s login failed. Abort.....' % self.bidno)
                         return
 
                 daemon_udp.add((self.bidno, self.pid_login))
 
                 bid0 = fd_bid(self,0)
                 if bid0.do_bid() != True:
-                        printer.warning('client %s bid 0 failed. Abort' % self.bidno)
+                        printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
                         return
 
                 bid1 = fd_bid(self,1)
                 if bid1.do_bid() != True:
-                        printer.warning('client %s bid 1 failed. Abort' % self.bidno)
+                        printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
                         return
-               
-                printer.warning('client %s bids finished. Quit' % self.bidno)
+
+                sleep(10)
+                printer.warning('client %s bids finished. Quit.....' % self.bidno)
                 return
 
 
