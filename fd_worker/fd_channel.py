@@ -241,9 +241,3 @@ def fd_channel_init():
         toubiao[0].wait_for_start()
         toubiao[1].wait_for_start()
 
-def fd_channel_test():
-        global global_info
-        global_info.flag_create_login       = True
-        global_info.flag_create_toubiao[0]  = True
-        global_info.flag_create_toubiao[1]  = True
-

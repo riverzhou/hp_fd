@@ -287,9 +287,3 @@ def fd_udp_init():
         daemon_udp.start()
         daemon_udp.wait_for_start()
 
-
-if __name__ == '__main__':
-        fd_udp_init()
-        daemon_udp.wait_for_stop()
-
-

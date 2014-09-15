@@ -401,36 +401,3 @@ class fd_client(pp_thread):
                 return
 
 
-#================================================
-
-if __name__ == '__main__':
-        from fd_channel import fd_channel_init, fd_channel_test, print_channel_number
-        from fd_redis   import fd_redis_init
-        from pp_server  import pp_dns_init
-        global global_info
-
-        pp_dns_init()
-        fd_redis_init()
-        fd_channel_init()
-
-        fd_channel_test()
-
-        client = fd_client('12345678','1234')
-        client.start()
-        client.wait_for_start()
-
-        print('client \tstarted')
-
-        sleep(3)
-        global_info.trigger_price[0] = 72600
-        global_info.event_image[0].set()
-        global_info.event_price[0].set()
-
-        sleep(3)
-        global_info.trigger_price[1] = 74000
-        global_info.event_image[1].set()
-        global_info.event_price[1].set()
-
-        client.wait_for_stop()
-
-
