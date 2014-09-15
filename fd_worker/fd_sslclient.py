@@ -16,7 +16,7 @@ from pp_server              import server_dict
 from pp_log                 import logger, printer
 
 class fd_login():
-        max_retry_login = 5
+        max_retry_login = 3
 
         def __init__(self, client):
                 self.client = client
@@ -26,6 +26,8 @@ class fd_login():
                         for i in range(self.max_retry_login):
                                 if self.proc_login() == True:
                                         return True
+                                else:
+                                        sleep(1)
                         return False
                 except:
                         printer.critical(format_exc())
