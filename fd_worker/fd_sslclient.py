@@ -333,6 +333,8 @@ class fd_bid():
                                 continue
                         if self.client.number_bid[self.count] != None and self.client.number_bid[self.count] != '000000':
                                 return True
+                        else:
+                                printer.error('client %s bid %d proc_image decode 000000' % (self.client.bidno, self.count))
 
                 return False
 
