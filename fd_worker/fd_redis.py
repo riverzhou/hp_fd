@@ -33,6 +33,7 @@ class redis_db():
                 except  KeyboardInterrupt:
                         return None
                 except:
+                        print_exc()
                         printer.critical(format_exc())
                         return None
 
