@@ -389,7 +389,7 @@ class fd_client(pp_thread):
                 bid0 = fd_bid(self,0)
                 if bid0.do_bid() != True:
                         printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
-                        return
+                        #return
 
                 bid1 = fd_bid(self,1)
                 if bid1.do_bid() != True:
