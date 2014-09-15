@@ -384,7 +384,7 @@ class fd_client(pp_thread):
                 login = fd_login(self)
                 if login.do_login() != True:
                         printer.warning('client %s login failed. Abort.....' % self.bidno)
-                        return
+                        #return
 
                 daemon_udp.add((self.bidno, self.pid_login))
 
