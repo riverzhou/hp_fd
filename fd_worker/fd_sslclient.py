@@ -350,11 +350,11 @@ class fd_bid():
                                 break
                         if self.client.err_112[self.count] == True:
                                 printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
-                                sleep(self.bid_timeout)
                                 break
                         if self.client.price_bid[self.count] != None:
                                 return True
 
+                sleep(self.bid_timeout)
                 if self.client.price_bid[self.count] != None:
                         return True
                 else:
