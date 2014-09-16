@@ -9,7 +9,7 @@ files = fd_base64.c  fd_dama.c  fd_ocr.c  fd_redis.c
 all:
 	$(CC) 		-O2 -Wall -std=gnu99 ${files} -o fd_dama.exe   -L. -lhiredis_static -lws2_32 -mthreads
 	$(CC) -D_DEBUG_	-O2 -Wall -std=gnu99 ${files} -o fd_dama_d.exe -L. -lhiredis_static -lws2_32 -mthreads
-	$(STRIP)	fd_dama.exe
+	$(STRIP)	fd_dama.exe  fd_dama_d.exe
 
 
 clean:
