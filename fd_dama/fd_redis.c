@@ -1,4 +1,5 @@
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -88,7 +89,15 @@ int redis_clean(void)
 int redis_reinit(void)
 {
 	redis_clean();
-	return redis_init();
+	int ret = -1;
+	while(true){
+		ret = redis_init();
+		if ( ret == 0 ) {
+			break;
+		}
+		Sleep(1000);	// 1秒
+	}
+	return 0;
 }
 
 int redis_get(char* buff)
