@@ -11,7 +11,7 @@
 char server_ip[] = "172.18.0.70";
 int  server_port = 6379;
 char password[]  = "river";
-int  redis_dbid  = 1;
+int  redis_dbid  = 5;
 
 //char server_ip[] = "192.168.1.90";
 //int  server_port = 6379;
@@ -27,28 +27,48 @@ redisContext *redis_connect;
 
 int redis_init(void)
 {
+	redis_connect = NULL;
 	redis_connect = redisConnect((char*)server_ip, server_port);
+	if (redis_connect == NULL) {
+		printf("Connection error: (NULL)\n");
+		return -1;
+	}
 	if (redis_connect->err) {
 		printf("Connection error: %s\n", redis_connect->errstr);
 		redisFree(redis_connect);
+		redis_connect = NULL;
 		return -1;
 	}
 
 	redisReply *reply = NULL;
-	reply= redisCommand(redis_connect, "AUTH %s", password);
+	reply = redisCommand(redis_connect, "AUTH %s", password);
+	if (reply == NULL ) {
+		printf("AUTH error: (NULL) %s\n", password);
+		redisFree(redis_connect);
+		redis_connect = NULL;
+		return -1;
+	}
 	if (reply->type == REDIS_REPLY_ERROR) {
 		printf("AUTH error: %s\n", password);
 		freeReplyObject(reply);
 		redisFree(redis_connect);
+		redis_connect = NULL;
 		return -1;
 	}
 	freeReplyObject(reply);
 
 	reply = redisCommand(redis_connect, "SELECT %d", redis_dbid);
+	if (reply == NULL ) {
+		printf("SELECT error: (NULL) %d\n", redis_dbid);
+		redisFree(redis_connect);
+		redis_connect = NULL;
+		return -1;
+	}
 	if (reply->type == REDIS_REPLY_ERROR) {
 		printf("SELECT error: %d\n", redis_dbid);
 		freeReplyObject(reply);
 		redisFree(redis_connect);
+		redis_connect = NULL;
 		return -1;
 	}
 	freeReplyObject(reply);
@@ -58,8 +78,10 @@ int redis_init(void)
 
 int redis_clean(void)
 {
-	if (redis_connect != NULL)
+	if (redis_connect != NULL){
 		redisFree(redis_connect);
+		redis_connect = NULL;
+	}
 	return 0;
 }
 
@@ -73,7 +95,12 @@ int redis_get(char* buff)
 {
 	redisReply *reply = NULL;
 	reply = redisCommand(redis_connect, "BLPOP %s 0", req_key);
-	if (reply == NULL || reply->type == REDIS_REPLY_ERROR) {
+	if (reply == NULL ) {
+		buff[0] = 0;
+		printf("redis_get error(NULL)\r\n");
+		return -1;
+	}
+	if (reply->type == REDIS_REPLY_ERROR) {
 		buff[0] = 0;
 		printf("redis_get error\r\n");
 		freeReplyObject(reply);
@@ -98,7 +125,11 @@ int redis_put(char* buff)
 {
 	redisReply *reply = NULL;
 	reply = redisCommand(redis_connect, "RPUSH %s %s", ack_key, buff);
-	if (reply == NULL || reply->type == REDIS_REPLY_ERROR) {
+	if (reply == NULL ) {
+		printf("redis_put error(NULL)\r\n");
+		return -1;
+	}
+	if (reply->type == REDIS_REPLY_ERROR) {
 		printf("redis_put error\r\n");
 		freeReplyObject(reply);
 		return -1;
