@@ -8,7 +8,7 @@ def time_sub(end, begin):
         return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
 
 class fd_global():
-        trigger_image  = [('10:32:00', 72600), ('11:29:35', 600), (None, None)]
+        trigger_image  = [('10:32:30', 72600), ('11:29:35', 600), (None, None)]
 
         trigger_channel_first  = ('10:31:00', '10:33:00')
         trigger_channel_second = ('11:28:00', '11:29:55')
