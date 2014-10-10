@@ -30,7 +30,7 @@ class fd_redis_reader(pp_thread):
                                 sleep(0)
                                 continue
                         self.manager.put_number(val)
-                        printer.debug('fd_redis_reader %s' % val)
+                        printer.data('fd_redis_reader %s' % val)
 
         def read(self):
                 return self.redis.blk_get_one(self.key_number).decode()
@@ -52,7 +52,7 @@ class fd_redis_writer(pp_thread):
                                 sleep(0)
                                 continue
                         self.write(val)
-                        printer.debug('fd_redis_writer %s' % val)
+                        printer.data('fd_redis_writer %s' % val)
 
         def write(self, val):
                 return self.redis.put_one(self.key_image, val.encode())
