@@ -83,7 +83,8 @@ class redis_logger():
                         'warning'  : 30,
                         'error'    : 40,
                         'critical' : 50,
-                        'null'     : 60,
+                        'data'     : 60,
+                        'null'     : 70,
                         }
 
         def __init__(self, level = 'debug'):
@@ -138,6 +139,14 @@ class redis_logger():
                 else:
                         self.redis_sender.put(('critical', (time, log)))
 
+        def data(self, log, bin=False):
+                if self.log_level > self.dict_log_level['data']: return
+                time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if bin == True:
+                        self.redis_sender.put(('data', dumps((time, log),0)))
+                else:
+                        self.redis_sender.put(('data', (time, log)))
+
         def wait_for_flush(self):
                 self.redis_sender.queue.join()
 
@@ -167,6 +176,9 @@ class console_logger():
         def critical(self, log):
                 print('critical: ',log)
 
+        def data(self, log):
+                print('data: ',log)
+
         def wait_for_flush(self):
                 pass
 
@@ -183,5 +195,6 @@ if __name__ == "__main__":
         logger.warning('test logger warning')
         logger.error('test logger error')
         logger.critical('test logger critical')
+        logger.data('test logger data')
         logger.wait_for_flush()
 
