@@ -39,6 +39,7 @@ def main():
         printer.debug('worker [%d] stopping' % redis_dbid)
 
         sleep(30)
+        printer.wait_for_flush()
 
 if __name__ == '__main__':
         try:

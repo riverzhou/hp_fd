@@ -3,6 +3,7 @@
 from threading              import Event, Lock
 from queue                  import Queue, Empty
 from time                   import sleep, time
+from datetime               import datetime
 from http.client            import HTTPSConnection, HTTPConnection
 from traceback              import print_exc, format_exc
 
@@ -73,6 +74,7 @@ class fd_channel():
                 self.lock_login_request.release()
 
         def pyget(self, handler, req, headers = {}):
+                time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 printer.info(str(headers))
                 printer.info(req)
 
@@ -101,8 +103,11 @@ class fd_channel():
                         printer.error(body)
                         key_val['body'] = ''
 
+                time_ack = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 printer.info(key_val['head'])
                 printer.info(key_val['body'])
+
+                printer.time(time_req + '---' + time_ack + '::' + str(headers) + '::' + req + '::' + key_val['body'])
 
                 return key_val
 
