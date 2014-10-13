@@ -14,7 +14,7 @@ class fd_global():
         trigger_image_b = [('10:35:00', 72600), ('11:29:35', 600), ('11:29:35', 800)]
 
         trigger_channel_first  = ('10:33:00', '10:35:30')
-        trigger_channel_second = ('11:28:00', '11:29:55')
+        trigger_channel_second = ('11:27:50', '11:29:55')
 
         decode_deadline = '11:29:50'
 

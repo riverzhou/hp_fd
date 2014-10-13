@@ -2,7 +2,7 @@
 
 # MODE A: 700 , MODE B: 600 + 800
 
-mode_price      = 'A'   # 700
+mode_price      = 'B'
 
 redis_passwd    = 'river'
 redis_port      = 6379
