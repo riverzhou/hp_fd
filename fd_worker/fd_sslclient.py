@@ -280,7 +280,7 @@ class fd_price(pp_thread):
 
 
 class fd_bid():
-        bid_timeout     = 3
+        bid_timeout     = 2
         max_retry_image = 3
         max_retry_price = 2
 
