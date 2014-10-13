@@ -5,7 +5,7 @@ from fd_config      import redis_dbid
 from fd_redis       import redis_db
 
 
-list_keys = ['warning', 'error', 'debug', 'critical', 'info']
+list_keys = ['warning', 'error', 'debug', 'critical', 'info', 'data', 'time']
 
 redis = redis_db(redis_dbid)
 
