@@ -21,10 +21,10 @@ class fd_global():
         def __init__(self):
                 global mode_price
 
-                if mode_price == 600:
-                        self.trigger_image = self.trigger_image_b
-                else:
+                if mode_price == 'A':
                         self.trigger_image = self.trigger_image_a
+                else:
+                        self.trigger_image = self.trigger_image_b
 
                 self.flag_create_login   = True
                 self.flag_create_toubiao = [False, False]
