@@ -4,6 +4,7 @@ from threading              import Event, Lock
 from time                   import sleep
 from traceback              import print_exc, format_exc
 
+from fd_config              import mode_price
 from fd_global              import global_info
 from fd_channel             import channel_center
 from fd_image               import redis_worker
