@@ -270,17 +270,18 @@ class fd_price(pp_thread):
                         if 'errcode' in ack_val:
                                 printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
                                 if ack_val['errcode'] == '112':
-                                        self.client.err_112[self.count] = True
+                                        self.client.set_err_112(self.count)
                                 return
                         if 'price' not in ack_val :
                                 printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
                                 return
-                        self.client.price_bid[self.count] = ack_val['price']
+                        self.client.set_price_bid(self.count, ack_val['price'])
                         return
 
 
 class fd_bid():
         bid_timeout     = 2
+        max_bid_timeout = 20
         max_retry_image = 3
         max_retry_price = 2
 
@@ -342,24 +343,24 @@ class fd_bid():
                 global global_info
 
                 global_info.event_price[self.count].wait()
-                self.client.price_bid[self.count] = None
+                #self.client.set_price_bid(self.count, None)
                 if self.price == None:
                         return False
                 for i in range(self.max_retry_price):
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
-                        sleep(self.bid_timeout)
+                        self.client.wait_price_bid(self.count, self.bid_timeout)
                         if global_info.flag_gameover == True:
                                 break
-                        if self.client.err_112[self.count] == True:
+                        if self.client.check_err_112(self.count) == True:
                                 printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
                                 break
-                        if self.client.price_bid[self.count] != None:
+                        if self.client.check_price_bid(self.count) != None:
                                 return True
 
-                sleep(self.bid_timeout)
-                if self.client.price_bid[self.count] != None:
+                self.client.wait_price_bid(self.count, self.max_bid_timeout)
+                if self.client.check_price_bid(self.count) != None:
                         return True
                 else:
                         return False
@@ -372,13 +373,15 @@ class fd_client(pp_thread):
                 self.machine        = proto_machine()
                 self.proto          = proto_ssl(bidno, passwd, self.machine.mcode, self.machine.image)
 
-                self.err_112        = [False, False]
+                self.err_112        = [False, False, False]
                 self.name_login     = None
                 self.pid_login      = None
-                self.sid_bid        = [None, None]
-                self.picture_bid    = [None, None]
-                self.number_bid     = [None, None]
-                self.price_bid      = [None, None]
+                self.sid_bid        = [None, None, None]
+                self.picture_bid    = [None, None, None]
+                self.number_bid     = [None, None, None]
+                self.price_bid      = [None, None, None]
+                self.lock_bid       = [Lock(),  Lock(),  Lock()]
+                self.event_bid      = [Event(), Event(), Event()]
 
         def main(self):
                 global daemon_udp
@@ -398,10 +401,40 @@ class fd_client(pp_thread):
                 bid1 = fd_bid(self,1)
                 if bid1.do_bid() != True:
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
-                        return
+                        #return
+
+                if mode_price != 'A':
+                        bid2 = fd_bid(self,2)
+                        if bid2.do_bid() != True:
+                                printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
+                                #return
 
                 sleep(10)
-                printer.warning('client %s bids finished. Quit.....' % self.bidno)
+                printer.warning('client %s bids finished. price : %s . Quit.....' % (self.bidno, str(self.price_bid)))
                 return
+
+        def wait_price_bid(count, timeout):
+                return self.event_bid[count].wait(timeout)
+
+        def check_err_112(count):
+                return self.err_112[count]
+
+        def check_price_bid(count):
+                return self.price_bid[count]
+
+        def set_err_112(count):
+                self.lock_bid[count].acquire()
+                self.err_112[count] = True
+                #self.event_bid[count].set()
+                self.lock_bid[count].release()
+                return True
+
+        def set_price_bid(count, price):
+                self.lock_bid[count].acquire()
+                self.price_bid[count] = price
+                if price != None:
+                        self.event_bid[count].set()
+                self.lock_bid[count].release()
+                return price
 
 
