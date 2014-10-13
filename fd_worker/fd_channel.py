@@ -107,7 +107,7 @@ class fd_channel():
                 printer.info(key_val['head'])
                 printer.info(key_val['body'])
 
-                printer.time(time_req + '---' + time_ack + '::' + str(headers) + '::' + req + '::' + key_val['body'])
+                printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + key_val['body'])
 
                 return key_val
 
