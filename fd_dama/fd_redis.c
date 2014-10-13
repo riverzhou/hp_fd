@@ -9,15 +9,10 @@
 
 #define MAX_BUFLEN	4096
 
-char server_ip[] = "172.18.0.70";
-int  server_port = 6379;
-char password[]  = "river";
-int  redis_dbid  = 5;
-
-//char server_ip[] = "192.168.1.90";
-//int  server_port = 6379;
-//char password[]  = "river";
-//int  redis_dbid  = 5;
+char redis_pass[]  	= "river";
+int  redis_dbid  	= 0;
+char redis_ip[32] 	= {0};
+int  redis_port 	= 6379;
 
 char req_key[] 	 = "req_image";
 char ack_key[] 	 = "ack_number";
@@ -29,7 +24,7 @@ redisContext *redis_connect;
 int redis_init(void)
 {
 	redis_connect = NULL;
-	redis_connect = redisConnect((char*)server_ip, server_port);
+	redis_connect = redisConnect((char*)redis_ip, redis_port);
 	if (redis_connect == NULL) {
 		printf("Connection error: (NULL)\n");
 		return -1;
@@ -42,15 +37,15 @@ int redis_init(void)
 	}
 
 	redisReply *reply = NULL;
-	reply = redisCommand(redis_connect, "AUTH %s", password);
+	reply = redisCommand(redis_connect, "AUTH %s", redis_pass);
 	if (reply == NULL ) {
-		printf("AUTH error: (NULL) %s\n", password);
+		printf("AUTH error: (NULL) %s\n", redis_pass);
 		redisFree(redis_connect);
 		redis_connect = NULL;
 		return -1;
 	}
 	if (reply->type == REDIS_REPLY_ERROR) {
-		printf("AUTH error: %s\n", password);
+		printf("AUTH error: %s\n", redis_pass);
 		freeReplyObject(reply);
 		redisFree(redis_connect);
 		redis_connect = NULL;

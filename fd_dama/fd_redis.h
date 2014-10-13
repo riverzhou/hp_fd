@@ -9,5 +9,8 @@ int redis_clean(void);
 int redis_get(char* buff);
 int redis_put(char* buff);
 
+int  redis_dbid;
+char redis_ip[32];
+
 #endif // #ifndef _REDIS_INCLUDE__H__
 

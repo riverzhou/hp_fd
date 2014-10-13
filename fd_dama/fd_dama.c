@@ -64,8 +64,40 @@ int make_result(char* buff, char* sid, char* code)
 	return 0;
 }
 
-int main(void)
+int parse_config(int argc, char* argv[])
 {
+	if ( argc != 3 ){
+		printf("usage:%s 192.168.1.90 5 \n",argv[0]);
+		return -1;
+	}
+
+	int ip = 0;
+	int db = 0;
+
+	ip = inet_addr(argv[1]);
+	if ( ip == INADDR_NONE ){
+		printf("ip : %s invalid \n" , argv[1] );
+		return -1;
+	}
+
+	db = atoi(argv[2]);
+	if( db < 1 ){
+		printf("db: %s  invalid \n" , argv[2] );
+		return -1;
+	}
+
+	strcpy(redis_ip , argv[1]);
+	redis_dbid = db;
+
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	if( parse_config(argc, argv) < 0 ) {
+		return -1;
+	}
+
 	if( init() < 0 ) {
 		return -1;	
 	}
