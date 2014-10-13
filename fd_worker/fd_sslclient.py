@@ -414,23 +414,23 @@ class fd_client(pp_thread):
                 printer.warning('client %s bids finished. price : %s . Quit.....' % (self.bidno, str(self.price_bid)))
                 return
 
-        def wait_price_bid(count, timeout):
+        def wait_price_bid(self, count, timeout):
                 return self.event_bid[count].wait(timeout)
 
-        def check_err_112(count):
+        def check_err_112(self, count):
                 return self.err_112[count]
 
-        def check_price_bid(count):
+        def check_price_bid(self, count):
                 return self.price_bid[count]
 
-        def set_err_112(count):
+        def set_err_112(self, count):
                 self.lock_bid[count].acquire()
                 self.err_112[count] = True
                 #self.event_bid[count].set()
                 self.lock_bid[count].release()
                 return True
 
-        def set_price_bid(count, price):
+        def set_price_bid(self, count, price):
                 self.lock_bid[count].acquire()
                 self.price_bid[count] = price
                 if price != None:
