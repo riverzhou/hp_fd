@@ -404,7 +404,7 @@ class fd_client(pp_thread):
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
                         #return
 
-                if pp_global_info.mode_price != 'A':
+                if pp_global_info.trigger_image[3][0] != None and pp_global_info.trigger_image[3][1] != None:
                         sleep(2)
                         bid2 = fd_bid(self,2)
                         if bid2.do_bid() != True:

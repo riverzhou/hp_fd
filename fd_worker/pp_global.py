@@ -9,13 +9,15 @@ def time_sub(end, begin):
 
 class pp_global():
 
-        trigger_image_a = [('10:35:00', 72600), ('11:29:35', 700), (None, None)]
-        trigger_image_b = [('10:35:00', 72600), ('11:29:35', 600), ('11:29:35', 800)]
+        trigger_image_a = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:50', 400)]
+        trigger_image_b = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:55', 300)]
+        trigger_image_c = [('10:35:00', 72600), ('11:29:50', 400), (None, None)]
+        trigger_image_d = [('10:35:00', 72600), ('11:29:55', 300), (None, None)]
 
-        trigger_channel_first  = ('10:33:20', '10:35:30')
-        trigger_channel_second = ('11:27:50', '11:29:55')
+        trigger_channel_first  = ('10:33:10', '10:55:00')
+        trigger_channel_second = ('11:28:10', '11:29:58')
 
-        decode_deadline = '11:29:50'
+        decode_deadline = '11:29:56'
 
         channel_timeout = 110
 
@@ -38,8 +40,14 @@ class pp_global():
 
                 if mode_price == 'A':
                         self.trigger_image = self.trigger_image_a
-                else:
+                if mode_price == 'B':
                         self.trigger_image = self.trigger_image_b
+                if mode_price == 'C':
+                        self.trigger_image = self.trigger_image_c
+                if mode_price == 'D':
+                        self.trigger_image = self.trigger_image_d
+                else:
+                        self.trigger_image = self.trigger_image_a
 
                 self.flag_create_login   = True
                 self.flag_create_toubiao = [False, False]
