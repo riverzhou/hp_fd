@@ -18,6 +18,8 @@ class fd_global():
 
         decode_deadline = '11:29:50'
 
+        channel_timeout = 110
+
         def __init__(self):
                 global mode_price
 
