@@ -48,14 +48,13 @@ class fd_login():
                         self.time_lastreq = curtime
                         return True
                 sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
                 return True
 
         def proc_login(self):
                 global  channel_center
-
-                self.check_interval()
 
                 proto   = self.client.proto
                 req     = proto.make_login_req()
@@ -68,6 +67,8 @@ class fd_login():
                         return False
 
                 head = proto.make_ssl_head(server_dict[group]['login']['name'])
+
+                self.check_interval()
                 info_val = channel_center.pyget(channel, req, head)
                 if info_val == None:
                         printer.error('client %s fd_login info is None' % self.client.bidno)
@@ -122,6 +123,7 @@ class fd_image(pp_thread):
                         self.time_lastreq = curtime
                         return True
                 sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
                 return True
@@ -136,14 +138,14 @@ class fd_image(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
-                        self.check_interval()
-
                         group, handle = channel_center.get_channel(channel)
                         if handle == None :
                                 printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
                                 continue
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
+
+                        self.check_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
@@ -241,7 +243,7 @@ class fd_decode(pp_thread):
 
         def wait_for_finish(self, timeout = None):
                 waittime = timeout if timeout != None else self.decode_timeout
-                if self.event_finish.wait(waittime) == True:
+                if self.event_finish.wait(waittime+2) == True:                  # XXX 多等待2秒
                         return True
                 else:
                         self.lock_timeout.acquire()
@@ -278,6 +280,7 @@ class fd_price(pp_thread):
                         self.time_lastreq = curtime
                         return True
                 sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
                 return True
@@ -294,14 +297,14 @@ class fd_price(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
-                        self.check_interval()
-
                         group, handle = channel_center.get_channel(channel, self.group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
                                 continue
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
+
+                        self.check_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
@@ -330,13 +333,21 @@ class fd_price(pp_thread):
 
 
 class fd_bid():
-        bid_timeout     = 2
-        max_retry_image = 3
-        max_retry_price = 2
+        min_retry_image_interval    = 3
+        min_retry_price_interval    = 2
+        max_retry_image             = 3
+        max_retry_price             = 2
+
+        count                       = 0     # 在子类中重写此参数
+        max_image_timeout           = 0     # 在子类中重写此参数
+        max_decode_timeout          = 0     # 在子类中重写此参数
+        max_price_timeout           = 0     # 在子类中重写此参数
 
         def __init__(self, client):
-                self.client = client
-                self.price  = None
+                self.client             = client
+                self.price              = None
+                self.time_image_lastreq = None
+                #self.time_price_lastreq = None
 
         def do_bid(self):
                 try:
@@ -344,6 +355,17 @@ class fd_bid():
                 except:
                         printer.critical(format_exc())
                         return False
+
+        def check_image_interval(self):
+                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_image_lastreq == None:
+                        self.time_image_lastreq = curtime
+                        return True
+                sleeptime = self.min_retry_image_interval - time_sub(curtime, self.time_image_lastreq)
+                self.time_image_lastreq = curtime
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
 
         def proc_bid(self):
                 if self.proc_image() != True:
@@ -366,6 +388,8 @@ class fd_bid():
                 if self.price == None:
                         return False
                 for i in range(self.max_retry_image):
+                        self.check_image_interval()
+
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
                         thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
@@ -397,7 +421,7 @@ class fd_bid():
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
-                        self.client.wait_price_bid(self.count, self.bid_timeout)
+                        self.client.wait_price_bid(self.count, self.min_retry_price_interval)
                         if pp_global_info.flag_gameover == True:
                                 break
                         if self.client.check_err_112(self.count) == True:
@@ -406,28 +430,31 @@ class fd_bid():
                         if self.client.check_price_bid(self.count) != None:
                                 return True
 
-                self.client.wait_price_bid(self.count, self.max_bid_timeout)
+                self.client.wait_price_bid(self.count, self.max_price_timeout)
                 if self.client.check_price_bid(self.count) != None:
                         return True
                 else:
                         return False
+
+
 class fd_bid_0(fd_bid):
         count               = 0
         max_image_timeout   = 10
         max_decode_timeout  = 30
-        max_bid_timeout     = 30
+        max_price_timeout   = 30
 
 class fd_bid_1(fd_bid):
         count               = 1
         max_image_timeout   = 4
         max_decode_timeout  = 8
-        max_bid_timeout     = 4
+        max_price_timeout   = 4
 
 class fd_bid_2(fd_bid):
         count               = 2
         max_image_timeout   = 3
         max_decode_timeout  = 6
-        max_bid_timeout     = 10
+        max_price_timeout   = 10
+
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
@@ -447,26 +474,50 @@ class fd_client(pp_thread):
                 self.lock_bid       = [Lock(),  Lock(),  Lock()]
                 self.event_bid      = [Event(), Event(), Event()]
 
-        def main(self):
-                global pp_global_info, daemon_udp
 
+        def do_login(self):
                 login = fd_login(self)
                 if login.do_login() != True:
                         printer.warning('client %s login failed. Abort.....' % self.bidno)
+                        return False
                 else:
                         daemon_udp.add((self.bidno, self.pid_login))
+                        return True
 
+
+        def do_bid0(self):
                 bid0 = fd_bid_0(self)
                 if bid0.do_bid() != True:
                         printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
 
+
+        def do_bid1(self):
                 bid1 = fd_bid_1(self)
                 if bid1.do_bid() != True:
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
 
+
+        def do_bid2(self):
                 bid2 = fd_bid_2(self)
                 if bid2.do_bid() != True:
                         printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
+
+
+        def stop_channel0(self):
+                pass
+
+        def main(self):
+                global pp_global_info, daemon_udp
+
+                self.do_login()
+
+                self.do_bid0()
+
+                self.stop_channel0()
+
+                self.do_bid1()
+
+                self.do_bid2()
 
                 sleep(10)
                 printer.warning('client %s bids finished. price : %s . Quit.....' % (self.bidno, str(self.price_bid)))
