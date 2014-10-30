@@ -152,7 +152,7 @@ class udp_worker(pp_thread):
 
         def check_game_over(self, cur_time):
                 global pp_global_info
-                if cur_time == None:
+                if cur_time == None and pp_global_info.sys_code != None:
                         pp_global_info.set_game_over()
 
         def check_create_channel(self, cur_time):
@@ -218,6 +218,7 @@ class udp_worker(pp_thread):
                 if stime == False:
                         return
 
+                self.update_syscode(code)
                 self.check_create_channel(stime)
 
                 int_price = self.check_price(info_val['price'])
@@ -229,6 +230,10 @@ class udp_worker(pp_thread):
                 self.check_image_time(stime, int_price)
 
                 self.update_systime(stime)
+
+        def update_syscode(self, code):
+                global pp_global_info
+                pp_global_info.update_syscode(code)
 
         def update_systime(self, stime):
                 global pp_global_info

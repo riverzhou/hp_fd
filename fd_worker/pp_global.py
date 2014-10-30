@@ -63,6 +63,7 @@ class pp_global():
 
                 self.lock_systime   = Lock()
                 self.sys_time       = '10:30:00'
+                self.sys_code       = None
 
         def set_trigger_price(self, count, price):
                 self.lock_trigger.acquire()
@@ -79,6 +80,17 @@ class pp_global():
                 if time_sub(stime, self.sys_time) > 0:
                         self.sys_time = stime
                 self.lock_systime.release()
+
+        def update_syscode(self, code):
+                if self.sys_code == None and code == 'A':
+                        self.sys_code = code
+                        return
+                if self.sys_code == None and code == 'B':
+                        self.sys_code = code
+                        return
+                if self.sys_code == 'A'  and code == 'B':
+                        self.sys_code = code
+                        return
 
 #-----------------------------
 
