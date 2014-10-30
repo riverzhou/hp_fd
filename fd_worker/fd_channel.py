@@ -40,9 +40,11 @@ class fd_channel():
                 global pp_global_info
                 cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 time     = channel_handle_tuple[0]
+                handle   = channel_handle_tuple[1]
                 if time_sub(cur_time, time) < pp_global_info.channel_timeout:
                         return True
                 else:
+                        self.close_handle(handle)
                         return False
 
         def find_channel(self, channel, group, timeout = None):
@@ -104,26 +106,38 @@ class fd_channel():
                         self.count_login_request = 0
                 self.lock_login_request.release()
 
-        def pyget(self, handler, req, headers = {}):
+        def close_handle(self, handle):
+                try:
+                        handle.close()
+                except:
+                        pass
+
+        def pyget(self, handle, req, headers = {}):
                 time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
 
                 printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req)
 
                 try:
-                        handler.request('GET', req, headers = headers)
+                        handle.request('GET', req, headers = headers)
                 except  KeyboardInterrupt:
+                        self.close_handle(handle)
                         return None
                 except:
                         printer.critical(format_exc())
+                        self.close_handle(handle)
                         return None
                 try:
-                        ack  = handler.getresponse()
+                        ack  = handle.getresponse()
                         body = ack.read()
                 except  KeyboardInterrupt:
+                        self.close_handle(handle)
                         return None
                 except:
                         printer.critical(format_exc())
+                        self.close_handle(handle)
                         return None
+
+                self.close_handle(handle)
 
                 key_val = {}
                 key_val['head']    = str(ack.msg)
@@ -162,18 +176,17 @@ class pp_channel_maker(pp_thread):
                 global channel_center, server_dict
                 self.manager.maker_in()
                 host    = server_dict[self.group][self.server]['ip']
-                handler = HTTPSConnection(host)
-                #handler = HTTPConnection(host)
-                handler._http_vsn = 10
-                handler._http_vsn_str = 'HTTP/1.0'
+                handle = HTTPSConnection(host)
+                handle._http_vsn = 10
+                handle._http_vsn_str = 'HTTP/1.0'
                 try:
-                        handler.connect()
+                        handle.connect()
                 except  KeyboardInterrupt:
                         pass
                 except:
                         printer.critical(format_exc())
                 else:
-                        channel_center.put_channel(self.channel, self.group, handler)
+                        channel_center.put_channel(self.channel, self.group, handle)
                 self.manager.maker_out()
 
 class pp_login_channel_manager(pp_thread):
