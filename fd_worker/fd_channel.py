@@ -8,11 +8,17 @@ from http.client            import HTTPSConnection, HTTPConnection
 from traceback              import print_exc, format_exc
 
 from pp_log                 import logger, printer
-from pp_baseclass           import pp_thread
 from pp_server              import server_dict
-from fd_global              import global_info
+
+from pp_global              import pp_global_info
+from pp_baseclass           import pp_thread
 
 #=============================================================================
+
+def time_sub(end, begin):
+        e = datetime.timestamp(datetime.strptime('1970-01-01 '+end,   '%Y-%m-%d %H:%M:%S.%f'))
+        b = datetime.timestamp(datetime.strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S.%f'))
+        return e-b
 
 class fd_channel():
         timeout_find_channel = 0.5
@@ -28,15 +34,25 @@ class fd_channel():
 
                 self.count_login_request    = 0
                 self.lock_login_request     = Lock()
+                self.lock_get_channel       = Lock()
+
+        def check_channel(self, channel_handle_tuple):
+                global pp_global_info
+                cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                time     = channel_handle_tuple[0]
+                if time_sub(cur_time, time) < pp_global_info.channel_timeout:
+                        return True
+                else
+                        return False
 
         def find_channel(self, channel, group, timeout = None):
                 if group == -1:
                         channel_group = 0 if self.queue[0][channel].qsize() >= self.queue[1][channel].qsize() else 1
                 else:
                         channel_group = group
-                channel_handle = None
+                channel_handle_tuple = None
                 try:
-                        channel_handle = self.queue[channel_group][channel].get(True, timeout)
+                        channel_handle_tuple = self.queue[channel_group][channel].get(True, timeout)
                 except  KeyboardInterrupt:
                         return channel_group, None
                 except  Empty:
@@ -44,22 +60,37 @@ class fd_channel():
                 except:
                         printer.critical(format_exc())
                         return channel_group, None
+                return  channel_group, channel_handle_tuple
+
+        def get_channel(self, channel, group = -1):
+                channel_handle = None
+                while True:
+                        self.lock_get_channel.acquire()
+                        channel_group, channel_handle_tuple = self.find_channel(channel, group, self.timeout_find_channel)
+                        self.lock_get_channel.release()
+                        if channel_handle_tuple == None :
+                                sleep(0)
+                                continue
+                        if self.check_channel(channel_handle_tuple) != True :
+                                sleep(0)
+                                continue
+                        channel_handle = channel_handle_tuple[1]
+                        if channel_handle == None:
+                                sleep(0)
+                                continue
+                        break
+
                 printer.debug(
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
                         % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['tb0'].qsize(), self.queue[1]['tb0'].qsize(), self.queue[0]['tb1'].qsize(), self.queue[1]['tb1'].qsize())
                         )
+
                 return  channel_group, channel_handle
 
-        def get_channel(self, channel, group = -1):
-                while True:
-                        channel_group, channel_handle = self.find_channel(channel, group, self.timeout_find_channel)
-                        if channel_handle != None:
-                                break
-                        sleep(0)
-                return  channel_group, channel_handle
-                                
         def put_channel(self, channel, group, handle):
-                return self.queue[group][channel].put(handle)
+                time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                channel_handle_tuple = (time, handle)
+                return  self.queue[group][channel].put(channel_handle_tuple)
 
         def login_request_increase(self):
                 self.lock_login_request.acquire()
@@ -75,8 +106,8 @@ class fd_channel():
 
         def pyget(self, handler, req, headers = {}):
                 time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                printer.info(str(headers))
-                printer.info(req)
+
+                printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req)
 
                 try:
                         handler.request('GET', req, headers = headers)
@@ -104,10 +135,10 @@ class fd_channel():
                         key_val['body'] = ''
 
                 time_ack = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                printer.info(key_val['head'])
-                printer.info(key_val['body'])
 
-                printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + key_val['body'])
+                printer.info(time_ack + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
+
+                printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
 
                 return key_val
 
