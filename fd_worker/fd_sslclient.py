@@ -73,9 +73,8 @@ class fd_login():
 
 class fd_image(pp_thread):
         max_retry       = 2
-        image_timeout   = 8
 
-        def __init__(self, client, count, price):
+        def __init__(self, client, count, price, image_timeout):
                 super().__init__()
                 self.client         = client
                 self.count          = count
@@ -173,9 +172,8 @@ class fd_image(pp_thread):
 
 
 class fd_decode(pp_thread):
-        decode_timeout  = 15
 
-        def __init__(self, client, count, sid, picture):
+        def __init__(self, client, count, sid, picture, decode_timeout):
                 super().__init__()
                 self.client         = client
                 self.count          = count
@@ -282,13 +280,11 @@ class fd_price(pp_thread):
 
 class fd_bid():
         bid_timeout     = 2
-        max_bid_timeout = 20
         max_retry_image = 3
         max_retry_price = 2
 
-        def __init__(self, client, count):
+        def __init__(self, client):
                 self.client = client
-                self.count  = count
                 self.price  = None
 
         def do_bid(self):
@@ -321,7 +317,7 @@ class fd_bid():
                 for i in range(self.max_retry_image):
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
-                        thread_image = fd_image(self.client, self.count, self.price)
+                        thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
                         thread_image.start()
                         if thread_image.wait_for_finish() != True :
                                 continue
@@ -329,7 +325,7 @@ class fd_bid():
                                 continue
 
                         self.client.number_bid[self.count] = None
-                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
+                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count], self.max_decode_timeout)
                         thread_decode.start()
                         if thread_decode.wait_for_finish() != True :
                                 continue
@@ -344,7 +340,6 @@ class fd_bid():
                 global pp_global_info
 
                 pp_global_info.event_price[self.count].wait()
-                #self.client.set_price_bid(self.count, None)
                 if self.price == None:
                         return False
                 for i in range(self.max_retry_price):
@@ -365,6 +360,23 @@ class fd_bid():
                         return True
                 else:
                         return False
+class fd_bid_0(fd_bid):
+        count               = 0
+        max_image_timeout   = 10
+        max_decode_timeout  = 30
+        max_bid_timeout     = 30
+
+class fd_bid_1(fd_bid):
+        count               = 1
+        max_image_timeout   = 4
+        max_decode_timeout  = 8
+        max_bid_timeout     = 4
+
+class fd_bid_2(fd_bid):
+        count               = 2
+        max_image_timeout   = 3
+        max_decode_timeout  = 6
+        max_bid_timeout     = 10
 
 class fd_client(pp_thread):
         def __init__(self, bidno, passwd):
@@ -390,28 +402,21 @@ class fd_client(pp_thread):
                 login = fd_login(self)
                 if login.do_login() != True:
                         printer.warning('client %s login failed. Abort.....' % self.bidno)
-                        #return
+                else:
+                        daemon_udp.add((self.bidno, self.pid_login))
 
-                daemon_udp.add((self.bidno, self.pid_login))
-
-                bid0 = fd_bid(self,0)
+                bid0 = fd_bid_0(self)
                 if bid0.do_bid() != True:
                         printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
-                        #return
 
-                bid1 = fd_bid(self,1)
+                bid1 = fd_bid_1(self)
                 if bid1.do_bid() != True:
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
-                        #return
 
-                if pp_global_info.trigger_image[3][0] != None and pp_global_info.trigger_image[3][1] != None:
-                        sleep(2)
-                        bid2 = fd_bid(self,2)
-                        if bid2.do_bid() != True:
-                                printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
-                                #return
+                bid2 = fd_bid_2(self)
+                if bid2.do_bid() != True:
+                        printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
 
-                sleep(10)
                 printer.warning('client %s bids finished. price : %s . Quit.....' % (self.bidno, str(self.price_bid)))
                 return
 
