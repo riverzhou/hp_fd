@@ -4,17 +4,17 @@ from threading              import Event, Lock
 from time                   import sleep
 from traceback              import print_exc, format_exc
 
-from fd_config              import mode_price
-from fd_global              import global_info
+from pp_log                 import logger, printer
+from pp_sslproto            import proto_ssl, proto_machine
+from pp_server              import server_dict
+from pp_baseclass           import pp_thread
+from pp_global              import pp_global_info
+
 from fd_channel             import channel_center
 from fd_image               import redis_worker
 from fd_udpclient           import daemon_udp
 
-from pp_baseclass           import pp_thread
-from pp_sslproto            import proto_ssl, proto_machine
-from pp_server              import server_dict
-
-from pp_log                 import logger, printer
+#===========================================================
 
 class fd_login():
         max_retry_login = 3
@@ -312,10 +312,10 @@ class fd_bid():
                 return  True
 
         def proc_image(self):
-                global global_info
+                global pp_global_info
 
-                global_info.event_image[self.count].wait()
-                self.price = global_info.trigger_price[self.count]
+                pp_global_info.event_image[self.count].wait()
+                self.price = pp_global_info.trigger_price[self.count]
                 if self.price == None:
                         return False
                 for i in range(self.max_retry_image):
@@ -341,9 +341,9 @@ class fd_bid():
                 return False
 
         def proc_price(self):
-                global global_info
+                global pp_global_info
 
-                global_info.event_price[self.count].wait()
+                pp_global_info.event_price[self.count].wait()
                 #self.client.set_price_bid(self.count, None)
                 if self.price == None:
                         return False
@@ -352,7 +352,7 @@ class fd_bid():
                         thread_price[0].start()
                         thread_price[1].start()
                         self.client.wait_price_bid(self.count, self.bid_timeout)
-                        if global_info.flag_gameover == True:
+                        if pp_global_info.flag_gameover == True:
                                 break
                         if self.client.check_err_112(self.count) == True:
                                 printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
@@ -385,7 +385,7 @@ class fd_client(pp_thread):
                 self.event_bid      = [Event(), Event(), Event()]
 
         def main(self):
-                global daemon_udp
+                global pp_global_info, daemon_udp
 
                 login = fd_login(self)
                 if login.do_login() != True:
@@ -404,7 +404,7 @@ class fd_client(pp_thread):
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
                         #return
 
-                if mode_price != 'A':
+                if pp_global_info.mode_price != 'A':
                         sleep(2)
                         bid2 = fd_bid(self,2)
                         if bid2.do_bid() != True:

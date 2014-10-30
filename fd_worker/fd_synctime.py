@@ -4,11 +4,10 @@ from  traceback         import print_exc, format_exc
 from  time              import sleep, time
 
 from  pp_baseclass      import pp_thread
-#from pp_log            import logger, printer
+from  pp_global         import pp_global_info
 
 from  fd_redis          import redis_db
 from  fd_config         import redis_dbid
-from  fd_global         import global_info
 
 #=================================================================================
 
@@ -28,11 +27,11 @@ class fd_synctime(pp_thread):
                 self.redis   = redis_db(self.db, 'timer')
 
         def main(self):
-                global global_info
-                self.redis.set(self.key_dead, global_info.decode_deadline)
+                global pp_global_info
+                self.redis.set(self.key_dead, pp_global_info.decode_deadline)
                 while True:
                         sleep(getsleeptime(self.time_interval))
-                        self.redis.set(self.key_time, global_info.sys_time)
+                        self.redis.set(self.key_time, pp_global_info.sys_time)
 
 
 #------------------------------------------------------

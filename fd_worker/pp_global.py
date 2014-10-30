@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 from threading      import Event, Lock
-from fd_config      import mode_price
 
 def time_sub(end, begin):
         e = end.split(':')
         b = begin.split(':')
         return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
 
-class fd_global():
+class pp_global():
 
         trigger_image_a = [('10:35:00', 72600), ('11:29:35', 700), (None, None)]
         trigger_image_b = [('10:35:00', 72600), ('11:29:35', 600), ('11:29:35', 800)]
@@ -19,6 +18,20 @@ class fd_global():
         decode_deadline = '11:29:50'
 
         channel_timeout = 110
+
+        mode_price = 'A'
+
+        list_account = [
+                ('11111111', '1111'),   # 测试
+                ('22222222', '2222'),   # 测试
+                ('33333333', '3333'),   # 测试
+                ('44444444', '4444'),   # 测试
+                ('55555555', '5555'),   # 测试
+                ('66666666', '6666'),   # 测试
+                ('77777777', '7777'),   # 测试
+                ('88888888', '8888'),   # 测试
+                ('99999999', '9999'),   # 测试
+                ]
 
         def __init__(self):
                 global mode_price
@@ -61,5 +74,5 @@ class fd_global():
 
 #-----------------------------
 
-global_info = fd_global()
+pp_global_info = pp_global()
 

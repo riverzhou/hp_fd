@@ -12,7 +12,7 @@ from pp_udpproto            import udp_proto
 from pp_server              import server_dict
 from pp_log                 import logger, printer
 
-from fd_global              import global_info
+from pp_global              import pp_global_info
 
 #=================================================
 
@@ -121,56 +121,56 @@ class udp_worker(pp_thread):
                                 return udp_result[0]
 
         def check_shot_price(self, cur_price):
-                global global_info
+                global pp_global_info
 
-                price = global_info.trigger_price[1]
+                price = pp_global_info.trigger_price[1]
                 if price != None and price <= cur_price + 300 and price >= cur_price - 300:
-                        global_info.event_price[1].set()
+                        pp_global_info.event_price[1].set()
 
-                price = global_info.trigger_price[2]
+                price = pp_global_info.trigger_price[2]
                 if price != None and price <= cur_price + 300 and price >= cur_price - 300:
-                        global_info.event_price[2].set()
+                        pp_global_info.event_price[2].set()
 
         def check_image_time(self, cur_time, cur_price):
-                global global_info
+                global pp_global_info
 
-                time, price = global_info.trigger_image[0]
+                time, price = pp_global_info.trigger_image[0]
                 if time != None and price != None and time_sub(cur_time, time) > 0:
-                        global_info.set_trigger_price(0, price)
-                        global_info.event_price[0].set()
-                        global_info.event_image[0].set()
+                        pp_global_info.set_trigger_price(0, price)
+                        pp_global_info.event_price[0].set()
+                        pp_global_info.event_image[0].set()
 
-                time, delta_price = global_info.trigger_image[1]
+                time, delta_price = pp_global_info.trigger_image[1]
                 if time != None and delta_price != None and time_sub(cur_time, time) > 0:
-                        global_info.set_trigger_price(1, cur_price + delta_price)
-                        global_info.event_image[1].set()
+                        pp_global_info.set_trigger_price(1, cur_price + delta_price)
+                        pp_global_info.event_image[1].set()
 
-                time, delta_price = global_info.trigger_image[2]
+                time, delta_price = pp_global_info.trigger_image[2]
                 if time != None and delta_price != None and time_sub(cur_time, time) > 0:
-                        global_info.set_trigger_price(2, cur_price + delta_price)
-                        global_info.event_image[2].set()
+                        pp_global_info.set_trigger_price(2, cur_price + delta_price)
+                        pp_global_info.event_image[2].set()
 
         def check_game_over(self, cur_time):
-                global global_info
+                global pp_global_info
                 if cur_time == None:
-                        global_info.set_game_over()
+                        pp_global_info.set_game_over()
 
         def check_create_channel(self, cur_time):
-                global global_info
-                time_delta = (time_sub(cur_time, global_info.trigger_channel_second[0]), time_sub(cur_time, global_info.trigger_channel_second[1]))
+                global pp_global_info
+                time_delta = (time_sub(cur_time, pp_global_info.trigger_channel_second[0]), time_sub(cur_time, pp_global_info.trigger_channel_second[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
-                        global_info.flag_create_toubiao[1] = True
+                        pp_global_info.flag_create_toubiao[1] = True
                         return
                 if time_delta[1] >= 0 and time_delta[1] <= 60:
-                        global_info.flag_create_toubiao[1] = False
+                        pp_global_info.flag_create_toubiao[1] = False
                         return
 
-                time_delta = (time_sub(cur_time, global_info.trigger_channel_first[0]), time_sub(cur_time, global_info.trigger_channel_first[1]))
+                time_delta = (time_sub(cur_time, pp_global_info.trigger_channel_first[0]), time_sub(cur_time, pp_global_info.trigger_channel_first[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
-                        global_info.flag_create_toubiao[0] = True
+                        pp_global_info.flag_create_toubiao[0] = True
                         return
                 if time_delta[1] >= 0 and time_delta[1] <= 60:
-                        global_info.flag_create_toubiao[0] = False
+                        pp_global_info.flag_create_toubiao[0] = False
                         return
 
         def check_time(self, stime):
@@ -195,7 +195,7 @@ class udp_worker(pp_thread):
                 return int_price
 
         def update_status(self):
-                global global_info
+                global pp_global_info
                 udp_recv = self.recv_udp()
                 if udp_recv == None:
                         return
@@ -231,8 +231,8 @@ class udp_worker(pp_thread):
                 self.update_systime(stime)
 
         def update_systime(self, stime):
-                global global_info
-                global_info.update_systime(stime)
+                global pp_global_info
+                pp_global_info.update_systime(stime)
 
         def main(self):
                 self.udp_format.start()

@@ -191,8 +191,8 @@ class pp_login_channel_manager(pp_thread):
                         self.manage_channel()
 
         def manage_channel(self):
-                global channel_center, global_info
-                if global_info.flag_create_login != True or global_info.flag_gameover == True:
+                global channel_center, pp_global_info
+                if pp_global_info.flag_create_login != True or pp_global_info.flag_gameover == True:
                         return
                 if channel_center.count_login_request <= 0: 
                         return
@@ -232,8 +232,8 @@ class pp_toubiao_channel_manager(pp_thread):
                         self.manage_channel()
 
         def manage_channel(self):
-                global global_info
-                if global_info.flag_create_toubiao[self.id] != True or global_info.flag_gameover == True:
+                global pp_global_info
+                if pp_global_info.flag_create_toubiao[self.id] != True or pp_global_info.flag_gameover == True:
                         return
                 if self.number_onway >= self.max_onway:
                         return
