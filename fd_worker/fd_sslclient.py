@@ -16,11 +16,18 @@ from fd_udpclient           import daemon_udp
 
 #===========================================================
 
+def time_sub(end, begin):
+        e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
+        b = datetime.timestamp(datetime.strptime(begin, '%Y-%m-%d %H:%M:%S.%f'))
+        return e-b
+
 class fd_login():
-        max_retry_login = 3
+        max_retry_login     = 3
+        min_retry_interval  = 3
 
         def __init__(self, client):
-                self.client = client
+                self.client             = client
+                self.time_lastreq       = None
 
         def do_login(self):
                 try:
@@ -34,8 +41,21 @@ class fd_login():
                         printer.critical(format_exc())
                         return False
 
+        def check_interval(self):
+                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_lastreq == None:
+                        self.time_lastreq = curtime
+                        return True
+                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
+
         def proc_login(self):
                 global  channel_center
+
+                self.check_interval()
+
                 proto   = self.client.proto
                 req     = proto.make_login_req()
 
@@ -72,17 +92,20 @@ class fd_login():
                 return True
 
 class fd_image(pp_thread):
-        max_retry       = 2
+        max_retry               = 2
+        min_retry_interval      = 2
 
         def __init__(self, client, count, price, image_timeout):
                 super().__init__()
-                self.client         = client
-                self.count          = count
-                self.price          = price
-                self.event_finish   = Event()
-                self.flag_timeout   = False
-                self.lock_timeout   = Lock()
-                self.flag_error     = False
+                self.client             = client
+                self.count              = count
+                self.price              = price
+                self.event_finish       = Event()
+                self.flag_timeout       = False
+                self.lock_timeout       = Lock()
+                self.flag_error         = False
+                self.image_timeout      = image_timeout
+                self.time_lastreq       = None
 
         def main(self):
                 try:
@@ -91,6 +114,16 @@ class fd_image(pp_thread):
                         pass
                 except:
                         printer.critical(format_exc())
+
+        def check_interval(self):
+                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_lastreq == None:
+                        self.time_lastreq = curtime
+                        return True
+                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
 
         def do_image(self):
                 global  channel_center
@@ -102,6 +135,8 @@ class fd_image(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
+                        self.check_interval()
+
                         group, handle = channel_center.get_channel(channel)
                         if handle == None :
                                 printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
@@ -175,13 +210,14 @@ class fd_decode(pp_thread):
 
         def __init__(self, client, count, sid, picture, decode_timeout):
                 super().__init__()
-                self.client         = client
-                self.count          = count
-                self.sid            = sid
-                self.picture        = picture
-                self.event_finish   = Event()
-                self.flag_timeout   = False
-                self.lock_timeout   = Lock()
+                self.client             = client
+                self.count              = count
+                self.sid                = sid
+                self.picture            = picture
+                self.event_finish       = Event()
+                self.flag_timeout       = False
+                self.lock_timeout       = Lock()
+                self.decode_timeout     = decode_timeout
 
         def main(self):
                 try:
@@ -216,14 +252,16 @@ class fd_decode(pp_thread):
 
 
 class fd_price(pp_thread):
-        max_retry       = 2
+        max_retry               = 2
+        min_retry_interval      = 1
 
         def __init__(self, client, count, price, group):
                 super().__init__()
-                self.client     = client
-                self.count      = count
-                self.price      = price
-                self.group      = group
+                self.client             = client
+                self.count              = count
+                self.price              = price
+                self.group              = group
+                self.time_lastreq       = None
 
         def main(self):
                 try:
@@ -232,6 +270,16 @@ class fd_price(pp_thread):
                         pass
                 except:
                         printer.critical(format_exc())
+
+        def check_interval(self):
+                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_lastreq == None:
+                        self.time_lastreq = curtime
+                        return True
+                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
 
         def do_price(self):
                 global channel_center
@@ -245,6 +293,8 @@ class fd_price(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
+                        self.check_interval()
+
                         group, handle = channel_center.get_channel(channel, self.group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
