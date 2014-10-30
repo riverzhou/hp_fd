@@ -4,11 +4,12 @@ from traceback              import print_exc
 from time                   import sleep
 
 from pp_log                 import logger, printer
+
+from pp_global              import pp_global_info
 from pp_server              import pp_dns_init
+from pp_config              import pp_config_init
 
-from fd_config              import list_account, redis_dbid
-from fd_global              import global_info
-
+from fd_config              import fd_redis_dbid
 from fd_image               import fd_image_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
@@ -20,23 +21,26 @@ from fd_sslclient           import fd_client
 list_client = []
 
 def main():
-        global list_account, list_client, global_info
+        global pp_global_info, printer
 
         pp_dns_init()
+        pp_config_init()
+
         fd_image_init()
         fd_channel_init()
         fd_udp_init()
         fd_timer_init()
 
-        for account in list_account:
+        list_client = []
+        for account in pp_global_info.list_account:
                 client = fd_client(account[0], account[1])
                 client.start()
                 list_client.append(client)
 
-        printer.debug('worker [%d] started' % redis_dbid)
+        printer.debug('worker [%d] started' % fd_redis_dbid)
         printer.debug('client %d initted' % len(list_client))
-        global_info.event_gameover.wait()
-        printer.debug('worker [%d] stopping' % redis_dbid)
+        pp_global_info.event_gameover.wait()
+        printer.debug('worker [%d] stopping' % fd_redis_dbid)
 
         sleep(60)
         printer.wait_for_flush()
