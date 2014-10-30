@@ -16,8 +16,8 @@ from pp_baseclass           import pp_thread
 #=============================================================================
 
 def time_sub(end, begin):
-        e = datetime.timestamp(datetime.strptime('1970-01-01 '+end,   '%Y-%m-%d %H:%M:%S.%f'))
-        b = datetime.timestamp(datetime.strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S.%f'))
+        e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
+        b = datetime.timestamp(datetime.strptime(begin, '%Y-%m-%d %H:%M:%S.%f'))
         return e-b
 
 class fd_channel():
@@ -42,7 +42,7 @@ class fd_channel():
                 time     = channel_handle_tuple[0]
                 if time_sub(cur_time, time) < pp_global_info.channel_timeout:
                         return True
-                else
+                else:
                         return False
 
         def find_channel(self, channel, group, timeout = None):

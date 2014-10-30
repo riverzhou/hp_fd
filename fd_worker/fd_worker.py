@@ -9,7 +9,7 @@ from pp_global              import pp_global_info
 from pp_server              import pp_dns_init
 from pp_config              import pp_config_init
 
-from fd_config              import fd_redis_dbid
+from fd_config              import redis_dbid
 from fd_image               import fd_image_init
 from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
@@ -37,10 +37,10 @@ def main():
                 client.start()
                 list_client.append(client)
 
-        printer.debug('worker [%d] started' % fd_redis_dbid)
+        printer.debug('worker [%d] started' % redis_dbid)
         printer.debug('client %d initted' % len(list_client))
         pp_global_info.event_gameover.wait()
-        printer.debug('worker [%d] stopping' % fd_redis_dbid)
+        printer.debug('worker [%d] stopping' % redis_dbid)
 
         sleep(60)
         printer.wait_for_flush()

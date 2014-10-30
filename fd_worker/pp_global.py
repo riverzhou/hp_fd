@@ -38,13 +38,13 @@ class pp_global():
         def __init__(self):
                 global mode_price
 
-                if mode_price == 'A':
+                if self.mode_price == 'A':
                         self.trigger_image = self.trigger_image_a
-                if mode_price == 'B':
+                if self.mode_price == 'B':
                         self.trigger_image = self.trigger_image_b
-                if mode_price == 'C':
+                if self.mode_price == 'C':
                         self.trigger_image = self.trigger_image_c
-                if mode_price == 'D':
+                if self.mode_price == 'D':
                         self.trigger_image = self.trigger_image_d
                 else:
                         self.trigger_image = self.trigger_image_a
