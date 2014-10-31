@@ -394,7 +394,7 @@ class fd_bid():
                                 price1 = None
                         if price1 != None and price1 >= self.price:
                                 printer.warning('client %s bid 2 price lower than bid 1 ' % self.client.bidno)
-                                #return False       # FIXME FIXME FIXME
+                                return False
 
                 for i in range(self.max_retry_image):
                         self.check_image_interval()
