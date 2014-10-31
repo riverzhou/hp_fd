@@ -65,6 +65,10 @@ class pp_global():
                 self.sys_time       = '10:30:00'
                 self.sys_code       = None
 
+                self.total_worker   = len(self.list_account)
+                self.num_todo_tb0   = len(self.list_account)
+                self.lock_todo_tb0  = Lock()
+
         def set_trigger_price(self, count, price):
                 self.lock_trigger.acquire()
                 if self.trigger_price[count] == None:
@@ -91,6 +95,17 @@ class pp_global():
                 if self.sys_code == 'A'  and code == 'B':
                         self.sys_code = code
                         return
+
+        def set_tb0_finish():
+                self.lock_todo_tb0.acquire()
+                self.num_todo_tb0 -= 1
+                self.lock_todo_tb0.release()
+
+        def check_tb0_finish():
+                if self.num_todo_tb0 <= 0:
+                        return True
+                else:
+                        return False
 
 #-----------------------------
 

@@ -503,8 +503,9 @@ class fd_client(pp_thread):
                         printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
 
 
-        def stop_channel0(self):
-                pass
+        def set_bid0_finish(self):
+                global pp_global_info
+                pp_global_info.set_bid0_finish()
 
         def main(self):
                 global pp_global_info, daemon_udp
@@ -513,7 +514,7 @@ class fd_client(pp_thread):
 
                 self.do_bid0()
 
-                self.stop_channel0()
+                self.set_bid0_finish()
 
                 self.do_bid1()
 
