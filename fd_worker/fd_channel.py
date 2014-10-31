@@ -250,7 +250,7 @@ class pp_toubiao_channel_manager(pp_thread):
                         return
                 if self.number_onway >= self.max_onway:
                         return
-                if self.id == 0 and pp_global_info.check_tb0_finish() == True:
+                if self.id == 0 and pp_global_info.check_bid0_finish() == True:
                         return
                 if self.id == 0:
                         channel = 'tb0'

@@ -96,12 +96,12 @@ class pp_global():
                         self.sys_code = code
                         return
 
-        def set_tb0_finish():
+        def set_bid0_finish(self):
                 self.lock_todo_tb0.acquire()
                 self.num_todo_tb0 -= 1
                 self.lock_todo_tb0.release()
 
-        def check_tb0_finish():
+        def check_bid0_finish(self):
                 if self.num_todo_tb0 <= 0:
                         return True
                 else:

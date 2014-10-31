@@ -530,7 +530,7 @@ class fd_client(pp_thread):
 
                 self.do_login()
 
-                while i in range(self.max_retry_bid0):
+                for i in range(self.max_retry_bid0):
                         self.do_bid0()
                         if self.check_bid0_finish() == True:
                                 break
