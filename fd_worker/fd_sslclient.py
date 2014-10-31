@@ -443,11 +443,13 @@ class fd_bid_0(fd_bid):
         max_decode_timeout  = 30
         max_price_timeout   = 30
 
+
 class fd_bid_1(fd_bid):
         count               = 1
         max_image_timeout   = 4
         max_decode_timeout  = 8
         max_price_timeout   = 4
+
 
 class fd_bid_2(fd_bid):
         count               = 2
@@ -457,6 +459,9 @@ class fd_bid_2(fd_bid):
 
 
 class fd_client(pp_thread):
+        max_retry_bid0      = 10
+        timewait_bid1       = 3
+
         def __init__(self, bidno, passwd):
                 super().__init__(bidno)
                 self.bidno          = bidno
@@ -489,30 +494,46 @@ class fd_client(pp_thread):
                 bid0 = fd_bid_0(self)
                 if bid0.do_bid() != True:
                         printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
+                        return False
+                return True
 
 
         def do_bid1(self):
                 bid1 = fd_bid_1(self)
                 if bid1.do_bid() != True:
                         printer.warning('client %s bid 1 failed. Abort.....' % self.bidno)
+                        return False
+                sleep(self.timewait_bid1)
+                return True
 
 
         def do_bid2(self):
+                global pp_global_info
+                if pp_global_info.flag_gameover == True:
+                        return False
+                if pp_global_info.trigger_image[2][0] == None or pp_global_info.trigger_image[2][1] == None:
+                        return False
                 bid2 = fd_bid_2(self)
                 if bid2.do_bid() != True:
                         printer.warning('client %s bid 2 failed. Abort.....' % self.bidno)
+                        return False
+                return True
 
 
         def set_bid0_finish(self):
                 global pp_global_info
-                pp_global_info.set_bid0_finish()
+                return pp_global_info.set_bid0_finish()
+
 
         def main(self):
                 global pp_global_info, daemon_udp
 
                 self.do_login()
 
-                self.do_bid0()
+                while i in range(self.max_retry_bid0):
+                        self.do_bid0()
+                        if self.check_bid0_finish() == True:
+                                break
 
                 self.set_bid0_finish()
 
@@ -548,4 +569,10 @@ class fd_client(pp_thread):
                 self.lock_bid[count].release()
                 return price
 
+        def check_bid0_finish(self):
+                if self.price_bid[0] != None:
+                        return True
+                if self.err_112[0] == True:
+                        return True
+                return False
 
