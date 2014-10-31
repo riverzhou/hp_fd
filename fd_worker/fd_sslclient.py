@@ -211,7 +211,7 @@ class fd_image(pp_thread):
 
 class fd_decode(pp_thread):
 
-        def __init__(self, client, count, sid, picture, decode_timeout):
+        def __init__(self, client, count, sid, picture, decode_type, decode_timeout):
                 super().__init__()
                 self.client             = client
                 self.count              = count
@@ -220,6 +220,7 @@ class fd_decode(pp_thread):
                 self.event_finish       = Event()
                 self.flag_timeout       = False
                 self.lock_timeout       = Lock()
+                self.decode_type        = decode_type
                 self.decode_timeout     = decode_timeout
 
         def main(self):
@@ -232,7 +233,7 @@ class fd_decode(pp_thread):
 
         def do_decode(self):
                 global redis_worker
-                redis_worker.put_request(self.sid, self.picture)
+                redis_worker.put_request(self.sid, self.decode_type, self.decode_timeout, self.picture)
                 number = redis_worker.get_result(self.sid)
                 self.lock_timeout.acquire()
                 if self.flag_timeout == False:
@@ -342,6 +343,7 @@ class fd_bid():
         max_image_timeout           = 0     # 在子类中重写此参数
         max_decode_timeout          = 0     # 在子类中重写此参数
         max_price_timeout           = 0     # 在子类中重写此参数
+        decode_type                 = ''    # 在子类中重写此参数
 
         def __init__(self, client):
                 self.client             = client
@@ -409,7 +411,7 @@ class fd_bid():
                                 continue
 
                         self.client.number_bid[self.count] = None
-                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count], self.max_decode_timeout)
+                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count], self.type_image_decode, self.max_decode_timeout)
                         thread_decode.start()
                         if thread_decode.wait_for_finish() != True :
                                 continue
@@ -451,6 +453,7 @@ class fd_bid_0(fd_bid):
         max_image_timeout   = 10
         max_decode_timeout  = 30
         max_price_timeout   = 30
+        type_image_decode   = 'A'
 
 
 class fd_bid_1(fd_bid):
@@ -458,6 +461,7 @@ class fd_bid_1(fd_bid):
         max_image_timeout   = 4
         max_decode_timeout  = 8
         max_price_timeout   = 4
+        type_image_decode   = 'B'
 
 
 class fd_bid_2(fd_bid):
@@ -465,6 +469,7 @@ class fd_bid_2(fd_bid):
         max_image_timeout   = 3
         max_decode_timeout  = 6
         max_price_timeout   = 10
+        type_image_decode   = 'B'
 
 
 class fd_client(pp_thread):

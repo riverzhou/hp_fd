@@ -145,12 +145,12 @@ class fd_redis_manager(pp_thread):
                 return  self.dict_result[sid].get_number()
 
         #外部调用接口
-        def put_request(self, sid, image):
+        def put_request(self, sid, decode_type , decode_timeout, image):
                 self.lock_result.acquire()
                 if sid not in self.dict_result:
                         self.dict_result[sid] = fd_dama_result()
                 self.lock_result.release()
-                val = ','.join([sid, image])
+                val = ','.join([sid, decode_type, str(decode_timeout), image])
                 return  self.queue_image.put(val)
 
 #---------------------------------------------------
