@@ -14,14 +14,14 @@ class pp_global():
         trigger_image_c = [('10:35:00', 72600), ('11:29:50', 400), (None, None)]
         trigger_image_d = [('10:35:00', 72600), ('11:29:55', 300), (None, None)]
 
-        trigger_channel_first  = ('10:33:10', '10:55:00')
+        trigger_channel_first  = ('10:31:10', '10:55:00')
         trigger_channel_second = ('11:28:10', '11:29:58')
 
         decode_deadline = '11:29:56'
 
         channel_timeout = 110
 
-        mode_price = 'A'
+        mode_price = 'B'
 
         list_account = [
                 ('11111111', '1111'),   # 测试

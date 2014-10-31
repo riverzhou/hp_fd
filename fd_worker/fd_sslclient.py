@@ -469,7 +469,7 @@ class fd_bid_2(fd_bid):
         max_image_timeout   = 3
         max_decode_timeout  = 6
         max_price_timeout   = 10
-        type_image_decode   = 'B'
+        type_image_decode   = 'C'
 
 
 class fd_client(pp_thread):
