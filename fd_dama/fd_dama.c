@@ -35,22 +35,35 @@ int init(void)
 	return 0;
 }
 
-int get_image(char* buff, char* sid, char* image)
+int get_image(char* buff, char* sid, char* type, char* timeout, char* image)
 {
-	int i   = 0;
+	int i = 0, n = 0;
+	int p[3] = {0};
+
 	int len = strlen(buff);
 
-	for(i = 0; i < len; i++) {
-		if (buff[i] == ',') {
-			break;
+	for(n = 0; n < 3; n++) {
+		for(i += 1; i < len; i++) {
+			if (buff[i] == ',') {
+				break;
+			}
 		}
+		p[n] = i;
 	}
 
-	if (i == len)
+	if (p[0] == len || p[1] == len || p[2] == len)
 		return -1;
 
-	memcpy(sid, buff, i);
-	memcpy(image, &(buff[i+1]), len - i - 1);
+	if (p[0] == 0 || p[1] == 0 || p[2] == 0)
+		return -1;
+
+	memcpy(sid, buff, p[0]);
+
+	memcpy(type, &(buff[p[0]+1]), p[1] - p[0] - 1);
+
+	memcpy(timeout, &(buff[p[1]+1]), p[2] - p[1] - 1);
+
+	memcpy(image, &(buff[p[2]+1]), len - p[2] - 1);
 
 	return 0;
 }
@@ -109,6 +122,8 @@ int main(int argc, char* argv[])
 	char base64_inbuff[MAX_BUFLEN]  = {0};
 	char base64_outbuff[MAX_BUFLEN] = {0};
 	char dama_sid[MAX_BUFLEN]	= {0};
+	char dama_type[MAX_BUFLEN]	= {0};
+	char dama_timeout[MAX_BUFLEN]	= {0};
 	char dama_code[MAX_BUFLEN]	= {0};
 
 	while(true){
@@ -117,6 +132,8 @@ int main(int argc, char* argv[])
 		memset(base64_inbuff,  0, sizeof(base64_inbuff));
 		memset(base64_outbuff, 0, sizeof(base64_outbuff));
 		memset(dama_sid,       0, sizeof(dama_sid));
+		memset(dama_type,      0, sizeof(dama_type));
+		memset(dama_timeout,   0, sizeof(dama_timeout));
 		memset(dama_code,      0, sizeof(dama_code));
 
 		int buff_len = 0;
@@ -128,7 +145,7 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		if (get_image(redis_inbuff, dama_sid, base64_inbuff) < 0)
+		if (get_image(redis_inbuff, dama_sid, dama_type, dama_timeout, base64_inbuff) < 0)
 			continue;
 		if (dama_sid[0] == 0)
 			continue;
