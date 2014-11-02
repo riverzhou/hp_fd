@@ -12,7 +12,7 @@ from pp_baseclass           import pp_thread
 from pp_global              import pp_global_info
 
 from fd_channel             import channel_center
-from fd_image               import redis_worker
+from fd_decode              import decode_worker
 from fd_udpclient           import daemon_udp
 
 #===========================================================
@@ -232,9 +232,9 @@ class fd_decode(pp_thread):
                         printer.critical(format_exc())
 
         def do_decode(self):
-                global redis_worker
-                redis_worker.put_request(self.sid, self.decode_type, self.decode_timeout, self.picture)
-                number = redis_worker.get_result(self.sid)
+                global decode_worker
+                decode_worker.put_request(self.sid, self.decode_type, self.decode_timeout, self.picture)
+                number = decode_worker.get_result(self.sid)
                 self.lock_timeout.acquire()
                 if self.flag_timeout == False:
                         self.client.number_bid[self.count] = number

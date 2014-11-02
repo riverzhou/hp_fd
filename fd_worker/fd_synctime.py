@@ -20,9 +20,6 @@ class fd_synctime(pp_thread):
 
         def __init__(self):
                 super().__init__()
-                global redis_dbid
-                self.db      = redis_dbid
-                self.redis   = redis_db(self.db, 'timer')
 
         def main(self):
                 global pp_global_info
