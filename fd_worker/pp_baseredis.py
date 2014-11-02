@@ -65,7 +65,7 @@ class redis_db(Thread):
 
         def connect_redis(self):
                 try:
-                        return StrictRedis(host = self.redis_ip, port = self.redis_port, password = self.redis_passwd, db = self.redis_dbid)
+                        return StrictRedis(host = self.redis_ip, port = self.redis_port, password = self.redis_passwd, db = self.redis_dbid, socket_keepalive = True)
                 except  KeyboardInterrupt:
                         return None
                 except:
