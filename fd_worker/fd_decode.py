@@ -2,25 +2,21 @@
 
 from time                   import sleep
 from traceback              import print_exc, format_exc
-from redis                  import StrictRedis
 from threading              import Event, Lock
 from queue                  import Queue
 
 from pp_baseclass           import pp_thread
-from fd_config              import redis_dbid
-from fd_redis               import redis_db
-
 from pp_log                 import logger, printer
+
+from pp_baseredis           import pp_redis
 
 #------------------------------------------
 
 class fd_redis_reader(pp_thread):
         key_number = 'ack_number'
 
-        def __init__(self, manager, db):
+        def __init__(self, manager):
                 super().__init__()
-                self.db      = db
-                self.redis   = redis_db(self.db, 'reader')
                 self.manager = manager
 
         def main(self):
@@ -32,17 +28,17 @@ class fd_redis_reader(pp_thread):
                         self.manager.put_number(val)
                         printer.data('fd_redis_reader %s' % val)
 
+        @pp_redis.safe_proc
         def read(self):
-                return self.redis.blk_get_one(self.key_number).decode()
+                global pp_redis
+                return pp_redis.redis.blk_get_one(self.key_number).decode()
 
 
 class fd_redis_writer(pp_thread):
         key_image = 'req_image'
 
-        def __init__(self, manager, db):
+        def __init__(self, manager):
                 super().__init__()
-                self.db      = db
-                self.redis   = redis_db(self.db, 'writer')
                 self.manager = manager
 
         def main(self):
@@ -54,8 +50,10 @@ class fd_redis_writer(pp_thread):
                         self.write(val)
                         printer.data('fd_redis_writer %s' % val)
 
+        @pp_redis.safe_proc
         def write(self, val):
-                return self.redis.put_one(self.key_image, val.encode())
+                global pp_redis
+                return pp_redis.redis.put_one(self.key_image, val.encode())
 
 
 class fd_dama_result():
@@ -79,17 +77,15 @@ class fd_dama_result():
                 return self.number
 
 
-class fd_redis_manager(pp_thread):
-        global redis_dbid
-        image_db    = redis_dbid
+class fd_decode_manager(pp_thread):
 
         def __init__(self):
                 super().__init__()
                 self.queue_image    = Queue()
                 self.queue_number   = Queue()
 
-                reader = fd_redis_reader(self, self.image_db)
-                writer = fd_redis_writer(self, self.image_db)
+                reader = fd_redis_reader(self)
+                writer = fd_redis_writer(self)
 
                 writer.start()
                 writer.wait_for_start()
@@ -155,10 +151,9 @@ class fd_redis_manager(pp_thread):
 
 #---------------------------------------------------
 
-redis_worker = fd_redis_manager()
+decode_worker = fd_decode_manager()
 
-def fd_image_init():
-        redis_worker.start()
-        redis_worker.wait_for_start()
-
+def fd_decode_init():
+        decode_worker.start()
+        decode_worker.wait_for_start()
 
