@@ -65,8 +65,7 @@ class redis_sender(Thread):
         def send(self, buff):
                 global pp_redis
                 #print('send', buff[1])
-                pp_redis.redis.rpush(buff[0], buff[1])
-                return True
+                return pp_redis.redis.rpush(buff[0], buff[1])
 
 #--------------------------------------------------------------------------------
 
