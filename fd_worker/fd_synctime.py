@@ -3,11 +3,9 @@
 from  traceback         import print_exc, format_exc
 from  time              import sleep, time
 
+from  pp_baseredis      import pp_redis
 from  pp_baseclass      import pp_thread
 from  pp_global         import pp_global_info
-
-from  fd_redis          import redis_db
-from  fd_config         import redis_dbid
 
 #=================================================================================
 
@@ -28,11 +26,19 @@ class fd_synctime(pp_thread):
 
         def main(self):
                 global pp_global_info
-                self.redis.set(self.key_dead, pp_global_info.decode_deadline)
                 while True:
                         sleep(getsleeptime(self.time_interval))
-                        self.redis.set(self.key_time, pp_global_info.sys_time)
+                        self.set_systime()
 
+        @pp_redis.safe_proc
+        def set_deadline(self):
+                global pp_redis
+                return pp_redis.redis.set(self.key_dead, pp_global_info.decode_deadline)
+
+        @pp_redis.safe_proc
+        def set_systime(self):
+                global pp_redis
+                return pp_redis.redis.set(self.key_time, pp_global_info.sys_time)
 
 #------------------------------------------------------
 
