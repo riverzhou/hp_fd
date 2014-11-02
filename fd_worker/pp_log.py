@@ -4,22 +4,20 @@ import  logging
 from    threading           import Thread, Event, Lock
 from    queue               import Queue
 from    datetime            import datetime
-from    redis               import StrictRedis
 from    traceback           import print_exc
 from    pickle              import dumps, loads
 
-from    fd_config           import redis_passwd, redis_port, redis_ip, redis_dbid
+from    pp_baseredis        import pp_redis
 
-#------------------------------------------
+#=================================================================================
 
 class redis_sender(Thread):
-        def __init__(self, redis, info):
+        def __init__(self, info):
                 super().__init__()
                 self.setDaemon(True)
                 self.event_started  = Event()
                 self.thread_info    = info
-                self.queue = Queue()
-                self.redis = redis
+                self.queue          = Queue()
 
         def wait_for_start(self, timeout = None):
                 if timeout == None:
@@ -36,7 +34,6 @@ class redis_sender(Thread):
                                 self.event_started.wait(timeout)
 
         def run(self):
-                print("pp_log \tredis_sender started")
                 self.event_started.set()
                 try:
                         self.main()
@@ -52,15 +49,8 @@ class redis_sender(Thread):
                         if self.send(buff) == True : 
                                 self.queue.task_done()
 
-        def send(self, buff):
-                try:
-                        self.redis.rpush(buff[0], buff[1])
-                        return True
-                except  KeyboardInterrupt:
-                        return False
-                except:
-                        print_exc()
-                        return False
+        def put(self, buff):
+                self.queue.put(buff)
 
         def get(self):
                 try:
@@ -71,9 +61,14 @@ class redis_sender(Thread):
                         print_exc()
                         return None
 
-        def put(self, buff):
-                self.queue.put(buff)
+        @pp_redis.safe_proc
+        def send(self, buff):
+                global pp_redis
+                #print('send', buff[1])
+                pp_redis.redis.rpush(buff[0], buff[1])
+                return True
 
+#--------------------------------------------------------------------------------
 
 class redis_logger():
         dict_log_level= {
@@ -89,14 +84,10 @@ class redis_logger():
                         }
 
         def __init__(self, level = 'debug'):
-                self.redis = self.connect_redis()
-                if self.redis == None : return None
-
                 level = level if level in self.dict_log_level else 'debug'
-
                 self.log_level = self.dict_log_level[level]
 
-                self.redis_sender = redis_sender(self.redis, 'redis_sender')
+                self.redis_sender = redis_sender('redis_sender')
                 self.redis_sender.start()
                 self.redis_sender.wait_for_start()
 
@@ -104,92 +95,84 @@ class redis_logger():
                 if self.log_level > self.dict_log_level['debug']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('debug', dumps((time, log),0)))
+                        self.redis_sender.put(('log_debug', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('debug', (time, log)))
+                        self.redis_sender.put(('log_debug', (time, log)))
 
         def info(self, log, bin=False):
                 if self.log_level > self.dict_log_level['info']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('info', dumps((time, log),0)))
+                        self.redis_sender.put(('log_info', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('info', (time, log)))
+                        self.redis_sender.put(('log_info', (time, log)))
 
         def warning(self, log, bin=False):
                 if self.log_level > self.dict_log_level['warning']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('warning', dumps((time, log),0)))
+                        self.redis_sender.put(('log_warning', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('warning', (time, log)))
+                        self.redis_sender.put(('log_warning', (time, log)))
 
         def error(self, log, bin=False):
                 if self.log_level > self.dict_log_level['error']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('error', dumps((time, log),0)))
+                        self.redis_sender.put(('log_error', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('error', (time, log)))
+                        self.redis_sender.put(('log_error', (time, log)))
 
         def critical(self, log, bin=False):
                 if self.log_level > self.dict_log_level['critical']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('critical', dumps((time, log),0)))
+                        self.redis_sender.put(('log_critical', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('critical', (time, log)))
+                        self.redis_sender.put(('log_critical', (time, log)))
 
         def data(self, log, bin=False):
                 if self.log_level > self.dict_log_level['data']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('data', dumps((time, log),0)))
+                        self.redis_sender.put(('log_data', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('data', (time, log)))
+                        self.redis_sender.put(('log_data', (time, log)))
 
         def time(self, log, bin=False):
                 if self.log_level > self.dict_log_level['time']: return
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if bin == True:
-                        self.redis_sender.put(('time', dumps((time, log),0)))
+                        self.redis_sender.put(('log_time', dumps((time, log),0)))
                 else:
-                        self.redis_sender.put(('time', (time, log)))
+                        self.redis_sender.put(('log_time', (time, log)))
 
         def wait_for_flush(self):
                 self.redis_sender.queue.join()
-
-        def connect_redis(self):
-                global redis_ip, redis_port, redis_passwd, redis_dbid
-                try:
-                        return StrictRedis(host = redis_ip, port = redis_port, password = redis_passwd, db = redis_dbid)
-                except:
-                        print_exc()
-                        return None
 
 #-----------------------------------------------------------------------------------------
 
 class console_logger():
         def debug(self, log):
-                print('debug:    ',log)
+                print('log_debug:    ',log)
 
         def info(self, log):
-                print('info:     ',log)
+                print('log_info:     ',log)
 
         def warning(self, log):
-                print('warning:  ',log)
+                print('log_warning:  ',log)
 
         def error(self, log):
-                print('error:    ',log)
+                print('log_error:    ',log)
 
         def critical(self, log):
-                print('critical: ',log)
+                print('log_critical: ',log)
 
         def data(self, log):
-                print('data:     ',log)
+                print('log_data:     ',log)
 
         def time(self, log):
-                print('time:     ',log)
+                print('log_time:     ',log)
 
         def wait_for_flush(self):
                 pass
@@ -197,11 +180,14 @@ class console_logger():
 #-----------------------------------------------------------------------------------------
 
 printer = redis_logger()
-logger  = console_logger()
+#logger  = console_logger()
+logger  = redis_logger()
 
 #================================ for test ===============================================
 
 if __name__ == "__main__":
+        from pp_baseredis  import pp_redis_init
+        pp_redis_init()
         logger.debug('test logger debug')
         logger.info('test logger info')
         logger.warning('test logger warning')
