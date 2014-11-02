@@ -14,8 +14,8 @@ def getsleeptime(interval):
 
 
 class fd_synctime(pp_thread):
-        key_time        = 'curtime'
-        key_dead        = 'deadline'
+        key_time        = 'syn_curtime'
+        key_dead        = 'syn_deadline'
         time_interval   = 0.5
 
         def __init__(self):
