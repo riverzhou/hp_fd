@@ -31,7 +31,7 @@ class fd_redis_reader(pp_thread):
         @pp_redis.safe_proc
         def read(self):
                 global pp_redis
-                return pp_redis.redis.blk_get_one(self.key_number).decode()
+                return pp_redis.redis.blpop(self.key_number)[1].decode()
 
 
 class fd_redis_writer(pp_thread):
@@ -53,7 +53,7 @@ class fd_redis_writer(pp_thread):
         @pp_redis.safe_proc
         def write(self, val):
                 global pp_redis
-                return pp_redis.redis.put_one(self.key_image, val.encode())
+                return pp_redis.redis.rpush(self.key_image, val.encode())
 
 
 class fd_dama_result():
