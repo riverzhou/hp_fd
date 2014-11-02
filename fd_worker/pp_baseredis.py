@@ -41,12 +41,13 @@ class redis_db(Thread):
                         if self.redis != None:
                                 del(self.redis)
                         self.redis = None
-                        while self.redis != None:
+                        while self.redis == None:
                                 self.redis = self.connect_redis()
                                 sleep(1)
                         self.flag_do_reconn = False
                         self.event_conn_ok.set()
                         self.event_conn_chk.clear()
+                        print(self.redis)
                 self.lock_do_reconn.release()
 
         def check_connect_ok(self):
@@ -94,10 +95,11 @@ class redis_db(Thread):
 
 pp_redis = redis_db(redis_ip, redis_port, redis_passwd, redis_dbid)
 
-def redis_init():
+def pp_redis_init():
         global pp_redis
         pp_redis.start()
         pp_redis.check_connect_ok()
 
-#redis_init()
+if __name__ == "__main__":
+        pp_redis_init()
 
