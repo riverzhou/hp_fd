@@ -23,9 +23,12 @@ def main():
         global pp_global_info, printer
 
         pp_dns_init()
-        pp_redis_init()
 
-        pp_global_init()
+        if pp_redis_init()  != True:
+                return
+        if pp_global_init() != True:
+                return
+
         pp_global_config_print()
 
         fd_decode_init()
@@ -54,5 +57,5 @@ if __name__ == '__main__':
                 pass
         except:
                 print_exc()
-
+        print()
 
