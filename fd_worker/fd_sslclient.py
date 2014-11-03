@@ -209,52 +209,6 @@ class fd_image(pp_thread):
                         return False
 
 
-class fd_decode(pp_thread):
-
-        def __init__(self, client, count, sid, picture, decode_type, decode_timeout):
-                super().__init__()
-                self.client             = client
-                self.count              = count
-                self.sid                = sid
-                self.picture            = picture
-                self.event_finish       = Event()
-                self.flag_timeout       = False
-                self.lock_timeout       = Lock()
-                self.decode_type        = decode_type
-                self.decode_timeout     = decode_timeout
-
-        def main(self):
-                try:
-                        self.do_decode()
-                except  KeyboardInterrupt:
-                        pass
-                except:
-                        printer.critical(format_exc())
-
-        def do_decode(self):
-                global decode_worker
-                decode_worker.put_request(self.sid, self.decode_type, self.decode_timeout, self.picture)
-                number = decode_worker.get_result(self.sid)
-                self.lock_timeout.acquire()
-                if self.flag_timeout == False:
-                        self.client.number_bid[self.count] = number
-                self.lock_timeout.release()
-                self.event_finish.set()
-                return
-
-        def wait_for_finish(self, timeout = None):
-                waittime = timeout if timeout != None else self.decode_timeout
-                if self.event_finish.wait(waittime+2) == True:                  # XXX 多等待2秒
-                        return True
-                else:
-                        self.lock_timeout.acquire()
-                        self.flag_timeout = True
-                        self.lock_timeout.release()
-                        printer.error('client %s bid %d fd_decode Timeout' % (self.client.bidno, self.count))
-                        sleep(0)
-                        return False
-
-
 class fd_price(pp_thread):
         max_retry               = 2
         min_retry_interval      = 1
@@ -333,6 +287,53 @@ class fd_price(pp_thread):
                         return
 
 
+class fd_decode(pp_thread):
+
+        def __init__(self, client, count, sid, picture):
+                global pp_global_info
+                super().__init__()
+                self.client             = client
+                self.count              = count
+                self.sid                = sid
+                self.picture            = picture
+                self.event_finish       = Event()
+                self.flag_timeout       = False
+                self.lock_timeout       = Lock()
+                self.type_decode        = pp_global_info.type_decode[count]
+                self.timeout_decode     = pp_global_info.timeout_decode[count]
+
+        def main(self):
+                try:
+                        self.do_decode()
+                except  KeyboardInterrupt:
+                        pass
+                except:
+                        printer.critical(format_exc())
+
+        def do_decode(self):
+                global decode_worker
+                decode_worker.put_request(self.sid, self.type_decode, self.timeout_decode, self.picture)
+                number = decode_worker.get_result(self.sid)
+                self.lock_timeout.acquire()
+                if self.flag_timeout == False:
+                        self.client.number_bid[self.count] = number
+                self.lock_timeout.release()
+                self.event_finish.set()
+                return
+
+        def wait_for_finish(self, timeout = None):
+                waittime = timeout if timeout != None else self.timeout_decode
+                if self.event_finish.wait(waittime+2) == True:                  # XXX 多等待2秒
+                        return True
+                else:
+                        self.lock_timeout.acquire()
+                        self.flag_timeout = True
+                        self.lock_timeout.release()
+                        printer.error('client %s bid %d fd_decode Timeout' % (self.client.bidno, self.count))
+                        sleep(0)
+                        return False
+
+
 class fd_bid():
         min_retry_image_interval    = 3
         min_retry_price_interval    = 2
@@ -341,9 +342,7 @@ class fd_bid():
 
         count                       = 0     # 在子类中重写此参数
         max_image_timeout           = 0     # 在子类中重写此参数
-        max_decode_timeout          = 0     # 在子类中重写此参数
         max_price_timeout           = 0     # 在子类中重写此参数
-        decode_type                 = ''    # 在子类中重写此参数
 
         def __init__(self, client):
                 self.client             = client
@@ -411,7 +410,7 @@ class fd_bid():
                                 continue
 
                         self.client.number_bid[self.count] = None
-                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count], self.type_image_decode, self.max_decode_timeout)
+                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
                         thread_decode.start()
                         if thread_decode.wait_for_finish() != True :
                                 continue
@@ -451,26 +450,17 @@ class fd_bid():
 class fd_bid_0(fd_bid):
         count               = 0
         max_image_timeout   = 10
-        max_decode_timeout  = 30
         max_price_timeout   = 30
-        type_image_decode   = 'A'
-
 
 class fd_bid_1(fd_bid):
         count               = 1
         max_image_timeout   = 4
-        max_decode_timeout  = 8
         max_price_timeout   = 4
-        type_image_decode   = 'B'
-
 
 class fd_bid_2(fd_bid):
         count               = 2
         max_image_timeout   = 3
-        max_decode_timeout  = 6
         max_price_timeout   = 10
-        type_image_decode   = 'C'
-
 
 class fd_client(pp_thread):
         max_retry_bid0      = 10

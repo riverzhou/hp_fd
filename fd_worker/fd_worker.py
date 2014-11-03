@@ -3,12 +3,10 @@
 from traceback              import print_exc
 from time                   import sleep
 
-from pp_baseredis           import pp_redis, pp_redis_init
-from pp_log                 import logger, printer
-
-from pp_global              import pp_global_info
 from pp_server              import pp_dns_init
-from pp_config              import pp_config_init
+from pp_baseredis           import pp_redis, pp_redis_init
+from pp_global              import pp_global_info, pp_global_init, pp_global_config_print
+from pp_log                 import logger, printer
 
 from fd_config              import redis_dbid
 from fd_decode              import fd_decode_init
@@ -27,7 +25,8 @@ def main():
         pp_dns_init()
         pp_redis_init()
 
-        pp_config_init()
+        pp_global_init()
+        pp_global_config_print()
 
         fd_decode_init()
         fd_channel_init()

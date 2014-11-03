@@ -26,11 +26,12 @@ class fd_synctime(pp_thread):
                 while True:
                         sleep(getsleeptime(self.time_interval))
                         self.set_systime()
+                        self.set_deadline()
 
         @pp_redis.safe_proc
         def set_deadline(self):
                 global pp_redis
-                return pp_redis.redis.set(self.key_dead, pp_global_info.decode_deadline)
+                return pp_redis.redis.set(self.key_dead, pp_global_info.deadline_decode)
 
         @pp_redis.safe_proc
         def set_systime(self):

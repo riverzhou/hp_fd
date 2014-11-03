@@ -1,73 +1,145 @@
 #!/usr/bin/env python3
 
+from time           import sleep
 from threading      import Event, Lock
+from pickle         import dumps, loads
+
+from pp_baseclass   import pp_thread
+from pp_baseredis   import pp_redis
+
+#========================================================================
 
 def time_sub(end, begin):
         e = end.split(':')
         b = begin.split(':')
         return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
 
-class pp_global():
-
-        trigger_image_a = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:50', 400)]
-        trigger_image_b = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:55', 300)]
-        trigger_image_c = [('10:35:00', 72600), ('11:29:50', 400), (None, None)]
-        trigger_image_d = [('10:35:00', 72600), ('11:29:55', 300), (None, None)]
-
-        trigger_channel_first  = ('10:31:10', '10:55:00')
-        trigger_channel_second = ('11:28:10', '11:29:58')
-
-        decode_deadline = '11:29:56'
-
-        channel_timeout = 110
-
-        mode_price = 'B'
-
-        list_account = [
-                ('11111111', '1111'),   # 测试
-                ('22222222', '2222'),   # 测试
-                ('33333333', '3333'),   # 测试
-                ('44444444', '4444'),   # 测试
-                ('55555555', '5555'),   # 测试
-                ('66666666', '6666'),   # 测试
-                ('77777777', '7777'),   # 测试
-                ('88888888', '8888'),   # 测试
-                ('99999999', '9999'),   # 测试
-                ]
+class pp_global(pp_thread):
+        key_static  = 'cfg_static'
+        key_dynamic = 'cfg_dynamic'
+        key_trigger = 'cfg_trigger'
 
         def __init__(self):
-                global mode_price
+                super().__init__()
+                self.event_config_init  = Event()
 
-                if self.mode_price == 'A':
-                        self.trigger_image = self.trigger_image_a
-                if self.mode_price == 'B':
-                        self.trigger_image = self.trigger_image_b
-                if self.mode_price == 'C':
-                        self.trigger_image = self.trigger_image_c
-                if self.mode_price == 'D':
-                        self.trigger_image = self.trigger_image_d
-                else:
-                        self.trigger_image = self.trigger_image_a
+        def init_local_config(self):
+                self.flag_create_login  = True
+                self.flag_create_toubiao= [False, False]
 
-                self.flag_create_login   = True
-                self.flag_create_toubiao = [False, False]
+                self.flag_gameover      = False
+                self.event_gameover     = Event()
 
-                self.flag_gameover  = False
-                self.event_gameover = Event()
+                self.event_image        = [Event(), Event(), Event()]
+                self.event_price        = [Event(), Event(), Event()]
 
-                self.event_image    = [Event(), Event(), Event()]
-                self.event_price    = [Event(), Event(), Event()]
+                self.trigger_price      = [None, None, None]
+                self.lock_trigger       = Lock()
 
-                self.trigger_price  = [None, None, None]
-                self.lock_trigger   = Lock()
+                self.lock_systime       = Lock()
+                self.sys_time           = '10:30:00'
+                self.sys_code           = None
 
-                self.lock_systime   = Lock()
-                self.sys_time       = '10:30:00'
-                self.sys_code       = None
+                self.total_worker       = len(self.list_account)
+                self.num_todo_tb0       = len(self.list_account)
+                self.lock_todo_tb0      = Lock()
 
-                self.total_worker   = len(self.list_account)
-                self.num_todo_tb0   = len(self.list_account)
-                self.lock_todo_tb0  = Lock()
+                return True
+
+        def init_static_config(self, key_val):
+                self.list_account       = key_val['list_account']
+                return True
+
+        def init_dynamic_config(self, key_val):
+                self.trigger_image      = key_val['image_trigger']
+                self.trigger_channel    = key_val['channel_trigger']
+                self.timeout_channel    = key_val['channel_timeout']
+                self.type_decode        = key_val['decode_type']
+                self.timeout_decode     = key_val['decode_timeout']
+                self.deadline_decode    = key_val['decode_deadline']
+                return True
+
+        def check_static_config(self, key_val):
+                try:
+                        if 'list_account' not in key_val:
+                                return False
+                        return True
+                except:
+                        return False
+
+        def check_dynamic_config(self, key_val):
+                try:
+                        if 'image_trigger'   not in key_val:
+                                return False
+                        if 'channel_trigger' not in key_val:
+                                return False
+                        if 'channel_timeout' not in key_val:
+                                return False
+                        if 'decode_type'     not in key_val:
+                                return False
+                        if 'decode_timeout'  not in key_val:
+                                return False
+                        if 'decode_deadline' not in key_val:
+                                return False
+                        return True
+                except:
+                        return False
+
+        def init_config(self):
+                while True:
+                        key_val = self.get_static_config()
+                        if self.check_static_config(key_val) != True:
+                                sleep(1)
+                                continue
+                        self.init_static_config(key_val)
+                        break
+
+                self.init_local_config()
+
+                flag_first_init = True
+                while True:
+                        key_val = self.get_dynamic_config()
+                        if self.check_dynamic_config(key_val) != True:
+                                sleep(1)
+                                continue
+                        self.init_dynamic_config(key_val)
+                        if flag_first_init == True:
+                                flag_first_init == False
+                                self.event_config_init.set()
+                return True
+
+        @pp_redis.safe_proc
+        def get_static_config(self):
+                global pp_redis
+                obj = pp_redis.redis.get(self.key_static)
+                if obj == None:
+                        return None
+                key_val = loads(obj)
+                return key_val
+
+        @pp_redis.safe_proc
+        def get_dynamic_config(self):
+                global pp_redis
+                ret = pp_redis.redis.blpop(self.key_trigger)
+                if ret == None:
+                        return None
+
+                obj = pp_redis.redis.get(self.key_static)
+                if obj == None:
+                        return None
+                key_val = loads(obj)
+                return key_val
+
+        def main(self):
+                self.init_config()
+
+        def wait_for_init(self):
+                try:
+                        return self.event_config_init.wait()
+                except  KeyboardInterrupt:
+                        return None
+                except:
+                        return False
 
         def set_trigger_price(self, count, price):
                 self.lock_trigger.acquire()
@@ -76,7 +148,7 @@ class pp_global():
                 self.lock_trigger.release()
 
         def set_game_over(self):
-                self.flag_gameover  = True
+                self.flag_gameover = True
                 self.event_gameover.set()
 
         def update_systime(self, stime):
@@ -107,7 +179,40 @@ class pp_global():
                 else:
                         return False
 
-#-----------------------------
+#--------------------------------------------
 
 pp_global_info = pp_global()
+
+def pp_global_init():
+        global pp_global_info
+        pp_global_info.start()
+        return pp_global_info.wait_for_init()
+
+
+def pp_global_config_print():
+        global pp_global_info
+        print(str(pp_global_info.list_account))
+        print(str(pp_global_info.trigger_image))
+        print(str(pp_global_info.trigger_channel))
+        print(str(pp_global_info.timeout_channel))
+        print(str(pp_global_info.type_decode))
+        print(str(pp_global_info.timeout_decode))
+        print(str(pp_global_info.deadline_decode))
+        return
+
+#============================================
+
+def config_test():
+        if pp_redis_init()  != True:
+                return
+
+        if pp_global_init() != True:
+                return
+
+        pp_global_config_print()
+
+if __name__ == "__main__":
+        from pp_baseredis   import pp_redis_init
+        config_test()
+        print()
 

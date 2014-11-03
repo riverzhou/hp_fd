@@ -41,7 +41,7 @@ class fd_channel():
                 cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 time     = channel_handle_tuple[0]
                 handle   = channel_handle_tuple[1]
-                if time_sub(cur_time, time) < pp_global_info.channel_timeout:
+                if time_sub(cur_time, time) < pp_global_info.timeout_channel:
                         return True
                 else:
                         self.close_handle(handle)
