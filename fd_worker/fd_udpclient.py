@@ -158,7 +158,8 @@ class udp_worker(pp_thread):
 
         def check_create_channel(self, cur_time):
                 global pp_global_info
-                time_delta = (time_sub(cur_time, pp_global_info.trigger_channel[1][0]), time_sub(cur_time, pp_global_info.trigger_channel[1][1]))
+                trigger_channel = pp_global_info.trigger_channel[1]
+                time_delta = (time_sub(cur_time, trigger_channel[0]), time_sub(cur_time, trigger_channel[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
                         pp_global_info.flag_create_toubiao[1] = True
                         return
@@ -166,7 +167,8 @@ class udp_worker(pp_thread):
                         pp_global_info.flag_create_toubiao[1] = False
                         return
 
-                time_delta = (time_sub(cur_time, pp_global_info.trigger_channel[0][0]), time_sub(cur_time, pp_global_info.trigger_channel[0][1]))
+                trigger_channel = pp_global_info.trigger_channel[0]
+                time_delta = (time_sub(cur_time, trigger_channel[0]), time_sub(cur_time, trigger_channel[1]))
                 if time_delta[0] >= 0 and time_delta[0] <= 60:
                         pp_global_info.flag_create_toubiao[0] = True
                         return
