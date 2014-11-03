@@ -62,6 +62,8 @@ class pp_global(pp_thread):
                 return True
 
         def check_static_config(self, key_val):
+                if key_val == None:
+                        return False
                 try:
                         if 'account_list' not in key_val:
                                 return False
@@ -70,6 +72,8 @@ class pp_global(pp_thread):
                         return False
 
         def check_dynamic_config(self, key_val):
+                if key_val == None:
+                        return False
                 try:
                         if 'image_trigger'   not in key_val:
                                 return False
