@@ -65,11 +65,11 @@ class file_writer(Thread):
 
         def send(self, buff):
                 self.logfile.write(buff[1][0] + '\t' + '['+  buff[0] + ']' + '\t' + buff[1][1] + '\n')
+                self.logfile.flush()
                 return True
 
         def wait_for_flush(self):
-                self.queue.join()
-                return self.logfile.flush()
+                return self.queue.join()
 
 #--------------------------------------------------------------------------------
 
