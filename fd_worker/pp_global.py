@@ -61,7 +61,7 @@ class pp_global(pp_thread):
 
         def check_static_config(self, key_val):
                 try:
-                        if 'list_account' not in key_val:
+                        if 'account_list' not in key_val:
                                 return False
                         return True
                 except:
@@ -124,7 +124,7 @@ class pp_global(pp_thread):
                 if ret == None:
                         return None
 
-                obj = pp_redis.redis.get(self.key_static)
+                obj = pp_redis.redis.get(self.key_dynamic)
                 if obj == None:
                         return None
                 key_val = loads(obj)
