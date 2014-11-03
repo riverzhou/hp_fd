@@ -102,16 +102,27 @@ class pp_global(pp_thread):
 
                 self.init_local_config()
 
-                flag_first_init = True
                 while True:
                         key_val = self.get_dynamic_config()
                         if self.check_dynamic_config(key_val) != True:
                                 sleep(1)
                                 continue
                         self.init_dynamic_config(key_val)
-                        if flag_first_init == True:
-                                flag_first_init == False
-                                self.event_config_init.set()
+                        break
+
+                self.event_config_init.set()
+
+                while True:
+                        if self.wait_dynamic_config() != True:
+                                sleep(1)
+                                continue
+
+                        key_val = self.get_dynamic_config()
+                        if self.check_dynamic_config(key_val) != True:
+                                sleep(1)
+                                continue
+                        self.init_dynamic_config(key_val)
+
                 return True
 
         @pp_redis.safe_proc
@@ -126,15 +137,19 @@ class pp_global(pp_thread):
         @pp_redis.safe_proc
         def get_dynamic_config(self):
                 global pp_redis
-                ret = pp_redis.redis.blpop(self.key_trigger)
-                if ret == None:
-                        return None
-
                 obj = pp_redis.redis.get(self.key_dynamic)
                 if obj == None:
                         return None
                 key_val = loads(obj)
                 return key_val
+
+        @pp_redis.safe_proc
+        def wait_dynamic_config(self):
+                global pp_redis
+                ret = pp_redis.redis.blpop(self.key_trigger)
+                if ret == None:
+                        return None
+                return True
 
         def main(self):
                 self.init_config()
