@@ -19,7 +19,7 @@ class file_writer(Thread):
                 self.event_started  = Event()
                 self.thread_info    = info
                 self.queue          = Queue()
-                self.logfile        = open(local_logfile, 'w')
+                self.logfile        = open(local_logfile, 'a')
 
         def wait_for_start(self, timeout = None):
                 if timeout == None:
