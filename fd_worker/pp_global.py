@@ -47,7 +47,7 @@ class pp_global(pp_thread):
                 return True
 
         def init_static_config(self, key_val):
-                self.list_account       = key_val['list_account']
+                self.list_account       = key_val['account_list']
                 return True
 
         def init_dynamic_config(self, key_val):
