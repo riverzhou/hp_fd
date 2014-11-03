@@ -6,7 +6,7 @@ from threading              import Event, Lock
 from queue                  import Queue
 
 from pp_baseclass           import pp_thread
-from pp_log                 import logger, printer
+from pp_log                 import printer
 
 from pp_baseredis           import pp_redis
 

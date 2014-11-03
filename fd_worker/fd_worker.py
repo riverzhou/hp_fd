@@ -4,9 +4,9 @@ from traceback              import print_exc
 from time                   import sleep
 
 from pp_server              import pp_dns_init
-from pp_baseredis           import pp_redis, pp_redis_init
+from pp_baseredis           import pp_redis, pp_redis_init, pp_redis_connect_print
 from pp_global              import pp_global_info, pp_global_init, pp_global_config_print
-from pp_log                 import logger, printer
+from pp_log                 import printer
 
 from fd_config              import redis_dbid
 from fd_decode              import fd_decode_init
@@ -14,6 +14,7 @@ from fd_channel             import fd_channel_init
 from fd_udpclient           import fd_udp_init
 from fd_synctime            import fd_timer_init
 from fd_sslclient           import fd_client
+from fd_log                 import logger
 
 #==============================================================
 
@@ -26,6 +27,9 @@ def main():
 
         if pp_redis_init()  != True:
                 return
+
+        pp_redis_connect_print()
+
         if pp_global_init() != True:
                 return
 
@@ -49,6 +53,7 @@ def main():
 
         sleep(60)
         printer.wait_for_flush()
+        logger.warit_for_flush()
 
 if __name__ == '__main__':
         try:

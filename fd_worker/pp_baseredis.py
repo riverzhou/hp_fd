@@ -6,6 +6,7 @@ from redis                  import StrictRedis
 from threading              import Event, Lock, Thread
 
 from fd_config              import redis_ip, redis_port, redis_passwd, redis_dbid
+from fd_log                 import logger
 
 #======================================================================
 
@@ -47,7 +48,6 @@ class redis_db(Thread):
                         self.flag_do_reconn = False
                         self.event_conn_ok.set()
                         self.event_conn_chk.clear()
-                        print(self.redis)
                 self.lock_do_reconn.release()
 
         def check_connect_ok(self):
@@ -106,6 +106,12 @@ def pp_redis_init():
         pp_redis.start()
         return pp_redis.check_connect_ok()
 
+def pp_redis_connect_print():
+        global pp_redis
+        logger.warning(pp_redis.redis)
+
 if __name__ == "__main__":
         pp_redis_init()
+        pp_redis_connect_print()
+        logger.wait_for_flush()
 

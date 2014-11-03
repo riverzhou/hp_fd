@@ -5,7 +5,7 @@ from time                   import sleep
 from datetime               import datetime
 from traceback              import print_exc, format_exc
 
-from pp_log                 import logger, printer
+from pp_log                 import printer
 from pp_sslproto            import proto_ssl, proto_machine
 from pp_server              import server_dict
 from pp_baseclass           import pp_thread

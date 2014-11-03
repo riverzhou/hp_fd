@@ -7,6 +7,8 @@ from pickle         import dumps, loads
 from pp_baseclass   import pp_thread
 from pp_baseredis   import pp_redis
 
+from fd_log         import logger
+
 #========================================================================
 
 def time_sub(end, begin):
@@ -191,13 +193,13 @@ def pp_global_init():
 
 def pp_global_config_print():
         global pp_global_info
-        print(str(pp_global_info.list_account))
-        print(str(pp_global_info.trigger_image))
-        print(str(pp_global_info.trigger_channel))
-        print(str(pp_global_info.timeout_channel))
-        print(str(pp_global_info.type_decode))
-        print(str(pp_global_info.timeout_decode))
-        print(str(pp_global_info.deadline_decode))
+        logger.info(str(pp_global_info.list_account))
+        logger.info(str(pp_global_info.trigger_image))
+        logger.info(str(pp_global_info.trigger_channel))
+        logger.info(str(pp_global_info.timeout_channel))
+        logger.info(str(pp_global_info.type_decode))
+        logger.info(str(pp_global_info.timeout_decode))
+        logger.info(str(pp_global_info.deadline_decode))
         return
 
 #============================================
@@ -214,5 +216,4 @@ def config_test():
 if __name__ == "__main__":
         from pp_baseredis   import pp_redis_init
         config_test()
-        print()
 

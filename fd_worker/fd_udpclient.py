@@ -10,8 +10,7 @@ from time                   import time, sleep, localtime, mktime, strptime, str
 from pp_baseclass           import pp_thread
 from pp_udpproto            import udp_proto
 from pp_server              import server_dict
-from pp_log                 import logger, printer
-
+from pp_log                 import printer
 from pp_global              import pp_global_info
 
 #=================================================
@@ -144,13 +143,13 @@ class udp_worker(pp_thread):
                 if time != None and delta_price != None and time_sub(cur_time, time) >= 0:
                         pp_global_info.set_trigger_price(1, cur_price + delta_price)
                         pp_global_info.event_image[1].set()
-                        #print('bid1', cur_price, delta_price, pp_global_info.trigger_price[1])
+                        #printer.debug('bid1', cur_price, delta_price, pp_global_info.trigger_price[1])
 
                 time, delta_price = pp_global_info.trigger_image[2]
                 if time != None and delta_price != None and time_sub(cur_time, time) >= 0:
                         pp_global_info.set_trigger_price(2, cur_price + delta_price)
                         pp_global_info.event_image[2].set()
-                        #print('bid2', cur_price, delta_price, pp_global_info.trigger_price[2])
+                        #printer.debug('bid2', cur_price, delta_price, pp_global_info.trigger_price[2])
 
         def check_game_over(self, cur_time):
                 global pp_global_info

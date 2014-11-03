@@ -6,7 +6,7 @@ from hashlib                import md5
 from xml.etree              import ElementTree
 from collections            import OrderedDict
 
-from pp_log                 import logger, printer
+from pp_log                 import printer
 
 #==================================================================================================================
 

@@ -7,7 +7,7 @@ from datetime               import datetime
 from http.client            import HTTPSConnection, HTTPConnection
 from traceback              import print_exc, format_exc
 
-from pp_log                 import logger, printer
+from pp_log                 import printer
 from pp_server              import server_dict
 
 from pp_global              import pp_global_info
