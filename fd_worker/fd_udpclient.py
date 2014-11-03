@@ -155,6 +155,12 @@ class udp_worker(pp_thread):
                 global pp_global_info
                 if cur_time == None and pp_global_info.sys_code != None:
                         pp_global_info.set_game_over()
+                        pp_global_info.event_price[0].set()
+                        pp_global_info.event_price[1].set()
+                        pp_global_info.event_price[2].set()
+                        pp_global_info.event_image[0].set()
+                        pp_global_info.event_image[1].set()
+                        pp_global_info.event_image[2].set()
 
         def check_create_channel(self, cur_time):
                 global pp_global_info

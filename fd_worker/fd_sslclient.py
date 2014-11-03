@@ -387,6 +387,7 @@ class fd_bid():
                 pp_global_info.event_image[self.count].wait()
                 self.price = pp_global_info.trigger_price[self.count]
                 if self.price == None:
+                        printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
                 if self.count == 2:
                         try:
@@ -426,6 +427,7 @@ class fd_bid():
 
                 pp_global_info.event_price[self.count].wait()
                 if self.price == None:
+                        printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
                 for i in range(self.max_retry_price):
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
