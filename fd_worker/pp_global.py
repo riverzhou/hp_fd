@@ -112,6 +112,8 @@ class pp_global(pp_thread):
 
                 self.event_config_init.set()
 
+                pp_global_config_print()
+
                 while True:
                         if self.wait_dynamic_config() != True:
                                 sleep(1)
@@ -122,6 +124,7 @@ class pp_global(pp_thread):
                                 sleep(1)
                                 continue
                         self.init_dynamic_config(key_val)
+                        pp_global_config_print()
 
                 return True
 
@@ -229,8 +232,6 @@ def config_test():
 
         if pp_global_init() != True:
                 return
-
-        pp_global_config_print()
 
 if __name__ == "__main__":
         from pp_baseredis   import pp_redis_init

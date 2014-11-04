@@ -28,12 +28,8 @@ def main():
         if pp_redis_init()  != True:
                 return
 
-        pp_redis_connect_print()
-
         if pp_global_init() != True:
                 return
-
-        pp_global_config_print()
 
         fd_decode_init()
         fd_channel_init()

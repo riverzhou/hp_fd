@@ -104,7 +104,11 @@ pp_redis = redis_db(redis_ip, redis_port, redis_passwd, redis_dbid)
 def pp_redis_init():
         global pp_redis
         pp_redis.start()
-        return pp_redis.check_connect_ok()
+        if pp_redis.check_connect_ok() == True:
+                pp_redis_connect_print()
+                return True
+        else:
+                return False
 
 def pp_redis_connect_print():
         global pp_redis
@@ -112,6 +116,5 @@ def pp_redis_connect_print():
 
 if __name__ == "__main__":
         pp_redis_init()
-        pp_redis_connect_print()
         logger.wait_for_flush()
 
