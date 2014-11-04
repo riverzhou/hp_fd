@@ -53,7 +53,7 @@ def main():
 
         sleep(60)
         printer.wait_for_flush()
-        logger.warit_for_flush()
+        logger.wait_for_flush()
 
 if __name__ == '__main__':
         try:
