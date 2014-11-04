@@ -457,7 +457,7 @@ class fd_bid_0(fd_bid):
 class fd_bid_1(fd_bid):
         count               = 1
         max_image_timeout   = 4
-        max_price_timeout   = 4
+        max_price_timeout   = 2
 
 class fd_bid_2(fd_bid):
         count               = 2
