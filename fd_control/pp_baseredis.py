@@ -97,6 +97,19 @@ class redis_db(Thread):
                         return ret
                 return _safe_proc
 
+        def save(self.proc):
+                if self.redis == None:
+                        return False
+                try:
+                        self.redis.save()
+                except  KeyboardInterrupt:
+                        return False
+                except:
+                        print_exc()
+                        return False
+                return True
+
+
 #===================================================================
 
 pp_redis = redis_db(redis_ip, redis_port, redis_passwd, redis_dbid)
