@@ -97,7 +97,7 @@ class redis_db(Thread):
                         return ret
                 return _safe_proc
 
-        def save(self.proc):
+        def save(self):
                 if self.redis == None:
                         return False
                 try:
