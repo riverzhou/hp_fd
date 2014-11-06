@@ -11,6 +11,10 @@ key_static  = 'cfg_static'
 key_dynamic = 'cfg_dynamic'
 key_trigger = 'cfg_trigger'
 
+def redis_save():
+        global pp_redis
+        return pp_redis.redis.save()
+
 #@pp_redis.safe_proc
 def redis_set_one(key, val):
         global pp_redis
@@ -79,6 +83,7 @@ def main():
         if write_dynamic_config()   != True:
                 print('write dynamic failed')
                 return False
+        redis_save()
         print('config write finished .....')
         return True
 
