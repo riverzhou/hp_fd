@@ -90,7 +90,7 @@ class redis_db(Thread):
                                         return None
                                 except:
                                         self.set_connect_error()
-                                        print_exc()
+                                        logger.critical(format_exc())
                                         sleep(0.1)
                                         continue
                                 break
@@ -105,7 +105,7 @@ class redis_db(Thread):
                 except  KeyboardInterrupt:
                         return False
                 except:
-                        print_exc()
+                        logger.critical(format_exc())
                         return False
                 return True
 
