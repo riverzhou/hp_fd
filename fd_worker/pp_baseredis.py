@@ -39,12 +39,20 @@ class redis_db(Thread):
         def reconnect_redis(self):
                 self.lock_do_reconn.acquire()
                 if self.flag_do_reconn == True:
-                        if self.redis != None:
-                                del(self.redis)
-                        self.redis = None
-                        while self.redis == None:
+                        while True:
+                                if self.redis != None:
+                                        del(self.redis)
                                 self.redis = self.connect_redis()
                                 sleep(1)
+                                try:
+                                        if self.redis.echo('echo') == b'echo':
+                                                break
+                                        else:
+                                                continue
+                                except  KeyboardInterrupt:
+                                        break
+                                except:
+                                        continue
                         self.flag_do_reconn = False
                         self.event_conn_ok.set()
                         self.event_conn_chk.clear()
