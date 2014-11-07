@@ -1,0 +1,6 @@
+[run]
+omit=/usr/local/lib/python3.4/dist-packages/*
+
+[report]
+omit=/usr/local/lib/python3.4/dist-packages/*
+
