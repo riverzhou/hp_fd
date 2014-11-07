@@ -1,6 +1,6 @@
-[run]
-omit=/usr/local/lib/python3.4/dist-packages/*
-
 [report]
 omit=/usr/local/lib/python3.4/dist-packages/*
+exclude_lines =
+	if __name__ == .__main__.:
+	except  KeyboardInterrupt:
 
