@@ -18,9 +18,12 @@ from fd_udpclient           import daemon_udp
 #===========================================================
 
 def time_sub(end, begin):
-        e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
-        b = datetime.timestamp(datetime.strptime(begin, '%Y-%m-%d %H:%M:%S.%f'))
-        return e-b
+        try:
+                e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
+                b = datetime.timestamp(datetime.strptime(begin, '%Y-%m-%d %H:%M:%S.%f'))
+                return e-b
+        except:
+                return -1
 
 class fd_login():
         max_retry_login     = 3

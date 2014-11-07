@@ -16,9 +16,12 @@ from pp_global              import pp_global_info
 #=================================================
 
 def time_sub(end, begin):
-        e = end.split(':')
-        b = begin.split(':')
-        return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
+        try:
+                e = end.split(':')
+                b = begin.split(':')
+                return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
+        except:
+                return -1
 
 
 def getsleeptime(interval):
@@ -153,7 +156,7 @@ class udp_worker(pp_thread):
 
         def check_game_over(self, cur_time):
                 global pp_global_info
-                if cur_time == None and pp_global_info.sys_code != None:
+                if cur_time == None and pp_global_info.sys_code != None and time_sub(pp_global_info.sys_time, pp_global_info.deadline_decode) > 1:
                         pp_global_info.set_game_over()
                         pp_global_info.event_price[0].set()
                         pp_global_info.event_price[1].set()

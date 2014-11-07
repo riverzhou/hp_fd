@@ -12,9 +12,12 @@ from fd_log         import logger
 #========================================================================
 
 def time_sub(end, begin):
-        e = end.split(':')
-        b = begin.split(':')
-        return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
+        try:
+                e = end.split(':')
+                b = begin.split(':')
+                return (int(e[0])*3600 + int(e[1])*60 + int(e[2])) - (int(b[0])*3600 + int(b[1])*60 + int(b[2]))
+        except:
+                return -1
 
 class pp_global(pp_thread):
         key_static  = 'cfg_static'
