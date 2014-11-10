@@ -208,7 +208,7 @@ class pp_login_channel_manager(pp_thread):
                                 time_interval = int(pp_global_info.timeout_channel[1])
                         except:
                                 time_interval = 2
-                        sleep(getsleeptime(time_interval)
+                        sleep(getsleeptime(time_interval))
                         self.manage_channel()
 
         def manage_channel(self):
@@ -254,7 +254,7 @@ class pp_toubiao_channel_manager(pp_thread):
                                 time_interval = int(pp_global_info.timeout_channel[1])
                         except:
                                 time_interval = 2
-                        sleep(getsleeptime(time_interval)
+                        sleep(getsleeptime(time_interval))
                         self.manage_channel()
 
         def manage_channel(self):
