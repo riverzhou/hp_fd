@@ -44,7 +44,7 @@ class fd_channel():
                 cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 time     = channel_handle_tuple[0]
                 handle   = channel_handle_tuple[1]
-                if time_sub(cur_time, time) < pp_global_info.timeout_channel:
+                if time_sub(cur_time, time) < pp_global_info.timeout_channel[0]:
                         return True
                 else:
                         self.close_handle(handle)
@@ -193,7 +193,6 @@ class pp_channel_maker(pp_thread):
                 self.manager.maker_out()
 
 class pp_login_channel_manager(pp_thread):
-        time_interval   = 1
         max_onway       = 20
 
         def __init__(self):
@@ -202,8 +201,14 @@ class pp_login_channel_manager(pp_thread):
                 self.number_onway = 0
 
         def main(self):
+                global pp_global_info
+                time_interval = 2
                 while True:
-                        sleep(getsleeptime(self.time_interval))
+                        try:
+                                time_interval = int(pp_global_info.timeout_channel[1])
+                        except:
+                                time_interval = 2
+                        sleep(getsleeptime(time_interval)
                         self.manage_channel()
 
         def manage_channel(self):
@@ -233,7 +238,6 @@ class pp_login_channel_manager(pp_thread):
                 self.lock_onway.release()
 
 class pp_toubiao_channel_manager(pp_thread):
-        time_interval   = 2
         max_onway       = 100
 
         def __init__(self, id):
@@ -243,8 +247,14 @@ class pp_toubiao_channel_manager(pp_thread):
                 self.id = id
 
         def main(self):
+                global pp_global_info
+                time_interval = 2
                 while True:
-                        sleep(getsleeptime(self.time_interval))
+                        try:
+                                time_interval = int(pp_global_info.timeout_channel[1])
+                        except:
+                                time_interval = 2
+                        sleep(getsleeptime(time_interval)
                         self.manage_channel()
 
         def manage_channel(self):
