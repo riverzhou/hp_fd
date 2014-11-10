@@ -62,6 +62,7 @@ class pp_global(pp_thread):
                 self.type_decode        = key_val['decode_type']
                 self.timeout_decode     = key_val['decode_timeout']
                 self.deadline_decode    = key_val['decode_deadline']
+                self.maxretry_bid0      = key_val['bid0_maxretry']
                 return True
 
         def check_static_config(self, key_val):
@@ -89,6 +90,8 @@ class pp_global(pp_thread):
                         if 'decode_timeout'  not in key_val:
                                 return False
                         if 'decode_deadline' not in key_val:
+                                return False
+                        if 'bid0_maxretry'   not in key_val:
                                 return False
                         return True
                 except:

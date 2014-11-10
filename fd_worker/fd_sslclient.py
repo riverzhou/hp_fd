@@ -468,7 +468,7 @@ class fd_bid_2(fd_bid):
         max_price_timeout   = 10
 
 class fd_client(pp_thread):
-        max_retry_bid0      = 10
+        max_retry_bid0      = 20
         timewait_bid1       = 3
 
         def __init__(self, bidno, passwd):
@@ -539,7 +539,17 @@ class fd_client(pp_thread):
 
                 self.do_login()
 
-                for i in range(self.max_retry_bid0):
+                i = 0
+                maxretry = self.max_retry_bid0
+                while True:
+                        try:
+                                maxretry = int(pp_global_info.maxretry_bid0)
+                        except:
+                                maxretry = self.max_retry_bid0
+                        if i > maxretry:
+                                break
+                        else:
+                                i += 1
                         self.do_bid0()
                         if self.check_bid0_finish() == True:
                                 break
