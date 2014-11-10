@@ -5,7 +5,7 @@ from traceback              import print_exc, format_exc
 from redis                  import StrictRedis
 from threading              import Event, Lock, Thread
 
-from fd_config              import redis_ip, redis_port, redis_passwd, redis_dbid
+from fd_config              import redis_ip, redis_port, redis_passwd
 
 #======================================================================
 
@@ -38,16 +38,23 @@ class redis_db(Thread):
         def reconnect_redis(self):
                 self.lock_do_reconn.acquire()
                 if self.flag_do_reconn == True:
-                        if self.redis != None:
-                                del(self.redis)
-                        self.redis = None
-                        while self.redis == None:
+                        while True:
+                                if self.redis != None:
+                                        del(self.redis)
                                 self.redis = self.connect_redis()
-                                sleep(1)
+                                sleep(0.1)
+                                try:
+                                        if self.redis.echo('echo') == b'echo':
+                                                break
+                                        else:
+                                                continue
+                                except  KeyboardInterrupt:
+                                        break
+                                except:
+                                        continue
                         self.flag_do_reconn = False
                         self.event_conn_ok.set()
                         self.event_conn_chk.clear()
-                        print(self.redis)
                 self.lock_do_reconn.release()
 
         def check_connect_ok(self):
@@ -109,16 +116,17 @@ class redis_db(Thread):
                         return False
                 return True
 
-
 #===================================================================
 
-pp_redis = redis_db(redis_ip, redis_port, redis_passwd, redis_dbid)
-
-def pp_redis_init():
-        global pp_redis
+def pp_redis_init(dbid):
+        pp_redis = redis_db(redis_ip, redis_port, redis_passwd, dbid)
         pp_redis.start()
-        return pp_redis.check_connect_ok()
+        if pp_redis.check_connect_ok() == True:
+                print(pp_redis.redis)
+                return pp_redis
+        else:
+                return None
 
 if __name__ == "__main__":
-        pp_redis_init()
+        pp_redis_init(5)
 
