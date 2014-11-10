@@ -17,12 +17,14 @@ account_list    = [
         ('99999999', '9999'),   # 测试
         ]
 
-channel_trigger = [('10:33:10', '10:55:00') , ('11:28:10', '11:29:58')]
-channel_timeout = 110
+channel_trigger = [('10:31:10', '10:45:00') , ('11:28:10', '11:29:58')]
+channel_timeout = [110, 2]
 
-image_trigger   = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:50', 500)]
+image_trigger   = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:50', 400)]
 
-decode_type     = ['A', 'B', 'C']
+decode_type     = ['A', 'B', 'B']
 decode_timeout  = [30, 8, 6]
-decode_deadline = '11:29:56'
+decode_deadline = '11:29:57'
+
+bid0_maxretry   = 20
 
