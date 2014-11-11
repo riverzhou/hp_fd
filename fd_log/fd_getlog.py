@@ -6,7 +6,7 @@ from pp_baseredis       import pp_redis_init_a, pp_redis_init_b
 
 list_dbs    = [ 1 ,2 ,3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-list_keys   = ['warning', 'error', 'debug', 'critical', 'info', 'data', 'time']
+list_keys   = ['log_warning', 'log_error', 'log_debug', 'log_critical', 'log_info', 'log_data', 'log_time']
 
 #================================================================================
 
