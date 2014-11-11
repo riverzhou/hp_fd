@@ -18,8 +18,6 @@ from fd_log                 import logger
 
 #==============================================================
 
-list_client = []
-
 def main():
         global pp_global_info, printer
 
