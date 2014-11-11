@@ -1,25 +1,32 @@
 #!/usr/bin/env python3
 
+from pp_baseredis       import pp_redis_init_a, pp_redis_init_b
 
-#from fd_config      import redis_dbid
-from fd_redis       import redis_db
+#================================================================================
 
-list_dbs    = [ 1 ,2 ,3, 4, 5 ]
+list_dbs    = [ 1 ,2 ,3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 list_keys   = ['warning', 'error', 'debug', 'critical', 'info', 'data', 'time']
 
+#================================================================================
 
 def main():
         for dbid in list_dbs:
-                redis = redis_db(dbid)
+                redis_a = pp_redis_init_a(dbid).redis
+                redis_b = pp_redis_init_b(dbid).redis
                 for key in list_keys:
-                        buff = redis.get_list(key)
-                        f = open('./log/' + str(dbid) + '_' + key + '.log', 'wb')
+                        f_name = './log/%.2d_%s.log' % (dbid, key)
+                        f = open(f_name, 'wb')
+                        buff = redis_a.lrange(key,0,-1)
+                        for line in buff:
+                                f.write(line)
+                                f.write('\r\n'.encode())
+                        buff = redis_b.lrange(key,0,-1)
                         for line in buff:
                                 f.write(line)
                                 f.write('\r\n'.encode())
                         f.close()
 
-
-main()
+if __name__ == '__main__':
+        main()
 

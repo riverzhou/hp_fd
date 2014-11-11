@@ -4,7 +4,7 @@ from threading              import Thread, Event, Lock, Semaphore
 from queue                  import Queue, LifoQueue
 from traceback              import print_exc
 
-from pp_log                 import logger, printer
+from pp_log                 import printer
 
 #============================================================================================
 
@@ -47,14 +47,11 @@ class pp_thread(Thread):
                 self.event_stop.set()
 
         def run(self):
-                #if self.thread_info != None : logger.debug('Thread %s : Id %s : %s : started' % (self.__class__.__name__, self.ident, self.thread_info))
+                #if self.thread_info != None : print('Thread %s : Id %s : %s : started' % (self.__class__.__name__, self.ident, self.thread_info))
                 self.event_started.set()
-                try:
-                        self.main()
-                except  KeyboardInterrupt:
-                        pass
+                self.main()
                 self.event_stopped.set()
-                #if self.thread_info != None : logger.debug('Thread %s : Id %s : %s : stoped' % (self.__class__.__name__, self.ident, self.thread_info))
+                #if self.thread_info != None : print('Thread %s : Id %s : %s : stoped' % (self.__class__.__name__, self.ident, self.thread_info))
 
         def main(self): pass
 
