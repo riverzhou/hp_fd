@@ -27,11 +27,9 @@ def time_sub(end, begin):
 
 class fd_login():
         max_retry_login     = 3
-        min_retry_interval  = 3
 
         def __init__(self, client):
                 self.client             = client
-                self.time_lastreq       = None
 
         def do_login(self):
                 try:
@@ -44,17 +42,6 @@ class fd_login():
                 except:
                         printer.critical(format_exc())
                         return False
-
-        def check_interval(self):
-                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                if self.time_lastreq == None:
-                        self.time_lastreq = curtime
-                        return True
-                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
-                self.time_image_lastreq = curtime
-                if sleeptime > 0:
-                        sleep(sleeptime)
-                return True
 
         def proc_login(self):
                 global  channel_center
@@ -71,7 +58,7 @@ class fd_login():
 
                 head = proto.make_ssl_head(server_dict[group]['login']['name'])
 
-                self.check_interval()
+                self.client.check_login_interval()
                 info_val = channel_center.pyget(channel, req, head)
                 if info_val == None:
                         printer.error('client %s fd_login info is None' % self.client.bidno)
@@ -98,7 +85,6 @@ class fd_login():
 
 class fd_image(pp_thread):
         max_retry               = 2
-        min_retry_interval      = 2
 
         def __init__(self, client, count, price, image_timeout):
                 super().__init__()
@@ -110,7 +96,6 @@ class fd_image(pp_thread):
                 self.lock_timeout       = Lock()
                 self.flag_error         = False
                 self.image_timeout      = image_timeout
-                self.time_lastreq       = None
 
         def main(self):
                 try:
@@ -119,17 +104,6 @@ class fd_image(pp_thread):
                         pass
                 except:
                         printer.critical(format_exc())
-
-        def check_interval(self):
-                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                if self.time_lastreq == None:
-                        self.time_lastreq = curtime
-                        return True
-                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
-                self.time_image_lastreq = curtime
-                if sleeptime > 0:
-                        sleep(sleeptime)
-                return True
 
         def do_image(self):
                 global  channel_center
@@ -148,7 +122,7 @@ class fd_image(pp_thread):
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
 
-                        self.check_interval()
+                        self.client.check_image_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
@@ -214,7 +188,7 @@ class fd_image(pp_thread):
 
 class fd_price(pp_thread):
         max_retry               = 2
-        min_retry_interval      = 1
+        min_self_interval       = 1
 
         def __init__(self, client, count, price, group):
                 super().__init__()
@@ -222,7 +196,7 @@ class fd_price(pp_thread):
                 self.count              = count
                 self.price              = price
                 self.group              = group
-                self.time_lastreq       = None
+                self.time_self_lastreq  = None
 
         def main(self):
                 try:
@@ -232,13 +206,13 @@ class fd_price(pp_thread):
                 except:
                         printer.critical(format_exc())
 
-        def check_interval(self):
-                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                if self.time_lastreq == None:
-                        self.time_lastreq = curtime
+        def check_self_interval(self):
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_self_lastreq == None:
+                        self.time_self_lastreq = curtime
                         return True
-                sleeptime = self.min_retry_interval - time_sub(curtime, self.time_lastreq)
-                self.time_image_lastreq = curtime
+                sleeptime = self.min_self_interval - time_sub(curtime, self.time_self_lastreq)
+                self.time_self_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
                 return True
@@ -262,7 +236,7 @@ class fd_price(pp_thread):
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
 
-                        self.check_interval()
+                        self.check_self_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
@@ -338,8 +312,6 @@ class fd_decode(pp_thread):
 
 
 class fd_bid():
-        min_retry_image_interval    = 3
-        min_retry_price_interval    = 2
         max_retry_image             = 3
         max_retry_price             = 2
 
@@ -350,8 +322,6 @@ class fd_bid():
         def __init__(self, client):
                 self.client             = client
                 self.price              = None
-                self.time_image_lastreq = None
-                #self.time_price_lastreq = None
 
         def do_bid(self):
                 try:
@@ -359,17 +329,6 @@ class fd_bid():
                 except:
                         printer.critical(format_exc())
                         return False
-
-        def check_image_interval(self):
-                curtime =  cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                if self.time_image_lastreq == None:
-                        self.time_image_lastreq = curtime
-                        return True
-                sleeptime = self.min_retry_image_interval - time_sub(curtime, self.time_image_lastreq)
-                self.time_image_lastreq = curtime
-                if sleeptime > 0:
-                        sleep(sleeptime)
-                return True
 
         def proc_bid(self):
                 if self.proc_image() != True:
@@ -402,8 +361,7 @@ class fd_bid():
                                 return False
 
                 for i in range(self.max_retry_image):
-                        self.check_image_interval()
-
+                        self.client.check_image_interval()
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
                         thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
@@ -436,7 +394,7 @@ class fd_bid():
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
-                        self.client.wait_price_bid(self.count, self.min_retry_price_interval)
+                        self.client.check_price_interval()
                         if pp_global_info.flag_gameover == True:
                                 break
                         if self.client.check_err_112(self.count) == True:
@@ -468,6 +426,10 @@ class fd_bid_2(fd_bid):
         max_price_timeout   = 10
 
 class fd_client(pp_thread):
+        min_login_interval  = 3
+        min_image_interval  = 3
+        min_price_interval  = 2
+
         max_retry_bid0      = 20
         timewait_bid1       = 3
 
@@ -488,6 +450,46 @@ class fd_client(pp_thread):
                 self.lock_bid       = [Lock(),  Lock(),  Lock()]
                 self.event_bid      = [Event(), Event(), Event()]
 
+                self.time_login_lastreq = None
+                self.time_image_lastreq = None
+                self.time_price_lastreq = None
+
+        def check_login_interval(self):
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                if self.time_login_lastreq == None:
+                        self.time_login_lastreq  = curtime
+                        return True
+                sleeptime = self.min_login_interval - time_sub(curtime, self.time_login_lastreq)
+                self.time_login_lastreq = curtime
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
+
+        def check_image_interval(self):
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                print('check_image_interval curtime : %s , lasttime : %s' % (curtime, self.time_image_lastreq))
+                if self.time_image_lastreq == None:
+                        self.time_image_lastreq = curtime
+                        return True
+                sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
+                print('check_image_interval sleeptime : %s' % sleeptime)
+                self.time_image_lastreq = curtime
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
+
+        def check_price_interval(self):
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                print('check_price_interval curtime : %s , lasttime : %s' % (curtime, self.time_price_lastreq))
+                if self.time_price_lastreq == None:
+                        self.time_price_lastreq = curtime
+                        return True
+                sleeptime = self.min_price_interval - time_sub(curtime, self.time_price_lastreq)
+                print('check_price_interval sleeptime : %s' % sleeptime)
+                self.time_price_lastreq = curtime
+                if sleeptime > 0:
+                        sleep(sleeptime)
+                return True
 
         def do_login(self):
                 login = fd_login(self)
@@ -498,14 +500,12 @@ class fd_client(pp_thread):
                         daemon_udp.add((self.bidno, self.pid_login))
                         return True
 
-
         def do_bid0(self):
                 bid0 = fd_bid_0(self)
                 if bid0.do_bid() != True:
                         printer.warning('client %s bid 0 failed. Abort.....' % self.bidno)
                         return False
                 return True
-
 
         def do_bid1(self):
                 bid1 = fd_bid_1(self)
@@ -514,7 +514,6 @@ class fd_client(pp_thread):
                         return False
                 sleep(self.timewait_bid1)
                 return True
-
 
         def do_bid2(self):
                 global pp_global_info
@@ -528,11 +527,9 @@ class fd_client(pp_thread):
                         return False
                 return True
 
-
         def set_bid0_finish(self):
                 global pp_global_info
                 return pp_global_info.set_bid0_finish()
-
 
         def main(self):
                 global pp_global_info, daemon_udp
