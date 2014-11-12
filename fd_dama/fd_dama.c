@@ -154,10 +154,14 @@ int main(int argc, char* argv[])
 			strcpy(dama_code, "000000");
 		}
 		else {
+#ifndef _TEST_
 			if (GetVcode(1, base64_outbuff, buff_len, dama_code) == false)
 				strcpy(dama_code, "000000");
 			else if (dama_code[5] == 0)
 				strcpy(dama_code, "000000");
+#else
+			strcpy(dama_code, "000000");
+#endif
 		}
 		make_result(redis_outbuff, dama_sid, dama_code);
 
