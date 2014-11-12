@@ -187,7 +187,7 @@ class fd_image(pp_thread):
 
 
 class fd_price(pp_thread):
-        max_retry               = 2
+        max_retry               = 1
         min_self_interval       = 1
 
         def __init__(self, client, count, price, group):
@@ -236,7 +236,7 @@ class fd_price(pp_thread):
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
 
-                        self.check_self_interval()
+                        #self.check_self_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val == None :
                                 printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
