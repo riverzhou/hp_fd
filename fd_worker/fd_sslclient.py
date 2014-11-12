@@ -467,12 +467,10 @@ class fd_client(pp_thread):
 
         def check_image_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                print('check_image_interval curtime : %s , lasttime : %s' % (curtime, self.time_image_lastreq))
                 if self.time_image_lastreq == None:
                         self.time_image_lastreq = curtime
                         return True
                 sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
-                print('check_image_interval sleeptime : %s' % sleeptime)
                 self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
@@ -480,12 +478,10 @@ class fd_client(pp_thread):
 
         def check_price_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                print('check_price_interval curtime : %s , lasttime : %s' % (curtime, self.time_price_lastreq))
                 if self.time_price_lastreq == None:
                         self.time_price_lastreq = curtime
                         return True
                 sleeptime = self.min_price_interval - time_sub(curtime, self.time_price_lastreq)
-                print('check_price_interval sleeptime : %s' % sleeptime)
                 self.time_price_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
