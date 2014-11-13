@@ -361,7 +361,7 @@ class fd_bid():
                                 return False
 
                 for i in range(self.max_retry_image):
-                        self.client.check_image_interval()
+                        self.client.check_image_interval(False)
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
                         thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
@@ -465,13 +465,15 @@ class fd_client(pp_thread):
                         sleep(sleeptime)
                 return True
 
-        def check_image_interval(self):
+        def check_image_interval(self, update = True):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_image_lastreq == None:
-                        self.time_image_lastreq = curtime
+                        if update == True:
+                                self.time_image_lastreq = curtime
                         return True
                 sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
-                self.time_image_lastreq = curtime
+                if update == True:
+                        self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
                 return True
