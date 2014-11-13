@@ -212,9 +212,9 @@ class fd_price(pp_thread):
                         self.time_self_lastreq = curtime
                         return True
                 sleeptime = self.min_self_interval - time_sub(curtime, self.time_self_lastreq)
-                self.time_self_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
+                self.time_self_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def do_price(self):
