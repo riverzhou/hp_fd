@@ -457,25 +457,26 @@ class fd_client(pp_thread):
         def check_login_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_login_lastreq == None:
-                        self.time_login_lastreq  = curtime
+                        self.time_login_lastreq = curtime
                         return True
                 sleeptime = self.min_login_interval - time_sub(curtime, self.time_login_lastreq)
-                self.time_login_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
+                self.time_login_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def check_image_interval(self, update = True):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                print('check_image_interval , update = %s , curtime = %s, lastreq = %s' % (update, curtime, self.time_image_lastreq))
                 if self.time_image_lastreq == None:
                         if update == True:
                                 self.time_image_lastreq = curtime
                         return True
                 sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
-                if update == True:
-                        self.time_image_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
+                if update == True:
+                        self.time_image_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def check_price_interval(self):
@@ -484,9 +485,9 @@ class fd_client(pp_thread):
                         self.time_price_lastreq = curtime
                         return True
                 sleeptime = self.min_price_interval - time_sub(curtime, self.time_price_lastreq)
-                self.time_price_lastreq = curtime
                 if sleeptime > 0:
                         sleep(sleeptime)
+                self.time_price_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def do_login(self):
