@@ -467,7 +467,7 @@ class fd_client(pp_thread):
 
         def check_image_interval(self, update = True):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                print('check_image_interval , update = %s , curtime = %s, lastreq = %s' % (update, curtime, self.time_image_lastreq))
+                #print('check_image_interval , update = %s , curtime = %s, lastreq = %s' % (update, curtime, self.time_image_lastreq))
                 if self.time_image_lastreq == None:
                         if update == True:
                                 self.time_image_lastreq = curtime
