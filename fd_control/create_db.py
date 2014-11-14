@@ -113,6 +113,7 @@ def write_db(dbid):
                 po = p_list[dbid]
         write_ac(f, ac_list, po)
         f.close()
+        print('DBID %d : NUMBER %d' % (dbid+1, len(ac_list)))
 
 def main():
         read_ac(ac_file)
