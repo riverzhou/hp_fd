@@ -52,9 +52,9 @@ class fd_login():
                 self.client.check_login_interval()
                 while True:
                         channel_center.login_request_increase()
-                        group, channel = channel_center.get_channel('login')
+                        group, handle = channel_center.get_channel('login')
                         channel_center.login_request_decrease()
-                        if channel == None:
+                        if handle == None:
                                 printer.error('client %s fd_login get channel Failed' % self.client.bidno)
                                 return False
 
