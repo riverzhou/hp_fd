@@ -124,7 +124,11 @@ class fd_image(pp_thread):
 
                 for i in range(self.max_retry):
                         self.client.check_image_interval()
+
                         while True:
+                                if self.flag_timeout == True:
+                                        break
+
                                 group, handle = channel_center.get_channel(channel)
                                 if handle == None :
                                         printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
@@ -133,13 +137,23 @@ class fd_image(pp_thread):
 
                                 head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
 
+                                self.lock_timeout.acquire()
+                                if self.flag_timeout == True:
+                                        self.lock_timeout.release()
+                                        break
                                 self.client.set_image_interval()
+                                self.lock_timeout.release()
+
                                 info_val = channel_center.pyget(handle, req, head)
+
                                 if info_val != False:
                                         break;
                                 else:
                                         printer.error('client %s bid %d fd_image info channel error' % (self.client.bidno, self.count))
                                         sleep(0.1)
+
+                        if self.flag_timeout == True:
+                                break
 
                         if info_val == None :
                                 printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
