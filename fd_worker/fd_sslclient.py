@@ -59,7 +59,14 @@ class fd_login():
                 head = proto.make_ssl_head(server_dict[group]['login']['name'])
 
                 self.client.check_login_interval()
-                info_val = channel_center.pyget(channel, req, head)
+                while True:
+                        info_val = channel_center.pyget(handle, req, head)
+                        if info_val != False:
+                                break;
+                        else:
+                                printer.error('client %s fd_login info channel error' % self.client.bidno)
+                                sleep(0.1)
+
                 if info_val == None:
                         printer.error('client %s fd_login info is None' % self.client.bidno)
                         return False
@@ -123,7 +130,14 @@ class fd_image(pp_thread):
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
 
                         self.client.check_image_interval()
-                        info_val = channel_center.pyget(handle, req, head)
+                        while True:
+                                info_val = channel_center.pyget(handle, req, head)
+                                if info_val != False:
+                                        break;
+                                else:
+                                        printer.error('client %s bid %d fd_image info channel error' % (self.client.bidno, self.count))
+                                        sleep(0.1)
+
                         if info_val == None :
                                 printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
                                 continue
@@ -237,7 +251,14 @@ class fd_price(pp_thread):
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
 
                         #self.check_self_interval()
-                        info_val = channel_center.pyget(handle, req, head)
+                        while True:
+                                info_val = channel_center.pyget(handle, req, head)
+                                if info_val != False:
+                                        break;
+                                else:
+                                        printer.error('client %s bid %d fd_price info channel error' % (self.client.bidno, self.count))
+                                        sleep(0.1)
+
                         if info_val == None :
                                 printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
                                 continue

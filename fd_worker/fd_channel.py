@@ -124,23 +124,30 @@ class fd_channel():
                         handle.request('GET', req, headers = headers)
                 except  KeyboardInterrupt:
                         self.close_handle(handle)
-                        return None
+                        return False
                 except:
                         printer.critical(format_exc())
                         self.close_handle(handle)
-                        return None
+                        return False
                 try:
                         ack  = handle.getresponse()
-                        body = ack.read()
                 except  KeyboardInterrupt:
                         self.close_handle(handle)
-                        return None
+                        return False
                 except:
                         printer.critical(format_exc())
                         self.close_handle(handle)
-                        return None
+                        return False
 
                 self.close_handle(handle)
+
+                try:
+                        body = ack.read()
+                except  KeyboardInterrupt:
+                        return None
+                except:
+                        printer.critical(format_exc())
+                        return None
 
                 key_val = {}
                 key_val['head']    = str(ack.msg)
