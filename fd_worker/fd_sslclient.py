@@ -49,17 +49,18 @@ class fd_login():
                 proto   = self.client.proto
                 req     = proto.make_login_req()
 
-                channel_center.login_request_increase()
-                group, channel = channel_center.get_channel('login')
-                channel_center.login_request_decrease()
-                if channel == None:
-                        printer.error('client %s fd_login get channel Failed' % self.client.bidno)
-                        return False
-
-                head = proto.make_ssl_head(server_dict[group]['login']['name'])
-
                 self.client.check_login_interval()
                 while True:
+                        channel_center.login_request_increase()
+                        group, channel = channel_center.get_channel('login')
+                        channel_center.login_request_decrease()
+                        if channel == None:
+                                printer.error('client %s fd_login get channel Failed' % self.client.bidno)
+                                return False
+
+                        head = proto.make_ssl_head(server_dict[group]['login']['name'])
+
+                        self.client.set_login_interval()
                         info_val = channel_center.pyget(handle, req, head)
                         if info_val != False:
                                 break;
@@ -122,15 +123,17 @@ class fd_image(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
-                        group, handle = channel_center.get_channel(channel)
-                        if handle == None :
-                                printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
-                                continue
-
-                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
-
                         self.client.check_image_interval()
                         while True:
+                                group, handle = channel_center.get_channel(channel)
+                                if handle == None :
+                                        printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
+                                        sleep(0.1)
+                                        continue
+
+                                head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
+
+                                self.client.set_image_interval()
                                 info_val = channel_center.pyget(handle, req, head)
                                 if info_val != False:
                                         break;
@@ -220,15 +223,17 @@ class fd_price(pp_thread):
                 except:
                         printer.critical(format_exc())
 
+        def set_self_interval(self):
+                self.time_self_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                return True
+
         def check_self_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_self_lastreq == None:
-                        self.time_self_lastreq = curtime
                         return True
                 sleeptime = self.min_self_interval - time_sub(curtime, self.time_self_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
-                self.time_self_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def do_price(self):
@@ -243,15 +248,17 @@ class fd_price(pp_thread):
                         channel = 'tb1'
 
                 for i in range(self.max_retry):
-                        group, handle = channel_center.get_channel(channel, self.group)
-                        if handle == None :
-                                printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
-                                continue
-
-                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
-
                         #self.check_self_interval()
                         while True:
+                                group, handle = channel_center.get_channel(channel, self.group)
+                                if handle == None :
+                                        printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
+                                        sleep(0.1)
+                                        continue
+
+                                head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
+
+                                #self.set_self_interval()
                                 info_val = channel_center.pyget(handle, req, head)
                                 if info_val != False:
                                         break;
@@ -382,7 +389,7 @@ class fd_bid():
                                 return False
 
                 for i in range(self.max_retry_image):
-                        self.client.check_image_interval(False)
+                        self.client.check_image_interval()
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
                         thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
@@ -416,6 +423,7 @@ class fd_bid():
                         thread_price[0].start()
                         thread_price[1].start()
                         self.client.check_price_interval()
+                        self.client.set_price_interval()
                         if pp_global_info.flag_gameover == True:
                                 break
                         if self.client.check_err_112(self.count) == True:
@@ -475,40 +483,44 @@ class fd_client(pp_thread):
                 self.time_image_lastreq = None
                 self.time_price_lastreq = None
 
+        def set_login_interval(self):
+                self.time_login_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                return True
+
         def check_login_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_login_lastreq == None:
-                        self.time_login_lastreq = curtime
                         return True
                 sleeptime = self.min_login_interval - time_sub(curtime, self.time_login_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
-                self.time_login_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
-        def check_image_interval(self, update = True):
+        def set_image_interval(self):
+                self.time_image_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                return True
+
+        def check_image_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 #print('check_image_interval , update = %s , curtime = %s, lastreq = %s' % (update, curtime, self.time_image_lastreq))
                 if self.time_image_lastreq == None:
-                        if update == True:
-                                self.time_image_lastreq = curtime
                         return True
                 sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
-                if update == True:
-                        self.time_image_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                return True
+
+        def set_price_interval(self):
+                self.time_price_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def check_price_interval(self):
                 curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_price_lastreq == None:
-                        self.time_price_lastreq = curtime
                         return True
                 sleeptime = self.min_price_interval - time_sub(curtime, self.time_price_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
-                self.time_price_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 return True
 
         def do_login(self):
