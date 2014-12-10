@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pickle         import dumps, loads
+from traceback      import print_exc, format_exc
 
 from pp_baseredis   import pp_redis_init
 
@@ -50,9 +51,11 @@ class set_config():
                 key_val['channel_trigger']      = db_config[self.dbid].channel_trigger
                 key_val['channel_timeout']      = db_config[self.dbid].channel_timeout
                 key_val['image_trigger']        = db_config[self.dbid].image_trigger
+                key_val['decode_deadline']      = db_config[self.dbid].decode_deadline
                 key_val['decode_type']          = db_config[self.dbid].decode_type
                 key_val['decode_timeout']       = db_config[self.dbid].decode_timeout
-                key_val['decode_deadline']      = db_config[self.dbid].decode_deadline
+                key_val['image_timeout']        = db_config[self.dbid].image_timeout
+                key_val['price_timeout']        = db_config[self.dbid].price_timeout
                 key_val['bid0_maxretry']        = db_config[self.dbid].bid0_maxretry
                 return dumps(key_val, protocol = 0)
 
@@ -93,8 +96,8 @@ def set_db(dbid):
         return True
 
 def main():
-        for dbid in range(1,12):
-                set_db(dbid)
+        for dbid in range(9):
+                set_db(dbid+1)
 
 if __name__ == "__main__":
         try:

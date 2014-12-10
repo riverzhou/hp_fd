@@ -120,7 +120,7 @@ def write_db(dbid):
 
 def main():
         read_ac(ac_file)
-        for dbid in range(11):
+        for dbid in range(9):
                 write_db(dbid)
 
 #=================================================
