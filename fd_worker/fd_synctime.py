@@ -14,6 +14,7 @@ def getsleeptime(interval):
 
 
 class fd_synctime(pp_thread):
+        deadline_decode = '11:29:55'
         key_time        = 'syn_curtime'
         key_dead        = 'syn_deadline'
         time_interval   = 0.5
@@ -31,7 +32,11 @@ class fd_synctime(pp_thread):
         @pp_redis.safe_proc
         def set_deadline(self):
                 global pp_redis
-                return pp_redis.redis.set(self.key_dead, pp_global_info.deadline_decode)
+                try:
+                        deadline_decode = pp_global_info.deadline_decode
+                except:
+                        deadline_decode = self.deadline_decode
+                return pp_redis.redis.set(self.key_dead, deadline_decode)
 
         @pp_redis.safe_proc
         def set_systime(self):
