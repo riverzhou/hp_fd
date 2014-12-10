@@ -320,7 +320,7 @@ class fd_price(pp_thread):
 
 class fd_decode(pp_thread):
 
-        def __init__(self, client, count, sid, picture):
+        def __init__(self, client, count, sid, picture, type_decode, timeout_decode):
                 global pp_global_info
                 super().__init__()
                 self.client             = client
@@ -330,8 +330,8 @@ class fd_decode(pp_thread):
                 self.event_finish       = Event()
                 self.flag_timeout       = False
                 self.lock_timeout       = Lock()
-                self.type_decode        = pp_global_info.type_decode[count]
-                self.timeout_decode     = pp_global_info.timeout_decode[count]
+                self.type_decode        = type_decode
+                self.timeout_decode     = timeout_decode
 
         def main(self):
                 try:
@@ -368,12 +368,7 @@ class fd_decode(pp_thread):
 class fd_bid():
         max_retry_image             = 3
         max_retry_price             = 2
-
         min_price_interval          = 2
-
-        count                       = 0     # 在子类中重写此参数
-        max_image_timeout           = 0     # 在子类中重写此参数
-        max_price_timeout           = 0     # 在子类中重写此参数
 
         def __init__(self, client):
                 self.client             = client
@@ -432,8 +427,14 @@ class fd_bid():
                         if self.client.sid_bid[self.count] == None or self.client.picture_bid[self.count] == None :
                                 continue
 
+                        try:
+                                decode_type     = pp_global_info.type_decode[self.count]
+                                decode_timeout  = int(pp_global_info.timeout_decode[self.count])
+                        except:
+                                decode_type     = self.decode_type
+                                decode_timeout  = self.decode_timeout
                         self.client.number_bid[self.count] = None
-                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count])
+                        thread_decode = fd_decode(self.client, self.count, self.client.bidno+self.client.sid_bid[self.count], self.client.picture_bid[self.count], decode_type, decode_timeout)
                         thread_decode.start()
                         if thread_decode.wait_for_finish() != True :
                                 continue
@@ -480,16 +481,22 @@ class fd_bid():
 
 class fd_bid_0(fd_bid):
         count               = 0
+        decode_type         = 'A'
+        decode_timeout      = 30
         max_image_timeout   = 10
         max_price_timeout   = 30
 
 class fd_bid_1(fd_bid):
         count               = 1
+        decode_type         = 'B'
+        decode_timeout      = 8
         max_image_timeout   = 4
         max_price_timeout   = 2
 
 class fd_bid_2(fd_bid):
         count               = 2
+        decode_type         = 'C'
+        decode_timeout      = 2
         max_image_timeout   = 3
         max_price_timeout   = 10
 
