@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 
-group   = 1     # 1/2:  节点1/节点2
+group   = 1     # 1/2/3/5:  节点1/节点2/节点3/节点5
 
-policy  = 1     # 1/2:  DLL OK / DLL 不OK
+policy  = 1     # 1/2/3:    DLL 中性 / DLL 良好 / DLL 糟糕
 
 #=============================================
 
 ac_file = 'ac_file.txt'
 
-db_file = ['db01.py','db02.py','db03.py','db04.py','db05.py','db06.py','db07.py','db08.py','db09.py','db10.py','db11.py']
+db_file = ['db01.py','db02.py','db03.py','db04.py','db05.py','db06.py','db07.py','db08.py','db09.py']
 
-g2_list = ['2A01','2A02','2A03','2A04','2A05','2B06','2B07','2B08','2B09','2B10','2B11']
+g1_list = ['11','12','13','14','15','16','17','18','19']
+g2_list = ['21','22','23','24','25','26','27','28','29']
+g3_list = ['31','32','33','34','35','36','37','38','39']
+g5_list = ['51','52','53','54','55','56','57','58','59']
 
-g1_list = ['1A01','1A02','1A03','1A04','1A05','1B06','1B07','1B08','1B09','1B10','1B11']
+group_list = [ None, g1_list, g2_list, g3_list, None, g5_list ]
 
-p1_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_a','policy_b','policy_c','policy_d','policy_e','policy_a']
+p1_list = ['policy_a', 'policy_b','policy_c','policy_a','policy_b','policy_c','policy_a','policy_b','policy_c']
+p2_list = ['policy_d', 'policy_e','policy_f','policy_d','policy_e','policy_f','policy_d','policy_e','policy_f']
+p3_list = ['policy_g', 'policy_h','policy_i','policy_g','policy_h','policy_i','policy_g','policy_h','policy_i']
 
-p2_list = ['policy_f', 'policy_f','policy_f','policy_g','policy_g','policy_f','policy_f','policy_f','policy_g','policy_g','policy_g']
+policy_list = [ None, p1_list, p2_list, p3_list ]
 
 head_0 = '''\
 #!/usr/bin/env python3
@@ -93,14 +98,10 @@ def write_ac(f, ac_list, po):
 def write_db(dbid):
         global dict_ac, db_file, g1_list, g2_list
         global policy, p1_list, p1_list
-        if group == 1:
-                g_list = g1_list
-        else:
-                g_list = g2_list
-        if policy == 1:
-                p_list = p1_list
-        else:
-                p_list = p2_list
+
+        g_list = group_list[group]
+        p_list = policy_list[policy]
+
         f   = open(db_file[dbid], 'w')
         acid  = g_list[dbid]
         if acid not in dict_ac:

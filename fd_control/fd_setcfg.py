@@ -4,11 +4,9 @@ from pickle         import dumps, loads
 
 from pp_baseredis   import pp_redis_init
 
-import db01,db02,db03,db04,db05,db06,db07,db08,db09,db10,db11
+import db01,db02,db03,db04,db05,db06,db07,db08,db09
 
-db00 = None
-
-db_config = [db00,db01,db02,db03,db04,db05,db06,db07,db08,db09,db10,db11]
+db_config = [None,db01,db02,db03,db04,db05,db06,db07,db08,db09]
 
 #=========================================================
 
