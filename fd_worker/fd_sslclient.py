@@ -147,7 +147,7 @@ class fd_image(pp_thread):
                                 printer.error('client %s bid %d fd_image info channel error' % (self.client.bidno, self.count))
                                 sleep(0.1)
                                 continue
-                        else
+                        else:
                                 break
 
                 if self.flag_timeout == True:
