@@ -361,6 +361,8 @@ class fd_bid():
         max_image_timeout           = 0     # 在子类中重写此参数
         max_price_timeout           = 0     # 在子类中重写此参数
 
+        min_price_interval          = 2
+
         def __init__(self, client):
                 self.client             = client
                 self.price              = None
@@ -433,18 +435,19 @@ class fd_bid():
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
                 for i in range(self.max_retry_price):
+                        self.client.check_price_interval()
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
                         thread_price[0].start()
                         thread_price[1].start()
-                        self.client.check_price_interval()
                         self.client.set_price_interval()
-                        if pp_global_info.flag_gameover == True:
-                                break
+                        self.client.wait_price_bid(self.count, self.min_price_interval)
                         if self.client.check_err_112(self.count) == True:
                                 printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
                                 break
                         if self.client.check_price_bid(self.count) != None:
                                 return True
+                        if pp_global_info.flag_gameover == True:
+                                break
 
                 self.client.wait_price_bid(self.count, self.max_price_timeout)
                 if self.client.check_price_bid(self.count) != None:
@@ -502,9 +505,9 @@ class fd_client(pp_thread):
                 return True
 
         def check_login_interval(self):
-                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_login_lastreq == None:
                         return True
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 sleeptime = self.min_login_interval - time_sub(curtime, self.time_login_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
@@ -515,10 +518,9 @@ class fd_client(pp_thread):
                 return True
 
         def check_image_interval(self):
-                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                #print('check_image_interval , update = %s , curtime = %s, lastreq = %s' % (update, curtime, self.time_image_lastreq))
                 if self.time_image_lastreq == None:
                         return True
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 sleeptime = self.min_image_interval - time_sub(curtime, self.time_image_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
@@ -529,9 +531,9 @@ class fd_client(pp_thread):
                 return True
 
         def check_price_interval(self):
-                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 if self.time_price_lastreq == None:
                         return True
+                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 sleeptime = self.min_price_interval - time_sub(curtime, self.time_price_lastreq)
                 if sleeptime > 0:
                         sleep(sleeptime)
