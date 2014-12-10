@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
-import  policy_c as policy
+import  policy_b as policy
 
 #=============================================
 
 channel_trigger = policy.channel_trigger
 channel_timeout = policy.channel_timeout
 image_trigger   = policy.image_trigger
+decode_deadline = policy.decode_deadline
 decode_type     = policy.decode_type
 decode_timeout  = policy.decode_timeout
-decode_deadline = policy.decode_deadline
+image_timeout   = policy.image_timeout
+price_timeout   = policy.price_timeout
 bid0_maxretry   = policy.bid0_maxretry
 
 #=============================================
