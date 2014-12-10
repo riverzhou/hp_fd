@@ -92,8 +92,6 @@ class fd_login():
                 return True
 
 class fd_image(pp_thread):
-        max_retry               = 2
-
         def __init__(self, client, count, price, image_timeout):
                 super().__init__()
                 self.client             = client
@@ -122,81 +120,92 @@ class fd_image(pp_thread):
                 else:
                         channel = 'tb1'
 
-                for i in range(self.max_retry):
-                        self.client.check_image_interval()
-
-                        while True:
-                                if self.flag_timeout == True:
-                                        break
-
-                                group, handle = channel_center.get_channel(channel)
-                                if handle == None :
-                                        printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
-                                        sleep(0.1)
-                                        continue
-
-                                head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
-
-                                self.lock_timeout.acquire()
-                                if self.flag_timeout == True:
-                                        self.lock_timeout.release()
-                                        break
-                                self.client.set_image_interval()
-                                self.lock_timeout.release()
-
-                                info_val = channel_center.pyget(handle, req, head)
-
-                                if info_val != False:
-                                        break;
-                                else:
-                                        printer.error('client %s bid %d fd_image info channel error' % (self.client.bidno, self.count))
-                                        sleep(0.1)
-
+                while True:
                         if self.flag_timeout == True:
                                 break
 
-                        if info_val == None :
-                                printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
-                                continue
-                        if info_val['status'] != 200:
-                                printer.error('client %s bid %d fd_image status %s' % (self.client.bidno, self.count, info_val['status']))
-                                continue
-                        if info_val['body'] == '' or info_val['body'] == None:
-                                printer.error('client %s bid %d fd_image body is None' % (self.client.bidno, self.count))
+                        group, handle = channel_center.get_channel(channel)
+                        if handle == None :
+                                printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
+                                sleep(0.1)
                                 continue
 
-                        ack_sid  = proto.get_sid_from_head(info_val['head'])
-                        ack_val  = proto.parse_image_ack(info_val['body'])
-                        if ack_val == None:
-                                printer.error('client %s bid %d fd_image ack is None' % (self.client.bidno, self.count))
-                                self.flag_error = True
-                                self.event_finish.set()
-                                return
-                        if ack_sid == None or ack_sid == '':
-                                printer.error('client %s bid %d fd_image sid is None' % (self.client.bidno, self.count))
-                                self.flag_error = True
-                                self.event_finish.set()
-                                return
-                        if 'image' not in ack_val:
-                                printer.error('client %s bid %d fd_image ack error %s' % (self.client.bidno, self.count, str(info_val)))
-                                self.flag_error = True
-                                self.event_finish.set()
-                                return
-                        if ack_val['image'] == None or ack_val['image'] == '':
-                                printer.error('client %s bid %d fd_image image is None' % (self.client.bidno, self.count))
-                                self.flag_error = True
-                                self.event_finish.set()
-                                return
+                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'])
 
                         self.lock_timeout.acquire()
-                        if self.flag_timeout == False:
-                                self.client.sid_bid[self.count]     = ack_sid
-                                self.client.picture_bid[self.count] = ack_val['image']
+                        if self.flag_timeout == True:
+                                self.lock_timeout.release()
+                                break
+                        self.client.set_image_interval()
                         self.lock_timeout.release()
+
+                        info_val = channel_center.pyget(handle, req, head)
+
+                        if info_val == False:
+                                printer.error('client %s bid %d fd_image info channel error' % (self.client.bidno, self.count))
+                                sleep(0.1)
+                                continue
+                        else
+                                break
+
+                if self.flag_timeout == True:
+                        self.flag_error = True
                         self.event_finish.set()
                         return
 
-                printer.error('client %s bid %d fd_image got max_retry %d' % (self.client.bidno, self.count, self.max_retry))
+                if info_val == None :
+                        printer.error('client %s bid %d fd_image info is None' % (self.client.bidno, self.count))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                if info_val['status'] != 200:
+                        printer.error('client %s bid %d fd_image status %s' % (self.client.bidno, self.count, info_val['status']))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                if info_val['body'] == '' or info_val['body'] == None:
+                        printer.error('client %s bid %d fd_image body is None' % (self.client.bidno, self.count))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                ack_sid  = proto.get_sid_from_head(info_val['head'])
+                ack_val  = proto.parse_image_ack(info_val['body'])
+
+                if ack_val == None:
+                        printer.error('client %s bid %d fd_image ack is None' % (self.client.bidno, self.count))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                if ack_sid == None or ack_sid == '':
+                        printer.error('client %s bid %d fd_image sid is None' % (self.client.bidno, self.count))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                if 'image' not in ack_val:
+                        printer.error('client %s bid %d fd_image ack error %s' % (self.client.bidno, self.count, str(info_val)))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                if ack_val['image'] == None or ack_val['image'] == '':
+                        printer.error('client %s bid %d fd_image image is None' % (self.client.bidno, self.count))
+                        self.flag_error = True
+                        self.event_finish.set()
+                        return
+
+                self.lock_timeout.acquire()
+                if self.flag_timeout == False:
+                        self.client.sid_bid[self.count]     = ack_sid
+                        self.client.picture_bid[self.count] = ack_val['image']
+                self.lock_timeout.release()
+                self.event_finish.set()
+                return
+
                 self.flag_error = True
                 self.event_finish.set()
                 return
@@ -218,9 +227,6 @@ class fd_image(pp_thread):
 
 
 class fd_price(pp_thread):
-        max_retry               = 1
-        min_self_interval       = 1
-
         def __init__(self, client, count, price, group):
                 super().__init__()
                 self.client             = client
@@ -261,49 +267,53 @@ class fd_price(pp_thread):
                 else:
                         channel = 'tb1'
 
-                for i in range(self.max_retry):
-                        #self.check_self_interval()
-                        while True:
-                                group, handle = channel_center.get_channel(channel, self.group)
-                                if handle == None :
-                                        printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
-                                        sleep(0.1)
-                                        continue
-
-                                head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
-
-                                #self.set_self_interval()
-                                info_val = channel_center.pyget(handle, req, head)
-                                if info_val != False:
-                                        break;
-                                else:
-                                        printer.error('client %s bid %d fd_price info channel error' % (self.client.bidno, self.count))
-                                        sleep(0.1)
-
-                        if info_val == None :
-                                printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
-                                continue
-                        if info_val['status'] != 200 :
-                                printer.error('client %s bid %d fd_price status %s' % (self.client.bidno, self.count, info_val['status']))
-                                continue
-                        if info_val['body'] == '' or info_val['body'] == None:
-                                printer.error('client %s bid %d fd_price body is None' % (self.client.bidno, self.count))
+                while True:
+                        group, handle = channel_center.get_channel(channel, self.group)
+                        if handle == None :
+                                printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
+                                sleep(0.1)
                                 continue
 
-                        ack_val = proto.parse_price_ack(info_val['body'])
-                        if ack_val == None:
-                                printer.error('client %s bid %d fd_price ack is None' % (self.client.bidno, self.count))
-                                return
-                        if 'errcode' in ack_val:
-                                printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
-                                if ack_val['errcode'] == '112':
-                                        self.client.set_err_112(self.count)
-                                return
-                        if 'price' not in ack_val :
-                                printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
-                                return
-                        self.client.set_price_bid(self.count, ack_val['price'])
+                        head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
+
+                        info_val = channel_center.pyget(handle, req, head)
+                        if info_val == False:
+                                printer.error('client %s bid %d fd_price info channel error' % (self.client.bidno, self.count))
+                                sleep(0.1)
+                                continue
+                        else:
+                                break
+
+                if info_val == None :
+                        printer.error('client %s bid %d fd_price info is None' % (self.client.bidno, self.count))
                         return
+
+                if info_val['status'] != 200 :
+                        printer.error('client %s bid %d fd_price status %s' % (self.client.bidno, self.count, info_val['status']))
+                        return
+
+                if info_val['body'] == '' or info_val['body'] == None:
+                        printer.error('client %s bid %d fd_price body is None' % (self.client.bidno, self.count))
+                        return
+
+                ack_val = proto.parse_price_ack(info_val['body'])
+
+                if ack_val == None:
+                        printer.error('client %s bid %d fd_price ack is None' % (self.client.bidno, self.count))
+                        return
+
+                if 'errcode' in ack_val:
+                        printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
+                        if ack_val['errcode'] == '112':
+                                self.client.set_err_112(self.count)
+                        return
+
+                if 'price' not in ack_val :
+                        printer.error('client %s bid %d fd_price ack error %s' % (self.client.bidno, self.count, str(ack_val)))
+                        return
+
+                self.client.set_price_bid(self.count, ack_val['price'])
+                return
 
 
 class fd_decode(pp_thread):
@@ -357,11 +367,11 @@ class fd_bid():
         max_retry_image             = 3
         max_retry_price             = 2
 
+        min_price_interval          = 2
+
         count                       = 0     # 在子类中重写此参数
         max_image_timeout           = 0     # 在子类中重写此参数
         max_price_timeout           = 0     # 在子类中重写此参数
-
-        min_price_interval          = 2
 
         def __init__(self, client):
                 self.client             = client
@@ -395,6 +405,7 @@ class fd_bid():
                 if self.price == None:
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
+
                 if self.count == 2:
                         try:
                                 price1 = int(self.client.check_price_bid(1))
@@ -434,6 +445,7 @@ class fd_bid():
                 if self.price == None:
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
+
                 for i in range(self.max_retry_price):
                         self.client.check_price_interval()
                         thread_price = [fd_price(self.client, self.count, self.price, 0), fd_price(self.client, self.count, self.price, 1)]
@@ -441,11 +453,11 @@ class fd_bid():
                         thread_price[1].start()
                         self.client.set_price_interval()
                         self.client.wait_price_bid(self.count, self.min_price_interval)
+                        if self.client.check_price_bid(self.count) != None:
+                                return True
                         if self.client.check_err_112(self.count) == True:
                                 printer.warning('client %s bid %s price %s meet err_112 %s %s' % (self.client.bidno, self.count, self.price, self.client.name_login, self.client.pid_login))
                                 break
-                        if self.client.check_price_bid(self.count) != None:
-                                return True
                         if pp_global_info.flag_gameover == True:
                                 break
 
