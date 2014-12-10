@@ -7,12 +7,14 @@ import common_policy
 channel_trigger = common_policy.channel_trigger
 channel_timeout = common_policy.channel_timeout
 bid0_maxretry   = common_policy.bid0_maxretry
+deadline        = common_policy.decode_deadline
 
 #----------------------------------------------------------------------------
 
-image_trigger   = [('10:35:00', 72600), ('11:29:55', 300), (None, None)]
+image_trigger   = [('10:35:00', 72600), ('11:29:40', 600), ('11:29:50', 500)]
 
 decode_type     = ['A', 'C', 'C']
-decode_timeout  = [30, 2, 2]
-decode_deadline = '11:29:56'
+decode_timeout  = [30, 3, 2]
+image_timeout   = [10, 4, 3]
+price_timeout   = [30, 2, 10]
 
