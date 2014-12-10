@@ -52,7 +52,7 @@ class fd_channel():
 
         def find_channel(self, channel, group, timeout = None):
                 if group == -1:
-                        channel_group = 0 if self.queue[0][channel].qsize() >= self.queue[1][channel].qsize() else 1
+                        channel_group = 1 if self.queue[0][channel].qsize() <= self.queue[1][channel].qsize() else 0
                 else:
                         channel_group = group
                 channel_handle_tuple = None

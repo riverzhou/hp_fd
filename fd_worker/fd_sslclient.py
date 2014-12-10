@@ -92,6 +92,8 @@ class fd_login():
                 return True
 
 class fd_image(pp_thread):
+        default_channel_group   = 1
+
         def __init__(self, client, count, price, image_timeout):
                 super().__init__()
                 self.client             = client
@@ -124,7 +126,7 @@ class fd_image(pp_thread):
                         if self.flag_timeout == True:
                                 break
 
-                        group, handle = channel_center.get_channel(channel)
+                        group, handle = channel_center.get_channel(channel, self.default_channel_group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
                                 sleep(0.1)
