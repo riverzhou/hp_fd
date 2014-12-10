@@ -59,9 +59,11 @@ class pp_global(pp_thread):
                 self.trigger_image      = key_val['image_trigger']
                 self.trigger_channel    = key_val['channel_trigger']
                 self.timeout_channel    = key_val['channel_timeout']
+                self.deadline_decode    = key_val['decode_deadline']
                 self.type_decode        = key_val['decode_type']
                 self.timeout_decode     = key_val['decode_timeout']
-                self.deadline_decode    = key_val['decode_deadline']
+                self.timeout_image      = key_val['image_timeout']
+                self.timeout_price      = key_val['price_timeout']
                 self.maxretry_bid0      = key_val['bid0_maxretry']
                 return True
 
@@ -85,11 +87,15 @@ class pp_global(pp_thread):
                                 return False
                         if 'channel_timeout' not in key_val:
                                 return False
+                        if 'decode_deadline' not in key_val:
+                                return False
                         if 'decode_type'     not in key_val:
                                 return False
                         if 'decode_timeout'  not in key_val:
                                 return False
-                        if 'decode_deadline' not in key_val:
+                        if 'image_timeout'   not in key_val:
+                                return False
+                        if 'price_timeout'   not in key_val:
                                 return False
                         if 'bid0_maxretry'   not in key_val:
                                 return False
@@ -218,16 +224,18 @@ def pp_global_init():
         pp_global_info.start()
         return pp_global_info.wait_for_init()
 
-
 def pp_global_config_print():
         global pp_global_info
         logger.info(str(pp_global_info.list_account))
         logger.info(str(pp_global_info.trigger_image))
         logger.info(str(pp_global_info.trigger_channel))
         logger.info(str(pp_global_info.timeout_channel))
+        logger.info(str(pp_global_info.deadline_decode))
         logger.info(str(pp_global_info.type_decode))
         logger.info(str(pp_global_info.timeout_decode))
-        logger.info(str(pp_global_info.deadline_decode))
+        logger.info(str(pp_global_info.timeout_image))
+        logger.info(str(pp_global_info.timeout_price))
+        logger.info(str(pp_global_info.maxretry_bid0))
         return
 
 #============================================

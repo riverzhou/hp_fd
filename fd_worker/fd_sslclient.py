@@ -421,7 +421,11 @@ class fd_bid():
                         self.client.check_image_interval()
                         self.client.picture_bid[self.count] = None
                         self.client.sid_bid[self.count]     = None
-                        thread_image = fd_image(self.client, self.count, self.price, self.max_image_timeout)
+                        try:
+                                max_image_timeout = int(pp_global_info.timeout_image[self.count])
+                        except:
+                                max_image_timeout = self.max_image_timeout
+                        thread_image = fd_image(self.client, self.count, self.price, max_image_timeout)
                         thread_image.start()
                         if thread_image.wait_for_finish() != True :
                                 continue
@@ -463,7 +467,11 @@ class fd_bid():
                         if pp_global_info.flag_gameover == True:
                                 break
 
-                self.client.wait_price_bid(self.count, self.max_price_timeout)
+                try:
+                        max_price_timeout = int(pp_global_info.timeout_price[self.count])
+                except:
+                        max_price_timeout = self.max_price_timeout
+                self.client.wait_price_bid(self.count, max_price_timeout)
                 if self.client.check_price_bid(self.count) != None:
                         return True
                 else:
