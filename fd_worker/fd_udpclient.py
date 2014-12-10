@@ -265,7 +265,7 @@ class udp_worker(pp_thread):
                                 sleep(1)
 
 class udp_manager(pp_thread):
-        max_count_worker = 4
+        max_count_worker = 6
 
         def __init__(self):
                 super().__init__()
@@ -273,8 +273,12 @@ class udp_manager(pp_thread):
                 self.lock_worker    = Lock()
                 self.queue_worker   = Queue()
                 self.list_worker    = []
+                self.inter_worker   = None
 
         def main(self):
+                #self.inter_worker   = udp_inter_worker()
+                #self.inter_worker.start()
+
                 group = 0
                 while True:
                         account = self.queue_worker.get()
