@@ -210,6 +210,8 @@ class pp_global(pp_thread):
                 self.lock_todo_tb0.release()
 
         def check_bid0_finish(self):
+                if self.sys_code == 'B':
+                        return True
                 if self.num_todo_tb0 <= 0:
                         return True
                 else:
