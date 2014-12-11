@@ -245,19 +245,6 @@ class fd_price(pp_thread):
                 except:
                         printer.critical(format_exc())
 
-        def set_self_interval(self):
-                self.time_self_lastreq = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                return True
-
-        def check_self_interval(self):
-                curtime = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-                if self.time_self_lastreq == None:
-                        return True
-                sleeptime = self.min_self_interval - time_sub(curtime, self.time_self_lastreq)
-                if sleeptime > 0:
-                        sleep(sleeptime)
-                return True
-
         def do_price(self):
                 global channel_center
                 proto   = self.client.proto
@@ -604,10 +591,6 @@ class fd_client(pp_thread):
                         return False
                 return True
 
-        def set_bid0_finish(self):
-                global pp_global_info
-                return pp_global_info.set_bid0_finish()
-
         def main(self):
                 global pp_global_info, daemon_udp
 
@@ -668,4 +651,9 @@ class fd_client(pp_thread):
                 if self.err_112[0] == True:
                         return True
                 return False
+
+        def set_bid0_finish(self):
+                global pp_global_info
+                return pp_global_info.set_bid0_finish()
+
 
