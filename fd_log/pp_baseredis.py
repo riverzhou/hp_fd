@@ -5,7 +5,7 @@ from traceback              import print_exc, format_exc
 from redis                  import StrictRedis
 from threading              import Event, Lock, Thread
 
-from fd_config              import redis_ip_a, redis_ip_b, redis_port, redis_passwd
+from fd_config              import redis_ip_a, redis_port, redis_passwd
 
 #======================================================================
 
@@ -120,15 +120,6 @@ class redis_db(Thread):
 
 def pp_redis_init_a(dbid):
         pp_redis = redis_db(redis_ip_a, redis_port, redis_passwd, dbid)
-        pp_redis.start()
-        if pp_redis.check_connect_ok() == True:
-                print(pp_redis.redis)
-                return pp_redis
-        else:
-                return None
-
-def pp_redis_init_b(dbid):
-        pp_redis = redis_db(redis_ip_b, redis_port, redis_passwd, dbid)
         pp_redis.start()
         if pp_redis.check_connect_ok() == True:
                 print(pp_redis.redis)

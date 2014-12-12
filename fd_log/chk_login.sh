@@ -1,4 +1,4 @@
 #!/bin/sh
 
-grep 'login failed' log/*warning.log 
+grep 'login' log/*warning.log |grep -v 'failed'
 
