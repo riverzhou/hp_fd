@@ -9,6 +9,7 @@ from traceback              import print_exc, format_exc
 
 from pp_log                 import printer
 from pp_server              import server_dict
+from pp_global              import pp_global_info
 
 from pp_baseclass           import pp_thread
 

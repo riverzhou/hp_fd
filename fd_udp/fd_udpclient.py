@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
 from threading              import Event, Lock
-from time                   import sleep
+from time                   import time, sleep
 from datetime               import datetime
 from traceback              import print_exc, format_exc
+from queue                  import Queue, Empty
 
 from pp_log                 import printer
 from pp_server              import server_dict
 from pp_baseclass           import pp_thread
-from pp_global              import pp_global_info
+from pp_htmlproto           import proto_html
 
 from fd_channel             import channel_center
+
 
 #===========================================================
 
@@ -22,25 +24,30 @@ def time_sub(end, begin):
         except:
                 return -1
 
-class fd_udpinfo(pp_thread):
-        req = 'carnetbidinfo.html'
+def getsleeptime(interval):
+        return  interval - time()%interval
 
-        def __init__(self, group):
+
+class fd_htmlinfo(pp_thread):
+
+        def __init__(self, manager, group):
                 super().__init__()
-                self.group = group
+                self.manager = manager
+                self.group   = group
+                self.proto   = proto_html()
 
         def main(self):
                 try:
-                        self.do_image()
+                        self.do_html()
                 except  KeyboardInterrupt:
                         pass
                 except:
                         printer.critical(format_exc())
 
-        def do_image(self):
+        def do_html(self):
                 global  channel_center
-                proto   = self.client.proto
-                req     = self.req
+                proto   = self.proto
+                req     = self.proto.make_html_req()
                 channel = 'query'
 
                 while True:
@@ -50,7 +57,7 @@ class fd_udpinfo(pp_thread):
                                 sleep(0.1)
                                 continue
 
-                        head = proto.make_query_head(server_dict[group]['query']['name'])
+                        head = proto.make_html_head(server_dict[group]['query']['name'])
 
                         info_val = channel_center.pyget(handle, req, head)
 
@@ -73,12 +80,57 @@ class fd_udpinfo(pp_thread):
                         printer.error('group body is None' % self.group)
                         return
 
-                ack_val  = proto.parse_query_ack(info_val['body'])
+                print(info_val['body'])
+
+                ack_val  = proto.parse_html_ack(info_val['body'])
+
+                print(ack_val)
+                return
 
                 if ack_val == None:
                         printer.error('group %d ack is None' % self.group)
                         return
 
-                daemon_im.queue_info.put(ack_val)
+                self.manager.queue_html.put(ack_val)
 
+
+class fd_html_manager(pp_thread):
+        interval_time = 0.5
+
+        def __init__(self):
+                super().__init__()
+                self.queue_html = Queue()
+
+        def main(self):
+                while True:
+                        thread_html = [fd_htmlinfo(self, 0), fd_htmlinfo(self, 1)]
+                        thread_html[1].start()
+                        sleep(self.interval_time/2)
+                        thread_html[0].start()
+                        sleep(getsleeptime(self.interval_time))
+
+html_manager = fd_html_manager()
+
+def html_init():
+        global html_manager
+        html_manager.start() 
+
+#=================================================================================
+
+if __name__ == '__main__':
+        from pp_server  import pp_dns_init
+        from pp_baseredis  import pp_redis_init
+        from fd_channel import fd_channel_init
+
+        pp_dns_init()
+        pp_redis_init()
+        fd_channel_init()
+        html_init()
+        try:
+                html_manager.join()
+        except  KeyboardInterrupt:
+                pass
+        except:
+                print_exc()
+        print()
 
