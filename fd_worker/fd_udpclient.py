@@ -158,7 +158,7 @@ class udp_worker(pp_thread):
         def check_game_over(self, cur_time):
                 global pp_global_info
 
-                if cur_time == None and pp_global_info.sys_code != None and time_sub(pp_global_info.sys_time, '11:29:59') >= 0:
+                if cur_time == None and pp_global_info.sys_code != None and time_sub(pp_global_info.sys_time, '11:29:58') >= 0:
                         pp_global_info.set_game_over()
                         pp_global_info.event_price[0].set()
                         pp_global_info.event_price[1].set()
