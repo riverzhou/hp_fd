@@ -110,7 +110,7 @@ class fd_html_manager(pp_thread):
 
 html_manager = fd_html_manager()
 
-def html_init():
+def fd_html_init():
         global html_manager
         html_manager.start() 
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
         pp_dns_init()
         pp_redis_init()
         fd_channel_init()
-        html_init()
+        fd_html_init()
         try:
                 html_manager.join()
         except  KeyboardInterrupt:
