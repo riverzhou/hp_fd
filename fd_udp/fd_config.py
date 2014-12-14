@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-local_logfile   = '/river/worker.log'
+local_logfile   = '/river/htmludp.log'
 
 redis_passwd    = 'river'
 redis_port      = 6379
