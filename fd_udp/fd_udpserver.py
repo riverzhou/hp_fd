@@ -21,7 +21,7 @@ from fd_htmlclient      import fd_html_init, html_manager
 
 #-------------------------------------------
 
-UDP_SERVER =('0.0.0.0', 999)
+UDP_SERVER =('0.0.0.0', 998)
 
 Thread.daemon  = True
 UDPServer.allow_reuse_address = True
