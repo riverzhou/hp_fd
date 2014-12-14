@@ -80,17 +80,17 @@ class fd_htmlinfo(pp_thread):
                         printer.error('group body is None' % self.group)
                         return
 
-                #print(info_val['body'])
-
                 ack_val  = proto.parse_html_ack(info_val['body'])
-
 
                 if ack_val == None:
                         printer.error('group %d ack is None' % self.group)
                         return
 
-                #print(ack_val)
                 self.manager.queue_html.put(ack_val)
+
+                #print(ack_val)
+                if key_val['code'] == 'B' or key_val['code'] == 'A':
+                        printer.warning(sorted(key_val.items()))
 
 
 class fd_html_manager(pp_thread):
@@ -117,9 +117,9 @@ def html_init():
 #=================================================================================
 
 if __name__ == '__main__':
-        from pp_server  import pp_dns_init
-        from pp_baseredis  import pp_redis_init
-        from fd_channel import fd_channel_init
+        from pp_server      import pp_dns_init
+        from pp_baseredis   import pp_redis_init
+        from fd_channel     import fd_channel_init
 
         pp_dns_init()
         pp_redis_init()
