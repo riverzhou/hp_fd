@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random, string
+#import random, string
 
 from collections            import OrderedDict
 
@@ -34,6 +34,9 @@ class proto_html():
                         key_val['systime']      = data[7].split('：')[1].strip()                        # 系统目前时间：11:09:37
                         key_val['price']        = data[8].split('：')[1].strip()                        # 目前最低可成交价：72600
                         key_val['lowtime']      = data[9].split('：')[1].strip()                        # 最低可成交价出价时间：10:30:08
+                        if self.check_valid_b(key_val) != True:
+                                key_val['code'] = None
+                                printer.error(html_string)
                 elif '<TYPE>INFO</TYPE><INFO>A拍卖会' in html_string:
                         key_val['code']         = 'A'
                         data = html_string.split()
@@ -44,6 +47,9 @@ class proto_html():
                         key_val['number']       = data[8].split('：')[1].strip()                        # 目前已投标人数：77163
                         key_val['price']        = data[9].split('：')[1].strip()                        # 目前最低可成交价：100
                         key_val['lowtime']      = data[10].split('：')[1].split('<')[0].strip()         # 最低可成交价出价时间：10:30:15</INFO>
+                        if self.check_valid_a(key_val) != True:
+                                key_val['code'] = None
+                                printer.error(html_string)
                 else:
                         key_val['code'] = 'C'
 
@@ -58,6 +64,59 @@ class proto_html():
         def make_html_req(self):
                 return  '/carnetbidinfo.html'
 
-#----------------------------------------------
+        def check_valid_a(self, key_val):
+                try:
+                        test = int(key_val['number_limit'])
+                except:
+                        return False
+                try:
+                        test = int(key_val['price_limit'])
+                except:
+                        return False
+                try:
+                        test = int(key_val['number'])
+                except:
+                        return False
+                try:
+                        test = int(key_val['price'])
+                except:
+                        return False
+                if self.is_time(key_val['systime']) != True:
+                        return False
+                if self.is_time(key_val['lowtime']) != True:
+                        return False
+                return True
 
+        def check_valid_b(self, key_val):
+                try:
+                        test = int(key_val['number_limit'])
+                except:
+                        return False
+                try:
+                        test = int(key_val['number'])
+                except:
+                        return False
+                try:
+                        test = int(key_val['price'])
+                except:
+                        return False
+                if self.is_time(key_val['systime']) != True:
+                        return False
+                if self.is_time(key_val['lowtime']) != True:
+                        return False
+                return True
+
+        def is_time(self, stime):
+                try:
+                        if len(stime) != 8 or stime[2] != ':' or stime[5] != ':' :
+                                return False
+                        x = int(stime[0:2])
+                        y = int(stime[3:5])
+                        z = int(stime[6:8])
+                except:
+                        return False
+                return  True
+
+
+#----------------------------------------------
 
