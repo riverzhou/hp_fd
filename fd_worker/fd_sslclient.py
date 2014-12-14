@@ -52,21 +52,24 @@ class fd_login():
                 self.client.check_login_interval()
                 while True:
                         channel_center.login_request_increase()
-                        group, handle = channel_center.get_channel('login')
+                        group, handle = channel_center.get_channel('login', None)
                         channel_center.login_request_decrease()
                         if handle == None:
                                 printer.error('client %s fd_login get channel Failed' % self.client.bidno)
-                                return False
+                                sleep(0.1)
+                                continue
 
                         head = proto.make_ssl_head(server_dict[group]['login']['name'])
 
                         self.client.set_login_interval()
                         info_val = channel_center.pyget(handle, req, head)
-                        if info_val != False:
-                                break;
-                        else:
+
+                        if info_val == False:
                                 printer.error('client %s fd_login info channel error' % self.client.bidno)
                                 sleep(0.1)
+                                continue
+                        else:
+                                break
 
                 if info_val == None:
                         printer.error('client %s fd_login info is None' % self.client.bidno)
@@ -93,6 +96,7 @@ class fd_login():
 
 class fd_image(pp_thread):
         default_channel_group   = 1
+        timeout_find_channel    = 2
 
         def __init__(self, client, count, price, image_timeout):
                 super().__init__()
@@ -126,7 +130,7 @@ class fd_image(pp_thread):
                         if self.flag_timeout == True:
                                 break
 
-                        group, handle = channel_center.get_channel(channel, self.default_channel_group)
+                        group, handle = channel_center.get_channel(channel, self.timeout_find_channel, self.default_channel_group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
                                 sleep(0.1)
@@ -229,6 +233,8 @@ class fd_image(pp_thread):
 
 
 class fd_price(pp_thread):
+        timeout_find_channel    = 1
+
         def __init__(self, client, count, price, group):
                 super().__init__()
                 self.client             = client
@@ -257,11 +263,10 @@ class fd_price(pp_thread):
                         channel = 'tb1'
 
                 while True:
-                        group, handle = channel_center.get_channel(channel, self.group)
+                        group, handle = channel_center.get_channel(channel, self.timeout_find_channel, self.group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_price get channel Failed' % (self.client.bidno, self.count))
-                                sleep(0.1)
-                                continue
+                                return
 
                         head = proto.make_ssl_head(server_dict[group]['toubiao']['name'], sid)
 
