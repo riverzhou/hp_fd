@@ -23,9 +23,9 @@ class pp_global(pp_thread):
 
         def __init__(self):
                 super().__init__()
-                self.timeout_channel    = [30, None]
                 self.flag_gameover      = False
                 self.event_gameover     = Event()
+                self.timeout_channel    = [30, None]
                 self.interval_channel   = 0.4
                 self.interval_html      = 0.5
 
