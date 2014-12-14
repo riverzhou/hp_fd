@@ -231,6 +231,7 @@ class udp_worker(pp_thread):
                         self.check_game_over(info_val['systime'])
                         return
 
+
                 stime = self.check_time(info_val['systime'])
                 if stime == False:
                         return
@@ -240,6 +241,7 @@ class udp_worker(pp_thread):
 
                 int_price = self.check_price(info_val['price'])
                 if int_price == False:
+                        printer.error(str(self.server_addr) + ' :: ' + udp_recv)
                         return
 
                 self.check_shot_price(int_price)
@@ -247,6 +249,8 @@ class udp_worker(pp_thread):
                 self.check_image_time(stime, int_price)
 
                 self.update_systime(stime)
+
+                printer.record(str(self.server_addr) + ' :: ' + udp_recv)
 
         def update_syscode(self, code):
                 global pp_global_info
