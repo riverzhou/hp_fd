@@ -25,21 +25,24 @@ policy_list = [ None, p1_list, p2_list, p3_list ]
 
 head_0 = '''\
 #!/usr/bin/env python3
-'''
 
+import common_policy
+'''
 
 head_1 = '''\
 #=============================================
 
-channel_trigger = policy.channel_trigger
-channel_timeout = policy.channel_timeout
+channel_trigger = common_policy.channel_trigger
+channel_timeout = common_policy.channel_timeout
+decode_deadline = common_policy.decode_deadline
+htmludp_addr    = common_policy.htmludp_addr
+bid0_maxretry   = common_policy.bid0_maxretry
+
 image_trigger   = policy.image_trigger
-decode_deadline = policy.decode_deadline
 decode_type     = policy.decode_type
 decode_timeout  = policy.decode_timeout
 image_timeout   = policy.image_timeout
 price_timeout   = policy.price_timeout
-bid0_maxretry   = policy.bid0_maxretry
 
 #=============================================
 '''

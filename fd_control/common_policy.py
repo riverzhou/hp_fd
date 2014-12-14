@@ -7,3 +7,5 @@ decode_deadline = '11:29:55'
 
 bid0_maxretry   = 20
 
+htmludp_addr    = ['192.168.1.90', 998]
+
