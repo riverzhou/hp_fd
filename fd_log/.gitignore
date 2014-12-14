@@ -3,6 +3,7 @@
 *.pyc
 *.log
 *.dump
+*.txt
 log
 bad.jpg
 __pycache__
