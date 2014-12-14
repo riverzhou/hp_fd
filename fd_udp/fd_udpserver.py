@@ -9,10 +9,18 @@ from traceback          import print_exc
 from hashlib            import md5
 from xml.etree          import ElementTree
 from threading          import Thread, Event, Lock, Semaphore
-from queue                  import Queue, Empty
+from queue              import Queue, Empty
 
 from pp_baseclass       import pp_thread, pp_sender
 from pp_log             import logger, printer
+
+from pp_server          import pp_dns_init
+from pp_baseredis       import pp_redis_init
+from fd_channel         import fd_channel_init
+from fd_htmlclient      import fd_html_init
+
+from fd_htmlclient      import html_manager
+
 
 #-------------------------------------------
 
@@ -328,8 +336,17 @@ class udp_server(pp_thread):
 
 #================================================================================
 
+def main_init():
+        pp_dns_init()
+        pp_redis_init()
+        fd_channel_init()
+        fd_html_init()
+
 def main():
         global daemon_im, daemon_bs, server_udp, UDP_SERVER
+
+        main_init()
+
         server_udp = UDPServer(UDP_SERVER, udp_handle)
 
         daemon_im = info_maker()
