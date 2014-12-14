@@ -69,15 +69,14 @@ class udp_worker(pp_thread):
                 self.pid            = acount[1]
                 self.group          = group
 
-                self.server_addr    = server_dict[group]['udp']['ip'], server_dict[group]['udp']['port']
+                self.proto          = udp_proto()
+                self.udp_format     = udp_format(self)
 
                 self.sock           = socket(AF_INET, SOCK_DGRAM)
                 self.sock.settimeout(self.udp_timeout)
                 self.sock.bind(('',0))
 
-                self.proto          = udp_proto()
-                self.udp_format     = udp_format(self)
-
+                self.server_addr    = server_dict[group]['udp']['ip'], server_dict[group]['udp']['port']
 
         def stop(self):
                 if self.udp_format != None : self.udp_format.stop()
@@ -270,21 +269,25 @@ class udp_worker(pp_thread):
                                 printer.critical(format_exc())
                                 sleep(1)
 
+class udp_htmlworker(udp_worker):
+         def __init__(self, acount):
+                global pp_global_info
+                super().__init__(acount, 1)
+                self.server_addr = pp_global_info.addr_htmludp
+
 class udp_manager(pp_thread):
         max_count_worker = 6
 
         def __init__(self):
                 super().__init__()
-                self.count_worker   = 0
-                self.lock_worker    = Lock()
-                self.queue_worker   = Queue()
-                self.list_worker    = []
-                self.inter_worker   = None
+                self.count_worker       = 0
+                self.lock_worker        = Lock()
+                self.queue_worker       = Queue()
+                self.list_worker        = []
+                self.flag_htmlworker    = False
+                self.htmlworker         = None
 
         def main(self):
-                #self.inter_worker   = udp_inter_worker()
-                #self.inter_worker.start()
-
                 group = 0
                 while True:
                         account = self.queue_worker.get()
@@ -292,6 +295,9 @@ class udp_manager(pp_thread):
                         worker = udp_worker(account, group)
                         self.list_worker.append(worker)
                         worker.start()
+                        if self.flag_htmlworker != True:
+                                self.htmlworker         = udp_htmlworker(account)
+                                self.flag_htmlworker    = True
 
         def add(self, account):
                 self.lock_worker.acquire()

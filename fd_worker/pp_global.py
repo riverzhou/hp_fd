@@ -64,6 +64,7 @@ class pp_global(pp_thread):
                 self.timeout_decode     = key_val['decode_timeout']
                 self.timeout_image      = key_val['image_timeout']
                 self.timeout_price      = key_val['price_timeout']
+                self.addr_htmludp       = key_val['htmludp_addr']
                 self.maxretry_bid0      = key_val['bid0_maxretry']
                 return True
 
@@ -96,6 +97,8 @@ class pp_global(pp_thread):
                         if 'image_timeout'   not in key_val:
                                 return False
                         if 'price_timeout'   not in key_val:
+                                return False
+                        if 'htmludp_addr'    not in key_val:
                                 return False
                         if 'bid0_maxretry'   not in key_val:
                                 return False
