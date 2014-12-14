@@ -261,6 +261,7 @@ class udp_worker(pp_thread):
                 pp_global_info.update_systime(stime)
 
         def main(self):
+                #print('udp_worker : ', str(self.server_addr))
                 self.udp_format.start()
                 self.udp_format.wait_for_start()
                 while True:
@@ -301,6 +302,7 @@ class udp_manager(pp_thread):
                         worker.start()
                         if self.flag_htmlworker != True:
                                 self.htmlworker         = udp_htmlworker(account)
+                                self.htmlworker.start()
                                 self.flag_htmlworker    = True
 
         def add(self, account):

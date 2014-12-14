@@ -184,7 +184,7 @@ class proto_udp():
                         key_val['price'],
                         key_val['lowtime']
                         ) )
-                print(info)
+                #print(info)
                 return info.encode('gb18030')
 
         def udp_make_b_info(self, key_val):
@@ -203,7 +203,7 @@ class proto_udp():
                         str(int(key_val['price']) - 300),
                         str(int(key_val['price']) + 300),
                         ) )
-                print(info)
+                #print(info)
                 return info.encode('gb18030')
 
 #------------------------------------------------------
