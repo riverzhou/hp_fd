@@ -219,12 +219,13 @@ class info_maker(pp_thread, proto_udp):
                 proto_udp.__init__(self)
                 self.addr_list = []
                 self.lock_addr = Lock()
-                self.queue_info= Queue()
 
         def main(self):
-                while True:
+                global html_manager
 
-                        key_val = self.queue_info.get()
+                while True:
+                        key_val = html_manager.queue_html.get()
+                        print(sorted(key_val.items()))
                         if key_val == None:
                                 sleep(0.1)
                         if key_val['code'] == 'B':
@@ -238,14 +239,6 @@ class info_maker(pp_thread, proto_udp):
                 global price_limit, number_limit
                 if len(self.addr_list) == 0 :
                         return False
-                #key_val = {}
-                #key_val['systime']  = self.list_data_a[count][0]
-                #key_val['lowtime']  = self.list_data_a[count][0]
-                #key_val['number']   = self.list_data_a[count][1]
-                #key_val['price']    = price_limit
-                #key_val['date']     = self.date
-                #key_val['number_limit'] = number_limit
-                #key_val['price_limit']  = price_limit
                 self.make(self.udp_make_a_info(key_val))
                 return True
 
@@ -253,13 +246,6 @@ class info_maker(pp_thread, proto_udp):
                 global number_people, number_limit
                 if len(self.addr_list) == 0 :
                         return False
-                #key_val = {}
-                #key_val['systime']  = self.list_data_b[count][0]
-                #key_val['lowtime']  = self.list_data_b[count][0]
-                #key_val['number']   = number_people
-                #key_val['price']    = self.list_data_b[count][1]
-                #key_val['date']     = self.date
-                #key_val['number_limit'] = number_limit
                 self.make(self.udp_make_b_info(key_val))
                 return True
 
@@ -372,5 +358,4 @@ if __name__ == "__main__":
                 print_exc()
         finally:
                 print()
-
 
