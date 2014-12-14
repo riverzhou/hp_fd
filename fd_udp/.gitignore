@@ -1,0 +1,11 @@
+*.swp
+*.pyo
+*.pyc
+*.log
+*.dump
+.coverage
+.coverage.*
+bad.jpg
+nohup.*
+__pycache__
+core

@@ -80,17 +80,16 @@ class fd_htmlinfo(pp_thread):
                         printer.error('group body is None' % self.group)
                         return
 
-                print(info_val['body'])
+                #print(info_val['body'])
 
                 ack_val  = proto.parse_html_ack(info_val['body'])
 
-                print(ack_val)
-                return
 
                 if ack_val == None:
                         printer.error('group %d ack is None' % self.group)
                         return
 
+                #print(ack_val)
                 self.manager.queue_html.put(ack_val)
 
 
