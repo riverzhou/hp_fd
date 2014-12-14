@@ -89,8 +89,8 @@ class fd_htmlinfo(pp_thread):
                 self.manager.queue_html.put(ack_val)
 
                 #print(ack_val)
-                if key_val['code'] == 'B' or key_val['code'] == 'A':
-                        printer.warning(sorted(key_val.items()))
+                if ack_val['code'] == 'B' or ack_val['code'] == 'A':
+                        printer.warning(sorted(ack_val.items()))
 
 
 class fd_html_manager(pp_thread):
