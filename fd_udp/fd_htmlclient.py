@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-from threading              import Event, Lock
-from time                   import time, sleep
-from datetime               import datetime
-from traceback              import print_exc, format_exc
-from queue                  import Queue, Empty
+from threading          import Event, Lock
+from time               import time, sleep
+from datetime           import datetime
+from traceback          import print_exc, format_exc
+from queue              import Queue, Empty
 
-from pp_log                 import printer
-from pp_server              import server_dict
-from pp_baseclass           import pp_thread
-from pp_htmlproto           import proto_html
+from pp_log             import printer
+from pp_server          import server_dict
+from pp_baseclass       import pp_thread
+from pp_global          import pp_global_info
+from pp_htmlproto       import proto_html
 
-from fd_channel             import channel_center
-
+from fd_channel         import channel_center
 
 #===========================================================
 
@@ -94,11 +94,11 @@ class fd_htmlinfo(pp_thread):
 
 
 class fd_html_manager(pp_thread):
-        interval_time = 0.5
-
         def __init__(self):
+                global pp_global_info
                 super().__init__()
-                self.queue_html = Queue()
+                self.interval_time  = pp_global_info.interval_html
+                self.queue_html     = Queue()
 
         def main(self):
                 while True:

@@ -10,7 +10,6 @@ from traceback              import print_exc, format_exc
 from pp_log                 import printer
 from pp_server              import server_dict
 from pp_global              import pp_global_info
-
 from pp_baseclass           import pp_thread
 
 #=============================================================================
@@ -186,12 +185,13 @@ class pp_channel_maker(pp_thread):
 
 class pp_query_channel_manager(pp_thread):
         max_onway       = 100
-        time_interval   = 0.4
 
         def __init__(self):
+                global pp_global_info
                 super().__init__()
-                self.lock_onway   = Lock()
-                self.number_onway = 0
+                self.time_interval  = pp_global_info.interval_channel
+                self.lock_onway     = Lock()
+                self.number_onway   = 0
 
         def main(self):
                 global pp_global_info
