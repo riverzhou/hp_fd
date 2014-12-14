@@ -240,6 +240,7 @@ def pp_global_config_print():
         logger.info(str(pp_global_info.timeout_decode))
         logger.info(str(pp_global_info.timeout_image))
         logger.info(str(pp_global_info.timeout_price))
+        logger.info(str(pp_global_info.addr_htmludp))
         logger.info(str(pp_global_info.maxretry_bid0))
         return
 
