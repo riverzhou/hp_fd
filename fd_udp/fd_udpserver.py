@@ -17,10 +17,7 @@ from pp_log             import logger, printer
 from pp_server          import pp_dns_init
 from pp_baseredis       import pp_redis_init
 from fd_channel         import fd_channel_init
-from fd_htmlclient      import fd_html_init
-
-from fd_htmlclient      import html_manager
-
+from fd_htmlclient      import fd_html_init, html_manager
 
 #-------------------------------------------
 
@@ -225,7 +222,7 @@ class info_maker(pp_thread, proto_udp):
 
                 while True:
                         key_val = html_manager.queue_html.get()
-                        print(sorted(key_val.items()))
+                        #print(sorted(key_val.items()))
                         if key_val == None:
                                 sleep(0.1)
                         if key_val['code'] == 'B':
