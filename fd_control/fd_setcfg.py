@@ -56,6 +56,7 @@ class set_config():
                 key_val['decode_timeout']       = db_config[self.dbid].decode_timeout
                 key_val['image_timeout']        = db_config[self.dbid].image_timeout
                 key_val['price_timeout']        = db_config[self.dbid].price_timeout
+                key_val['htmludp_addr']         = db_config[self.dbid].htmludp_addr
                 key_val['bid0_maxretry']        = db_config[self.dbid].bid0_maxretry
                 return dumps(key_val, protocol = 0)
 
