@@ -132,8 +132,10 @@ class udp_worker(pp_thread):
                 if price != None and price <= cur_price + 300 and price >= cur_price - 300:
                         pp_global_info.event_price[2].set()
 
-        def check_image_time(self, cur_time, cur_price):
+        def check_image_time(self, cur_price):
                 global pp_global_info
+
+                cur_time = pp_global_info.sys_time
 
                 time, price = pp_global_info.trigger_image[0]
                 if time != None and price != None and time_sub(cur_time, time) > 0:
@@ -170,25 +172,24 @@ class udp_worker(pp_thread):
                         pp_global_info.event_image[1].set()
                         pp_global_info.event_image[2].set()
 
-        def check_create_channel(self, cur_time):
+        def check_create_channel(self):
                 global pp_global_info
+
+                cur_time = pp_global_info.sys_time
+
                 trigger_channel = pp_global_info.trigger_channel[1]
                 time_delta = (time_sub(cur_time, trigger_channel[0]), time_sub(cur_time, trigger_channel[1]))
-                if time_delta[0] >= 0 and time_delta[0] <= 60:
+                if time_delta[0] >= 0 and time_delta[1] < -10:
                         pp_global_info.flag_create_toubiao[1] = True
-                        return
-                if time_delta[1] >= 0 and time_delta[1] <= 60:
+                if time_delta[1] > 0:
                         pp_global_info.flag_create_toubiao[1] = False
-                        return
 
                 trigger_channel = pp_global_info.trigger_channel[0]
                 time_delta = (time_sub(cur_time, trigger_channel[0]), time_sub(cur_time, trigger_channel[1]))
-                if time_delta[0] >= 0 and time_delta[0] <= 60:
+                if time_delta[0] >= 0 and time_delta[1] < -10:
                         pp_global_info.flag_create_toubiao[0] = True
-                        return
-                if time_delta[1] >= 0 and time_delta[1] <= 60:
+                if time_delta[1] > 0:
                         pp_global_info.flag_create_toubiao[0] = False
-                        return
 
         def check_time(self, stime):
                 try:
@@ -231,13 +232,13 @@ class udp_worker(pp_thread):
                         self.check_game_over(info_val['systime'])
                         return
 
-
                 stime = self.check_time(info_val['systime'])
                 if stime == False:
                         return
 
                 self.update_syscode(code)
-                self.check_create_channel(stime)
+                self.update_systime(stime)
+                self.check_create_channel()
 
                 int_price = self.check_price(info_val['price'])
                 if int_price == False:
@@ -246,9 +247,7 @@ class udp_worker(pp_thread):
 
                 self.check_shot_price(int_price)
 
-                self.check_image_time(stime, int_price)
-
-                self.update_systime(stime)
+                self.check_image_time(int_price)
 
                 printer.record(str(self.server_addr) + ' :: ' + udp_recv)
 
