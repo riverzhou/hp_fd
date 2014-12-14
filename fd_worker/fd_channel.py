@@ -24,7 +24,7 @@ def time_sub(end, begin):
                 return -1
 
 class fd_channel():
-        timeout_find_channel = 0.5
+        timeout_find_channel = 0.3
 
         def __init__(self):
                 self.queue = [{},{}]
@@ -50,14 +50,14 @@ class fd_channel():
                         self.close_handle(handle)
                         return False
 
-        def find_channel(self, channel, group, timeout = None):
+        def find_channel(self, channel, group):
                 if group == -1:
                         channel_group = 1 if self.queue[0][channel].qsize() <= self.queue[1][channel].qsize() else 0
                 else:
                         channel_group = group
                 channel_handle_tuple = None
                 try:
-                        channel_handle_tuple = self.queue[channel_group][channel].get(True, timeout)
+                        channel_handle_tuple = self.queue[channel_group][channel].get(True, self.timeout_find_channel)
                 except  KeyboardInterrupt:
                         return channel_group, None
                 except  Empty:
@@ -67,12 +67,14 @@ class fd_channel():
                         return channel_group, None
                 return  channel_group, channel_handle_tuple
 
-        def get_channel(self, channel, group = -1):
+        def get_channel(self, channel, timeout, group = -1):
+                channel_group  = None
                 channel_handle = None
+                start = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 while True:
-                        self.lock_get_channel.acquire()
-                        channel_group, channel_handle_tuple = self.find_channel(channel, group, self.timeout_find_channel)
-                        self.lock_get_channel.release()
+                        if timeout != None and time_sub(datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'), start) > timeout:
+                                break
+                        channel_group, channel_handle_tuple = self.find_channel(channel, group)
                         if channel_handle_tuple == None :
                                 sleep(0)
                                 continue
