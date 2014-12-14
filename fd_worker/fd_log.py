@@ -83,7 +83,8 @@ class file_logger():
                         'critical' : 50,
                         'data'     : 60,
                         'time'     : 70,
-                        'null'     : 80,
+                        'record'   : 80,
+                        'null'     : 90,
                         }
 
         def __init__(self, level = 'debug'):
@@ -129,6 +130,11 @@ class file_logger():
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 self.file_writer.put(('log_time', (time, str(log))))
 
+        def record(self, log, bin=False):
+                if self.log_level > self.dict_log_level['record']: return
+                time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                self.file_writer.put(('log_record', (time, str(log))))
+
         def wait_for_flush(self):
                 self.file_writer.wait_for_flush()
 
@@ -148,5 +154,6 @@ if __name__ == "__main__":
         logger.critical('test logger critical')
         logger.data('test logger data')
         logger.time('test logger time')
+        logger.record('record logger time')
         logger.wait_for_flush()
 
