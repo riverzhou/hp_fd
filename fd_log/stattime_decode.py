@@ -92,7 +92,15 @@ def print_result():
 
         for uid in dict_decode:
                 data = dict_decode[uid]
-                print('%s %s %s %s %s %.2s %s %s %s' % (data['machine'], data['bidno'], data['sid'], data['req_time'], data['type'], data['timeout'].rjust(2), data['ack_time'], data['number'], data['cost']))
+                try:
+                        ack_time = data['ack_time']
+                        number   = data['number']
+                        cost     = data['cost']
+                except:
+                        ack_time = None
+                        number   = None
+                        cost     = None
+                print('%s %s %s %s %s %.2s %s %s %s' % (data['machine'], data['bidno'], data['sid'], data['req_time'], data['type'], data['timeout'].rjust(2), ack_time, number, cost))
 
         print('Total req is %d ' % count_req)
         print('Total ack is %d ' % count_ack)
