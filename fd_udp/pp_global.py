@@ -23,7 +23,7 @@ class pp_global(pp_thread):
 
         def __init__(self):
                 super().__init__()
-                self.timeout_channel    = [100, None]
+                self.timeout_channel    = [30, None]
                 self.flag_gameover      = False
                 self.event_gameover     = Event()
 

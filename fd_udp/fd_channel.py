@@ -188,11 +188,10 @@ class pp_query_channel_manager(pp_thread):
         max_onway       = 100
         time_interval   = 0.4
 
-        def __init__(self, id):
+        def __init__(self):
                 super().__init__()
                 self.lock_onway   = Lock()
                 self.number_onway = 0
-                self.id = id
 
         def main(self):
                 global pp_global_info
@@ -207,9 +206,8 @@ class pp_query_channel_manager(pp_thread):
                         return
                 if self.number_onway >= self.max_onway:
                         return
-                channel = 'query'
                 try:
-                        maker = [pp_channel_maker(self, 'query', 0, channel), pp_channel_maker(self, 'query', 1, channel)]
+                        maker = [pp_channel_maker(self, 'query', 0, 'query'), pp_channel_maker(self, 'query', 1, 'query')]
                 except:
                         printer.critical(format_exc())
                         return
@@ -230,14 +228,11 @@ class pp_query_channel_manager(pp_thread):
 
 channel_center = fd_channel()
 
-query = [pp_query_channel_manager(0), pp_query_channel_manager(1)]
+query_manager  = pp_query_channel_manager()
 
 def fd_channel_init():
-        global query
+        global query_manager
+        query_manager.start()
+        query_manager.wait_for_start()
 
-        query[0].start()
-        query[1].start()
-
-        query[0].wait_for_start()
-        query[1].wait_for_start()
 
