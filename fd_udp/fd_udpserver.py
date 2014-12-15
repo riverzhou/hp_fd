@@ -326,7 +326,7 @@ def main_init():
         fd_html_init()
 
 def main():
-        global daemon_im, daemon_bs, server_udp, UDP_SERVER
+        global daemon_im, daemon_bs, server_udp, UDP_SERVER, html_manager
 
         main_init()
 
@@ -344,7 +344,10 @@ def main():
 
         logger.debug('UDP Server start at %s : %d' % (UDP_SERVER[0], UDP_SERVER[1]))
         print('UDP Server start at %s : %d' % (UDP_SERVER[0], UDP_SERVER[1]))
-        daemon_im.join()
+        #daemon_im.join()
+
+        html_manager.event_gameover.wait()
+        sleep(30)
 
 if __name__ == "__main__":
         try:

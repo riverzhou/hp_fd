@@ -17,12 +17,7 @@ from fd_channel         import channel_center
 #===========================================================
 
 def time_sub(end, begin):
-        try:
-                e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
-                b = datetime.timestamp(datetime.strptime(begin, '%Y-%m-%d %H:%M:%S.%f'))
-                return e-b
-        except:
-                return -1
+        return int(mktime(strptime('1970-01-01 '+end, '%Y-%m-%d %H:%M:%S'))) - int(mktime(strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S')))
 
 def getsleeptime(interval):
         return  interval - time()%interval
@@ -37,6 +32,10 @@ class fd_htmlinfo(pp_thread):
                 self.group                  = group
                 self.proto                  = proto_html()
                 self.timeout_find_channel   = pp_global_info.interval_html
+
+        def check_game_over(self, cur_time):
+                if time_sub(cur_time, '11:29:55') >= 0:
+                        self.manager.event_gameover.set()
 
         def main(self):
                 try:
@@ -89,6 +88,9 @@ class fd_htmlinfo(pp_thread):
 
                 self.manager.queue_html.put(ack_val)
 
+                if 'systime' in ack_val:
+                        self.check_game_over(ack_val['systime'])
+
                 #print(ack_val)
                 if ack_val['code'] == 'B' or ack_val['code'] == 'A':
                         printer.warning(sorted(ack_val.items()))
@@ -100,6 +102,7 @@ class fd_html_manager(pp_thread):
                 super().__init__()
                 self.interval_time  = pp_global_info.interval_html
                 self.queue_html     = Queue()
+                self.event_gameover = Event()
 
         def main(self):
                 while True:
