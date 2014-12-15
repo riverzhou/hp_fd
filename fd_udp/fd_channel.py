@@ -100,7 +100,7 @@ class fd_channel():
                         handle.close()
                         del(handle)
                 except:
-                        pass
+                        printer.critical(format_exc())
 
         def pyget(self, handle, req, headers = {}):
                 time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
