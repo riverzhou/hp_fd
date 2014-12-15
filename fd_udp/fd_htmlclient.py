@@ -31,10 +31,12 @@ def getsleeptime(interval):
 class fd_htmlinfo(pp_thread):
 
         def __init__(self, manager, group):
+                global pp_global_info
                 super().__init__()
-                self.manager = manager
-                self.group   = group
-                self.proto   = proto_html()
+                self.manager                = manager
+                self.group                  = group
+                self.proto                  = proto_html()
+                self.timeout_find_channel   = pp_global_info.interval_html
 
         def main(self):
                 try:
@@ -51,11 +53,10 @@ class fd_htmlinfo(pp_thread):
                 channel = 'query'
 
                 while True:
-                        group, handle = channel_center.get_channel(channel, self.group)
+                        group, handle = channel_center.get_channel(channel, self.timeout_find_channel, self.group)
                         if handle == None :
                                 printer.error('group %d get channel Failed' % self.group)
-                                sleep(0.1)
-                                continue
+                                return
 
                         head = proto.make_html_head(server_dict[group]['query']['name'])
 
