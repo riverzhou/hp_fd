@@ -63,7 +63,7 @@ class fd_htmlinfo(pp_thread):
                         info_val = channel_center.pyget(handle, req, head)
 
                         if info_val == False:
-                                printer.error('group %d  info channel error' % self.group)
+                                printer.error('group %d info channel error' % self.group)
                                 sleep(0.1)
                                 continue
                         else:
@@ -78,7 +78,7 @@ class fd_htmlinfo(pp_thread):
                         return
 
                 if info_val['body'] == '' or info_val['body'] == None:
-                        printer.error('group body is None' % self.group)
+                        printer.error('group %d body is None' % self.group)
                         return
 
                 ack_val  = proto.parse_html_ack(info_val['body'])
