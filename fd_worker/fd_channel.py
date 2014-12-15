@@ -114,6 +114,7 @@ class fd_channel():
         def close_handle(self, handle):
                 try:
                         handle.close()
+                        del(handle)
                 except:
                         pass
 
@@ -121,6 +122,8 @@ class fd_channel():
                 time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
 
                 printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req)
+
+                ack = None
 
                 try:
                         handle.request('GET', req, headers = headers)
@@ -146,9 +149,11 @@ class fd_channel():
                 try:
                         body = ack.read()
                 except  KeyboardInterrupt:
+                        del(ack)
                         return None
                 except:
                         printer.critical(format_exc())
+                        del(ack)
                         return None
 
                 key_val = {}
@@ -166,6 +171,7 @@ class fd_channel():
 
                 printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
 
+                del(ack)
                 return key_val
 
 #===================================
