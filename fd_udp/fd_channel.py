@@ -9,6 +9,7 @@ from traceback              import print_exc, format_exc
 
 from pp_log                 import printer
 from pp_server              import server_dict
+
 from pp_global              import pp_global_info
 from pp_baseclass           import pp_thread
 
@@ -23,7 +24,7 @@ def time_sub(end, begin):
                 return -1
 
 class fd_channel():
-        timeout_find_channel = 0.5
+        timeout_find_channel = 0.3
 
         def __init__(self):
                 self.queue = [{},{}]
@@ -45,14 +46,14 @@ class fd_channel():
                         self.close_handle(handle)
                         return False
 
-        def find_channel(self, channel, group, timeout = None):
+        def find_channel(self, channel, group):
                 if group == -1:
                         channel_group = 1 if self.queue[0][channel].qsize() <= self.queue[1][channel].qsize() else 0
                 else:
                         channel_group = group
                 channel_handle_tuple = None
                 try:
-                        channel_handle_tuple = self.queue[channel_group][channel].get(True, timeout)
+                        channel_handle_tuple = self.queue[channel_group][channel].get(True, self.timeout_find_channel)
                 except  KeyboardInterrupt:
                         return channel_group, None
                 except  Empty:
@@ -62,12 +63,14 @@ class fd_channel():
                         return channel_group, None
                 return  channel_group, channel_handle_tuple
 
-        def get_channel(self, channel, group = -1):
+        def get_channel(self, channel, timeout, group = -1):
+                channel_group  = None
                 channel_handle = None
+                start = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 while True:
-                        self.lock_get_channel.acquire()
-                        channel_group, channel_handle_tuple = self.find_channel(channel, group, self.timeout_find_channel)
-                        self.lock_get_channel.release()
+                        if timeout != None and time_sub(datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f'), start) > timeout:
+                                break
+                        channel_group, channel_handle_tuple = self.find_channel(channel, group)
                         if channel_handle_tuple == None :
                                 sleep(0)
                                 continue
@@ -95,6 +98,7 @@ class fd_channel():
         def close_handle(self, handle):
                 try:
                         handle.close()
+                        del(handle)
                 except:
                         pass
 
@@ -102,6 +106,8 @@ class fd_channel():
                 time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
 
                 printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req)
+
+                ack = None
 
                 try:
                         handle.request('GET', req, headers = headers)
@@ -127,9 +133,11 @@ class fd_channel():
                 try:
                         body = ack.read()
                 except  KeyboardInterrupt:
+                        del(ack)
                         return None
                 except:
                         printer.critical(format_exc())
+                        del(ack)
                         return None
 
                 key_val = {}
@@ -147,6 +155,7 @@ class fd_channel():
 
                 printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
 
+                del(ack)
                 return key_val
 
 #===================================
@@ -182,7 +191,6 @@ class pp_channel_maker(pp_thread):
                         channel_center.put_channel(self.channel, self.group, handle)
                 self.manager.maker_out()
 
-
 class pp_query_channel_manager(pp_thread):
         max_onway       = 100
 
@@ -194,8 +202,6 @@ class pp_query_channel_manager(pp_thread):
                 self.number_onway   = 0
 
         def main(self):
-                global pp_global_info
-                time_interval = 2
                 while True:
                         sleep(getsleeptime(self.time_interval))
                         self.manage_channel()
@@ -211,8 +217,8 @@ class pp_query_channel_manager(pp_thread):
                 except:
                         printer.critical(format_exc())
                         return
-                maker[1].start()
                 maker[0].start()
+                maker[1].start()
 
         def maker_in(self):
                 self.lock_onway.acquire()
