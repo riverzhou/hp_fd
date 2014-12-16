@@ -202,6 +202,7 @@ def create_deploy_udp(deply_file):
                         for filename in list_ct_file:
                                 cmd = make_scp_cmd(ip, port, filename, dirname)
                                 f.write(cmd)
+                                f.write(make_scp_hosts_cmd(ip, port))
         f.close()
         return
 
