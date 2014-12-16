@@ -53,7 +53,7 @@ local_logfile   = '/river/worker.log'
 
 redis_passwd    = 'river'
 redis_port      = 6379
-redis_ip        = %s 
+redis_ip        = '%s'
 redis_dbid      = %d
 
 '''
