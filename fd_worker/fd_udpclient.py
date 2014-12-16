@@ -244,7 +244,7 @@ class udp_worker(pp_thread):
 
                 self.check_image_time(int_price)
 
-                printer.record(str(self.server_addr) + ' :: ' + udp_recv)
+                #printer.record(str(self.server_addr) + ' :: ' + udp_recv)
 
         def update_syscode(self, code):
                 global pp_global_info
