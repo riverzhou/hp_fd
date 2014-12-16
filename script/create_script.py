@@ -15,6 +15,9 @@ deploy_ctrl_file    = 'deploy_ctrl.sh'
 start_worker_file   = 'start_worker.sh'
 start_udp_file      = 'start_udp.sh'
 
+stop_worker_file    = 'stop_worker.sh'
+stop_udp_file       = 'stop_udp.sh'
+
 check_worker_file   = 'check_worker.sh'
 check_udp_file      = 'check_udp.sh'
 
@@ -37,11 +40,13 @@ DST_CONF_WORKER     = 'fd_config.py'
 cmd_worker_clean    = 'rm /river/fd -rf; mkdir -p /river/fd/fd_worker; ls -l /river '
 cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/fd/fd_worker; cp /river/fd_config.py .; cat /river/fd_config.py; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
 cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py > /dev/null 2>&1 &'
+cmd_worker_stop     = 'killall -9 python3; echo killed'
 cmd_worker_check    = 'cat /river/worker.log '
 
 cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
 cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
 cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py > /dev/null 2>&1 &'
+cmd_udp_stop        = 'killall -9 python3; echo killed'
 cmd_udp_check       = 'cat /river/htmludp.log '
 
 #---------------------------------------------
@@ -250,10 +255,38 @@ def create_start_udp(start_file):
         f.close()
         return
 
-def create_check_worker(start_file):
+def create_stop_worker(stop_file):
         global map_worker_file, PORT_SSH
         dict_map = read_map(map_worker_file)
-        f = open(start_file, 'w')
+        f = open(stop_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_stop)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_stop_udp(stop_file):
+        global map_udp_file, PORT_SSH
+        dict_map = read_map(map_udp_file)
+        f = open(stop_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_udp_stop)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_check_worker(check_file):
+        global map_worker_file, PORT_SSH
+        dict_map = read_map(map_worker_file)
+        f = open(check_file, 'w')
         f.write(make_sh_head())
         for node in dict_map:
                 for worker in dict_map[node]:
@@ -264,10 +297,10 @@ def create_check_worker(start_file):
         f.close()
         return
 
-def create_check_udp(start_file):
+def create_check_udp(check_file):
         global map_udp_file, PORT_SSH
         dict_map = read_map(map_udp_file)
-        f = open(start_file, 'w')
+        f = open(check_file, 'w')
         f.write(make_sh_head())
         for node in dict_map:
                 for worker in dict_map[node]:
@@ -312,6 +345,9 @@ def main():
 
         create_start_udp(start_udp_file)
         create_start_worker(start_worker_file)
+
+        create_stop_udp(stop_udp_file)
+        create_stop_worker(stop_worker_file)
 
         create_check_udp(check_udp_file)
         create_check_worker(check_worker_file)
