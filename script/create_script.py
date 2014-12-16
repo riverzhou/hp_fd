@@ -15,6 +15,9 @@ deploy_ctrl_file    = 'deploy_ctrl.sh'
 start_worker_file   = 'start_worker.sh'
 start_udp_file      = 'start_udp.sh'
 
+check_worker_file   = 'check_worker.sh'
+check_udp_file      = 'check_udp.sh'
+
 #---------------------------------------------
 
 list_node           = ['node1', 'node2', 'node3', 'node5']
@@ -29,6 +32,20 @@ DIR_WORKER          = 'fd/fd_worker/'
 LOCAL_CONF_WORKER   = 'fd_config.%s.py'
 DST_CONF_WORKER     = 'fd_config.py'
 
+#---------------------------------------------
+
+cmd_worker_clean    = 'rm /river/fd -rf; mkdir -p /river/fd/fd_worker; ls -l /river '
+cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/fd/fd_worker; cp /river/fd_config.py .; cat /river/fd_config.py; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
+cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py '
+cmd_worker_check    = 'cat /river/worker.log '
+
+cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
+cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
+cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py '
+cmd_udp_check       = 'cat /river/htmludp.log '
+
+#---------------------------------------------
+
 model_conf_worker   = '''\
 #!/usr/bin/env python3
 
@@ -40,12 +57,6 @@ redis_ip        = %s
 redis_dbid      = %d
 
 '''
-
-cmd_worker_clean    = 'rm /river/fd -rf; mkdir -p /river/fd/fd_worker; ls -l /river '
-cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/fd/fd_worker; cp /river/fd_config.py .; cat /river/fd_config.py; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
-
-cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
-cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz '
 
 #=============================================
 
@@ -153,7 +164,7 @@ def create_deploy_worker(deply_file):
         return
 
 def create_deploy_udp_clean(deply_file):
-        global map_worker_file, PORT_SSH, DIR_DEPOLY
+        global map_udp_file, PORT_SSH, DIR_DEPOLY
         dict_map = read_map(map_udp_file)
         f = open(deply_file, 'w')
         f.write(make_sh_head())
@@ -167,7 +178,7 @@ def create_deploy_udp_clean(deply_file):
         return
 
 def create_deploy_udp_init(deply_file):
-        global map_worker_file, PORT_SSH, DIR_DEPOLY
+        global map_udp_file, PORT_SSH, DIR_DEPOLY
         dict_map = read_map(map_udp_file)
         f = open(deply_file, 'a')
         for node in dict_map:
@@ -180,7 +191,7 @@ def create_deploy_udp_init(deply_file):
         return
 
 def create_deploy_udp(deply_file):
-        global map_worker_file, PORT_SSH, DIR_DEPOLY
+        global map_udp_file, PORT_SSH, DIR_DEPOLY
         dict_map = read_map(map_udp_file)
         f = open(deply_file, 'a')
         for node in dict_map:
@@ -195,7 +206,7 @@ def create_deploy_udp(deply_file):
         return
 
 def create_deploy_ctrl(deply_file):
-        global map_worker_file, PORT_SSH, DIR_DEPOLY
+        global map_ctrl_file, PORT_SSH, DIR_DEPOLY
         dict_map = read_map(map_ctrl_file)
         f = open(deply_file, 'w')
         f.write(make_sh_head())
@@ -207,6 +218,62 @@ def create_deploy_ctrl(deply_file):
                         for filename in list_ct_file:
                                 cmd = make_scp_cmd(ip, port, filename, dirname)
                                 f.write(cmd)
+        f.close()
+        return
+
+def create_start_worker(start_file):
+        global map_worker_file, PORT_SSH
+        dict_map = read_map(map_worker_file)
+        f = open(start_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_start)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_start_udp(start_file):
+        global map_udp_file, PORT_SSH
+        dict_map = read_map(map_udp_file)
+        f = open(start_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_udp_start)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_check_worker(start_file):
+        global map_worker_file, PORT_SSH
+        dict_map = read_map(map_worker_file)
+        f = open(start_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_check)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_check_udp(start_file):
+        global map_udp_file, PORT_SSH
+        dict_map = read_map(map_udp_file)
+        f = open(start_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_udp_check)
+                        f.write(cmd)
         f.close()
         return
 
@@ -242,8 +309,15 @@ def main():
 
         create_deploy_ctrl(deploy_ctrl_file)
 
+        create_start_udp(start_udp_file)
+        create_start_worker(start_worker_file)
+
+        create_check_udp(check_udp_file)
+        create_check_worker(check_worker_file)
+
 #=================================================
 
 if __name__ == '__main__':
         main()
+
 
