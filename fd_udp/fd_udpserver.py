@@ -5,7 +5,7 @@ import sys
 from socketserver       import UDPServer, BaseRequestHandler
 from time               import time, sleep, localtime, mktime, strptime, strftime
 from struct             import pack, unpack
-from traceback          import print_exc
+from traceback          import print_exc, format_exc
 from hashlib            import md5
 from xml.etree          import ElementTree
 from threading          import Thread, Event, Lock, Semaphore
@@ -16,6 +16,7 @@ from pp_log             import logger, printer
 from pp_server          import pp_dns_init
 from pp_baseredis       import pp_redis_init
 
+from fd_log             import logger
 from fd_channel         import fd_channel_init
 from fd_htmlclient      import fd_html_init, html_manager
 
@@ -116,8 +117,8 @@ class proto_udp():
                         for child in root:
                                 key_val[child.tag] = child.text
                 except :
-                        print(string)
-                print(string)
+                        logger.error(string)
+                logger.info(string)
                 #print(sorted(key_val.items()))
                 #print('')
                 return key_val
@@ -131,7 +132,7 @@ class proto_udp():
                         ) % (
                         key_val['date']
                         ) )
-                print(info)
+                #print(info)
                 return info.encode('gb18030')
 
         def udp_make_x_info(self, key_val):
@@ -151,7 +152,7 @@ class proto_udp():
                         key_val['date'],
                         key_val['systime']
                         ) )
-                print(info)
+                #print(info)
                 return info.encode('gb18030')
 
         def udp_make_y_info(self, key_val):
@@ -166,7 +167,7 @@ class proto_udp():
                         ) % (
                         key_val['date']
                         ) )
-                print(info)
+                #print(info)
                 return info.encode('gb18030')
 
         def udp_make_a_info(self, key_val):
@@ -295,7 +296,7 @@ class udp_handle(BaseRequestHandler):
                 except  KeyError:
                         pass
                 except:
-                        print_exc()
+                        logger.critical(format_exc())
                 else:
                         proc(key_val)
 
