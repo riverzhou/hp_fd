@@ -1,4 +1,4 @@
 #!/bin/sh
 
-ls -l log/*critical.log
+wc -l log/*critical.log
 
