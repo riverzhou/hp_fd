@@ -36,12 +36,12 @@ DST_CONF_WORKER     = 'fd_config.py'
 
 cmd_worker_clean    = 'rm /river/fd -rf; mkdir -p /river/fd/fd_worker; ls -l /river '
 cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/fd/fd_worker; cp /river/fd_config.py .; cat /river/fd_config.py; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
-cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py '
+cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py > /dev/null 2>&1 &'
 cmd_worker_check    = 'cat /river/worker.log '
 
 cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
 cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
-cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py '
+cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py > /dev/null 2>&1 &'
 cmd_udp_check       = 'cat /river/htmludp.log '
 
 #---------------------------------------------
