@@ -19,7 +19,7 @@ group_list = [ None, g1_list, g2_list, g3_list, None, g5_list ]
 
 p1_list = ['policy_a', 'policy_b','policy_c','policy_a','policy_b','policy_c','policy_a','policy_b','policy_c']
 p2_list = ['policy_d', 'policy_e','policy_f','policy_d','policy_e','policy_f','policy_d','policy_e','policy_f']
-p3_list = ['policy_g', 'policy_h','policy_i','policy_g','policy_h','policy_i','policy_g','policy_h','policy_i']
+p3_list = ['policy_g', 'policy_h','policy_h','policy_g','policy_h','policy_h','policy_g','policy_h','policy_h']
 
 policy_list = [ None, p1_list, p2_list, p3_list ]
 
