@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-group   = 1     # 1/2/3/5:  节点1/节点2/节点3/节点5
+from fd_group import group
 
 policy  = 1     # 1/2/3:    DLL 中性 / DLL 良好 / DLL 糟糕
 
