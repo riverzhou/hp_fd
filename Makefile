@@ -11,6 +11,7 @@ clean_dirs := $(addprefix _clean_,$(dirs))
 .PHONY: $(clean_dirs) clean
 
 clean:  $(clean_dirs)
+	@rm -rf *.tgz
 	@echo 
 	@echo '=========== All Project Cleaned ! ==========='
 	@echo 
