@@ -21,8 +21,8 @@ stop_udp_file       = 'stop_udp.sh'
 check_worker_file   = 'check_worker.sh'
 check_udp_file      = 'check_udp.sh'
 
-restart_worker_file = 'restart_worker.sh'
-restart_udp_file    = 'restart_udp.sh'
+reboot_worker_file  = 'reboot_worker.sh'
+reboot_udp_file     = 'reboot_udp.sh'
 
 #---------------------------------------------
 
@@ -45,14 +45,14 @@ cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/f
 cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py > /dev/null 2>&1 &'
 cmd_worker_stop     = 'killall -9 python3; echo killed'
 cmd_worker_check    = 'cat /river/worker.log '
-cmd_worker_restart  = 'rm /root/.bash_history -f; echo reboot; reboot'
+cmd_worker_reboot  = 'rm /root/.bash_history -f; echo reboot; reboot'
 
 cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
 cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
 cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py > /dev/null 2>&1 &'
 cmd_udp_stop        = 'killall -9 python3; echo killed'
 cmd_udp_check       = 'cat /river/htmludp.log '
-cmd_udp_restart     = 'redis-cli -a river flushall; rm /root/.bash_history -f; echo reboot; reboot'
+cmd_udp_reboot     = 'redis-cli -a river flushall; rm /root/.bash_history -f; echo reboot; reboot'
 
 #---------------------------------------------
 
@@ -260,30 +260,30 @@ def create_start_udp(start_file):
         f.close()
         return
 
-def create_restart_worker(restart_file):
+def create_reboot_worker(reboot_file):
         global map_worker_file, PORT_SSH
         dict_map = read_map(map_worker_file)
-        f = open(restart_file, 'w')
+        f = open(reboot_file, 'w')
         f.write(make_sh_head())
         for node in dict_map:
                 for worker in dict_map[node]:
                         ip      = worker['ip']
                         port    = PORT_SSH
-                        cmd     = make_ssh_cmd(ip, port, cmd_worker_restart)
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_reboot)
                         f.write(cmd)
         f.close()
         return
 
-def create_restart_udp(restart_file):
+def create_reboot_udp(reboot_file):
         global map_udp_file, PORT_SSH
         dict_map = read_map(map_udp_file)
-        f = open(restart_file, 'w')
+        f = open(reboot_file, 'w')
         f.write(make_sh_head())
         for node in dict_map:
                 for worker in dict_map[node]:
                         ip      = worker['ip']
                         port    = PORT_SSH
-                        cmd     = make_ssh_cmd(ip, port, cmd_udp_restart)
+                        cmd     = make_ssh_cmd(ip, port, cmd_udp_reboot)
                         f.write(cmd)
         f.close()
         return
@@ -385,8 +385,8 @@ def main():
         create_check_udp(check_udp_file)
         create_check_worker(check_worker_file)
 
-        create_restart_udp(restart_udp_file)
-        create_restart_worker(restart_worker_file)
+        create_reboot_udp(reboot_udp_file)
+        create_reboot_worker(reboot_worker_file)
 
 #=================================================
 
