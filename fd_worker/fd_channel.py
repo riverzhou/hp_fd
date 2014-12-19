@@ -222,7 +222,7 @@ class pp_login_channel_manager(pp_thread):
                 time_interval = 2
                 while True:
                         try:
-                                time_interval = int(pp_global_info.timeout_channel[1])
+                                time_interval = float(pp_global_info.timeout_channel[1])
                         except:
                                 time_interval = 2
                         sleep(getsleeptime(time_interval))
@@ -268,7 +268,7 @@ class pp_toubiao_channel_manager(pp_thread):
                 time_interval = 2
                 while True:
                         try:
-                                time_interval = int(pp_global_info.timeout_channel[1])
+                                time_interval = float(pp_global_info.timeout_channel[1])
                         except:
                                 time_interval = 2
                         sleep(getsleeptime(time_interval))
