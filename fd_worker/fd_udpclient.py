@@ -23,10 +23,10 @@ def time_sub(end, begin):
         except:
                 return -1
 
-
 def getsleeptime(interval):
+        if interval == 0:
+                return interval
         return  interval - time()%interval
-
 
 class udp_format(pp_thread):
         interval = 20

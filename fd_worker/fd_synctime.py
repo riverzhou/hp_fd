@@ -10,8 +10,9 @@ from  pp_global         import pp_global_info
 #=================================================================================
 
 def getsleeptime(interval):
+        if interval == 0:
+                return interval
         return  interval - time()%interval
-
 
 class fd_synctime(pp_thread):
         deadline_decode = '11:29:55'
