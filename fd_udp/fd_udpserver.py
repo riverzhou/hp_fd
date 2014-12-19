@@ -37,8 +37,10 @@ def time_add(time, second):
         ret = strftime('%Y-%m-%d %H:%M:%S', localtime(int(mktime(strptime('1970-01-01 '+time, "%Y-%m-%d %H:%M:%S"))) + second))
         return ret.split()[1]
 
-def getsleeptime(itime):
-        return itime - time()%itime
+def getsleeptime(interval):
+        if interval == 0:
+                return interval
+        return  interval - time()%interval
 
 def format_data(list_data):
         list_out = []

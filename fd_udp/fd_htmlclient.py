@@ -20,8 +20,9 @@ def time_sub(end, begin):
         return int(mktime(strptime('1970-01-01 '+end, '%Y-%m-%d %H:%M:%S'))) - int(mktime(strptime('1970-01-01 '+begin, '%Y-%m-%d %H:%M:%S')))
 
 def getsleeptime(interval):
+        if interval == 0:
+                return interval
         return  interval - time()%interval
-
 
 class fd_htmlinfo(pp_thread):
 
