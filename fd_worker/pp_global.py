@@ -38,6 +38,8 @@ class pp_global(pp_thread):
                 self.event_image        = [Event(), Event(), Event()]
                 self.event_price        = [Event(), Event(), Event()]
 
+                self.flag_bid1_cancel   = False
+
                 self.trigger_price      = [None, None, None]
                 self.lock_trigger       = Lock()
 

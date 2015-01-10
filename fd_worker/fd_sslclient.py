@@ -395,14 +395,9 @@ class fd_bid():
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
 
-                if self.count == 2:
-                        try:
-                                price1 = int(self.client.check_price_bid(1))
-                        except:
-                                price1 = None
-                        if price1 != None and price1 >= self.price:
-                                printer.warning('client %s bid 2 price lower than bid 1 ' % self.client.bidno)
-                                return False
+                if self.count == 2 and self.client.check_price_bid(1) == self.price:
+                        printer.warning('client %s bid 2 price as same as bid 1 , cancel ' % self.client.bidno)
+                        return False
 
                 for i in range(self.max_retry_image):
                         self.client.check_image_interval()
@@ -441,6 +436,10 @@ class fd_bid():
                 global pp_global_info
 
                 pp_global_info.event_price[self.count].wait()
+                if self.count == 1 and pp_global_info.flag_bid1_cancel == True:
+                        printer.warning('client %s bid 1 cancel' % self.client.bidno)
+                        return False
+
                 if self.price == None:
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
@@ -498,7 +497,7 @@ class fd_client(pp_thread):
         min_price_interval  = 2
 
         max_retry_bid0      = 20
-        timewait_bid1       = 3
+        timewait_bid1       = 2
 
         def __init__(self, bidno, passwd):
                 super().__init__(bidno)

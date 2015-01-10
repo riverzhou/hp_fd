@@ -102,6 +102,7 @@ class fd_channel():
         def put_channel(self, channel, group, handle):
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 channel_handle_tuple = (time, handle)
+                printer.debug('put_channel : channel %s, group %d, time %s' % (channel, group, time))
                 return  self.queue[group][channel].put(channel_handle_tuple)
 
         def login_request_increase(self):
