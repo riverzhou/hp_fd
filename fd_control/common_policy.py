@@ -1,7 +1,7 @@
 #!/usr/bin/evn python3
 
-channel_trigger = [('10:32:30', '10:55:00') , ('11:27:50', '11:29:58')]
-channel_timeout = [112, 2]
+channel_trigger = [('10:32:30', '10:55:00') , ('11:27:45', '11:29:58')]
+channel_timeout = [114, 1.5]
 
 decode_deadline = '11:29:55'
 
