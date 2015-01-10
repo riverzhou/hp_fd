@@ -2,5 +2,5 @@
 
 wc -l log/*critical.log
 
-grep '' log/*critical.log | grep -v '[Errno 110]'
+grep '' log/*critical.log | grep -v '\[Errno 110\]'
 
