@@ -497,7 +497,7 @@ class fd_client(pp_thread):
         min_price_interval  = 2
 
         max_retry_bid0      = 20
-        timewait_bid1       = 2
+        timewait_bid1       = 3
 
         def __init__(self, bidno, passwd):
                 super().__init__(bidno)
