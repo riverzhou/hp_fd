@@ -474,21 +474,21 @@ class fd_bid_0(fd_bid):
         count               = 0
         decode_type         = 'A'
         decode_timeout      = 30
-        max_image_timeout   = 10
+        max_image_timeout   = 20
         max_price_timeout   = 30
 
 class fd_bid_1(fd_bid):
         count               = 1
         decode_type         = 'B'
         decode_timeout      = 8
-        max_image_timeout   = 4
+        max_image_timeout   = 7
         max_price_timeout   = 2
 
 class fd_bid_2(fd_bid):
         count               = 2
         decode_type         = 'C'
         decode_timeout      = 2
-        max_image_timeout   = 3
+        max_image_timeout   = 7
         max_price_timeout   = 10
 
 class fd_client(pp_thread):
