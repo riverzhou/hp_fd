@@ -2,7 +2,7 @@
 
 from fd_group import group
 
-policy  = 1     # 1/2/3:    DLL 中性 / DLL 良好 / DLL 糟糕
+policy  = 1     # 1/2:    DLL 良好 / DLL 糟糕
 
 #=============================================
 
