@@ -26,8 +26,8 @@ class pp_global(pp_thread):
                 self.flag_gameover      = False
                 self.event_gameover     = Event()
                 self.timeout_channel    = [20, None]
-                self.interval_channel   = 0.4
-                self.interval_html      = 0.5
+                self.interval_channel   = 1
+                self.interval_html      = 1.2
 
         def set_game_over(self):
                 self.flag_gameover = True
