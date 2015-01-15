@@ -395,7 +395,7 @@ class fd_bid():
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
 
-                if self.count == 2 and self.client.check_price_bid(1) == self.price:
+                if self.count == 2 and str(self.client.check_price_bid(1)) == str(self.price):
                         printer.warning('client %s bid 2 price as same as bid 1 , cancel ' % self.client.bidno)
                         return False
 
