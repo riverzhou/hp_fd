@@ -474,7 +474,7 @@ class fd_bid_0(fd_bid):
         count               = 0
         decode_type         = 'A'
         decode_timeout      = 30
-        max_image_timeout   = 20
+        max_image_timeout   = 30
         max_price_timeout   = 30
 
 class fd_bid_1(fd_bid):
