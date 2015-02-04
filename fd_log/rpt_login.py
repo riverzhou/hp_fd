@@ -26,12 +26,14 @@ def main():
         global dict_ac_group, dict_bidok, dict_bid112
         dict_ac_group = read_ac()[group]
         check_login()
-        print('\r\nlogin ok : \r\n')
+        print('\r\nlogin ok :')
         for bidno in dict_login:
                 print(dict_login[bidno])
-        print('\r\nnot login yet : \r\n')
+        print('login ok count: %d \r\n' % len(dict_login))
+        print('\r\nnot login yet :')
         for bidno in dict_ac_group:
                 print(dict_ac_group[bidno])
+        print('not login count: %d \r\n' % len(dict_ac_group))
 
 main()
 

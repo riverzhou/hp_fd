@@ -42,15 +42,18 @@ def main():
         dict_ac_group = read_ac()[group]
         check_bidok()
         check_bid112()
-        print('\r\nbid ok : \r\n')
+        print('\r\nbid ok :')
         for bidno in dict_bidok:
                 print(dict_bidok[bidno])
-        print('\r\nbid 112 : \r\n')
+        print('bid ok count: %d \r\n' % len(dict_bidok))
+        print('\r\nbid 112 :')
         for bidno in dict_bid112:
                 print(dict_bid112[bidno])
-        print('\r\nnot bid yet : \r\n')
+        print('bid ok count: %d \r\n' % len(dict_bid112))
+        print('\r\nnot bid yet :')
         for bidno in dict_ac_group:
                 print(dict_ac_group[bidno])
+        print('bid ok count: %d \r\n' % len(dict_ac_group))
 
 main()
 
