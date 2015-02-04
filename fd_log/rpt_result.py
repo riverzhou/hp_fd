@@ -5,7 +5,7 @@ from datetime   import datetime
 
 from operator   import itemgetter
 
-result_file     = '5_result.txt'
+result_file     = '0_result.txt'
 
 #================================================================================================
 
@@ -13,7 +13,7 @@ dict_worker     = {}
 
 dict_result     = {}
 
-dict_policy     = {'A':{}, 'B':{}, 'C':{}, 'D':{}, 'E':{}}
+dict_policy     = {'A':{}, 'B':{}, 'C':{}}
 
 dict_machine    = {
         1:'A',
@@ -96,7 +96,7 @@ def reset():
         global dict_result, dict_policy, dict_worker
         dict_worker     = {}
         dict_result     = {}
-        dict_policy     = {'A':{}, 'B':{}, 'C':{}, 'D':{}, 'E':{}}
+        #dict_policy     = {'A':{}, 'B':{}, 'C':{}}
 
 def main():
         print('all:')

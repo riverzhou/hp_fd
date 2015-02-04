@@ -2,10 +2,14 @@
 
 from time       import time, sleep, localtime, mktime, strptime, strftime
 from datetime   import datetime
+import sys
 
-image_file     = '5_image_get.txt'
-
-decode_file    = '5_decode_req.txt'
+if sys.argv[1] == '2':
+        image_file     = '2_image_get.txt'
+        decode_file    = '2_decode_req.txt'
+else:
+        image_file     = '1_image_get.txt'
+        decode_file    = '1_decode_req.txt'
 
 #================================================================================================
 

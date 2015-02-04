@@ -2,10 +2,14 @@
 
 from time       import time, sleep, localtime, mktime, strptime, strftime
 from datetime   import datetime
+import sys
 
-image_filename  = '5_image_get.txt'
-
-bid_filename    = '5_price_get.txt'
+if sys.argv[1] == '2':
+        image_file      = '2_image_get.txt'
+        bid_file        = '2_price_get.txt'
+else:
+        image_file      = '1_image_get.txt'
+        bid_file        = '1_price_get.txt'
 
 #================================================================================================
 
@@ -17,7 +21,7 @@ def time_sub(end, begin):
 
 
 def bid():
-        bid_f   = open(bid_filename, 'r')
+        bid_f   = open(bid_file, 'r')
         while True:
                 line = bid_f.readline()
                 if not line or line.strip() == '':

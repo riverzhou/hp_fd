@@ -3,10 +3,14 @@
 from time           import time, sleep, localtime, mktime, strptime, strftime
 from datetime       import datetime
 from collections    import OrderedDict
+import sys
 
-req_filename  = '5_decode_req.txt'
-
-ack_filename  = '5_decode_ack.txt'
+if sys.argv[1] == '2':
+        req_file    = '2_decode_req.txt'
+        ack_file    = '2_decode_ack.txt'
+else:
+        req_file    = '1_decode_req.txt'
+        ack_file    = '1_decode_ack.txt'
 
 #================================================================================================
 
@@ -27,7 +31,7 @@ def time_sub(end, begin):
 def req():
         global dict_decode, count_req, count_ack
         count_req   = 0
-        req_f = open(req_filename, 'r')
+        req_f = open(req_file, 'r')
         while True:
                 line = req_f.readline()
                 if not line or line.strip() == '':
@@ -59,7 +63,7 @@ def req():
 def ack():
         global dict_decode, count_req, count_ack
         count_ack   = 0
-        ack_f   = open(ack_filename, 'r')
+        ack_f   = open(ack_file, 'r')
         while True:
                 line = ack_f.readline()
                 if not line or line.strip() == '':
