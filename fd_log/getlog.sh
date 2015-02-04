@@ -20,5 +20,8 @@ grep -H bid.aspx 	log/*info.log 	|grep ' 11:'		> 2_price_req.txt
 
 
 grep -H 'login' log/*warning.log 	|grep -v 'failed' 	> 0_login.txt
+grep -H 'bid 0 price 73700' log/*warning.log 			> 0_bidok.txt
 grep -H 'bids finished' log/*warning.log 			> 0_result.txt
+grep -H -E '<ERRORCODE>112</ERRORCODE>' log/*time*		> 0_bid112.txt
+
 

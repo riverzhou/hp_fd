@@ -5,6 +5,8 @@ from datetime   import datetime
 
 from operator   import itemgetter
 
+from fd_account import read_ac, group
+
 result_file     = '0_result.txt'
 
 #================================================================================================
@@ -37,7 +39,7 @@ def time_sub(end, begin):
         return "%.6f" % (e-b)
 
 def result_get(filename):
-        global dict_result
+        global dict_result, group
         res_f   = open(filename, 'r')
         node    = filename.split('_')[0]
         while True:
@@ -45,13 +47,13 @@ def result_get(filename):
                 if not line or line.strip() == '':
                         break
                 data        = line.split(':')
-                machine     = data[0].strip().split('.')[0].strip().split('_')[0].lstrip('log/')
+                machine     = data[0].strip().split('.')[0].strip().split('_')[0].lstrip('log/').lstrip('0')
                 p           = dict_machine[int(machine)]
                 data        = line.split(' : ')
                 price       = data[1].strip().split('.')[0].strip()
                 data        = line.split('client ')
                 bidno       = data[1].strip().split()[0].strip()
-                worker      = node + '_' + machine
+                worker      = str(group) + machine
 
                 if price not in dict_result:
                         dict_result[price] = []
