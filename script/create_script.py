@@ -48,7 +48,7 @@ cmd_worker_check    = 'cat /river/worker.log '
 cmd_worker_reboot  = 'rm /root/.bash_history -f; echo reboot; reboot'
 
 cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
-cmd_udp_init        = 'cd /river/fd; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
+cmd_udp_init        = 'cd /river/fd; rm -r /river/fd/fd_udp; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
 cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py > /dev/null 2>&1 &'
 cmd_udp_stop        = 'killall -9 python3; echo killed'
 cmd_udp_check       = 'cat /river/htmludp.log '
