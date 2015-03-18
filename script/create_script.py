@@ -26,7 +26,7 @@ reboot_udp_file     = 'reboot_udp.sh'
 
 #---------------------------------------------
 
-list_node           = ['node1', 'node2', 'node3', 'node5']
+list_node           = ['node1', 'node2', 'node3', 'node5', 'node6']
 
 list_wk_file        = ['/river/fd/fd_worker.tgz']
 list_ct_file        = ['/river/fd/fd_control.tgz', '/river/fd/fd_log.tgz', '/river/fd/fd_udp.tgz']
