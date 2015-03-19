@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
 from fd_account import read_ac, group
-
-#=============================================================
-
-min_price       = 74000
+from pp_price   import min_price
 
 #=============================================================
 
