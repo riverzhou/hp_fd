@@ -11,6 +11,7 @@ map_ctrl_file       = 'map_ctrl.txt'
 deploy_worker_file  = 'deploy_worker.sh'
 deploy_udp_file     = 'deploy_udp.sh'
 deploy_ctrl_file    = 'deploy_ctrl.sh'
+deploy_ac_file      = 'deploy_ac.sh'
 
 start_worker_file   = 'start_worker.sh'
 start_udp_file      = 'start_udp.sh'
@@ -24,10 +25,34 @@ check_udp_file      = 'check_udp.sh'
 reboot_worker_file  = 'reboot_worker.sh'
 reboot_udp_file     = 'reboot_udp.sh'
 
+shutdown_worker_file= 'shutdown_worker.sh'
+shutdown_udp_file   = 'shutdown_udp.sh'
+
+dict_node_worker_start_file  = {
+            'node1' : 'node1_start_worker.sh',
+            'node2' : 'node2_start_worker.sh',
+            'node3' : 'node3_start_worker.sh',
+            'node4' : 'node4_start_worker.sh',
+            'node5' : 'node5_start_worker.sh',
+            'node6' : 'node6_start_worker.sh',
+            'node7' : 'node7_start_worker.sh',
+            }
+
+dict_node_worker_stop_file   = {
+            'node1' : 'node1_stop_worker.sh',
+            'node2' : 'node2_stop_worker.sh',
+            'node3' : 'node3_stop_worker.sh',
+            'node4' : 'node4_stop_worker.sh',
+            'node5' : 'node5_stop_worker.sh',
+            'node6' : 'node6_stop_worker.sh',
+            'node7' : 'node7_stop_worker.sh',
+            }
+
 #---------------------------------------------
 
-list_node           = ['node1', 'node2', 'node3', 'node5', 'node6']
+list_node           = ['node1', 'node2', 'node3', 'node4', 'node5', 'node6', 'node7']
 
+list_ac_file        = ['/river/fd/fd_control/ac_file.txt']
 list_wk_file        = ['/river/fd/fd_worker.tgz']
 list_ct_file        = ['/river/fd/fd_control.tgz', '/river/fd/fd_log.tgz', '/river/fd/fd_udp.tgz']
 
@@ -45,14 +70,16 @@ cmd_worker_init     = 'cd /river/fd; tar -zxvf /river/fd_worker.tgz; cd /river/f
 cmd_worker_start    = 'killall -9 python3; echo > /river/worker.log; nohup /river/fd/fd_worker/fd_worker.py > /dev/null 2>&1 &'
 cmd_worker_stop     = 'killall -9 python3; echo killed'
 cmd_worker_check    = 'cat /river/worker.log '
-cmd_worker_reboot  = 'rm /root/.bash_history -f; echo reboot; reboot'
+cmd_worker_reboot   = 'rm /root/.bash_history -f; echo reboot; reboot'
+cmd_worker_shutdown = 'rm /root/.bash_history -f; echo poweroff; poweroff'
 
 cmd_udp_clean       = 'rm /river/fd -rf; mkdir -p /river/fd/fd_udp; ls -l /river '
 cmd_udp_init        = 'cd /river/fd; rm -r /river/fd/fd_udp; tar -zxvf /river/fd_udp.tgz; cat /etc/hosts.origin /river/hosts > /etc/hosts; cat /etc/hosts'
 cmd_udp_start       = 'killall -9 python3; echo > /river/htmludp.log; nohup /river/fd/fd_udp/fd_udpserver.py > /dev/null 2>&1 &'
 cmd_udp_stop        = 'killall -9 python3; echo killed'
 cmd_udp_check       = 'cat /river/htmludp.log '
-cmd_udp_reboot     = 'redis-cli -a river flushall; rm /root/.bash_history -f; echo reboot; reboot'
+cmd_udp_reboot      = 'redis-cli -a river flushall; rm /root/.bash_history -f; echo reboot; reboot'
+cmd_udp_shutdown    = 'rm /river/fd -rf; rm /river/* ; rm /root/.bash_history -f; echo poweroff; poweroff'
 
 #---------------------------------------------
 
@@ -201,7 +228,7 @@ def create_deploy_udp_init(deply_file):
         return
 
 def create_deploy_udp(deply_file):
-        global map_udp_file, PORT_SSH, DIR_DEPOLY
+        global map_udp_file, PORT_SSH, DIR_DEPOLY, list_ct_file
         dict_map = read_map(map_udp_file)
         f = open(deply_file, 'a')
         for node in dict_map:
@@ -217,7 +244,7 @@ def create_deploy_udp(deply_file):
         return
 
 def create_deploy_ctrl(deply_file):
-        global map_ctrl_file, PORT_SSH, DIR_DEPOLY
+        global map_ctrl_file, PORT_SSH, DIR_DEPOLY, list_ct_file
         dict_map = read_map(map_ctrl_file)
         f = open(deply_file, 'w')
         f.write(make_sh_head())
@@ -227,6 +254,31 @@ def create_deploy_ctrl(deply_file):
                         port    = PORT_SSH
                         dirname = DIR_DEPOLY
                         for filename in list_ct_file:
+                                cmd = make_scp_cmd(ip, port, filename, dirname)
+                                f.write(cmd)
+        f.close()
+        return
+
+def create_deploy_ac(deply_file):
+        global map_ct_file, PORT_SSH, DIR_DEPOLY, list_ac_file
+        dict_map = read_map(map_ctrl_file)
+        f = open(deply_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        dirname = DIR_DEPOLY
+                        for filename in list_ac_file:
+                                cmd = make_scp_cmd(ip, port, filename, dirname)
+                                f.write(cmd)
+        dict_map = read_map(map_udp_file)
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        dirname = DIR_DEPOLY
+                        for filename in list_ac_file:
                                 cmd = make_scp_cmd(ip, port, filename, dirname)
                                 f.write(cmd)
         f.close()
@@ -284,6 +336,34 @@ def create_reboot_udp(reboot_file):
                         ip      = worker['ip']
                         port    = PORT_SSH
                         cmd     = make_ssh_cmd(ip, port, cmd_udp_reboot)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_shutdown_worker(shutdown_file):
+        global map_worker_file, PORT_SSH
+        dict_map = read_map(map_worker_file)
+        f = open(shutdown_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_shutdown)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_shutdown_udp(shutdown_file):
+        global map_udp_file, PORT_SSH
+        dict_map = read_map(map_udp_file)
+        f = open(shutdown_file, 'w')
+        f.write(make_sh_head())
+        for node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_udp_shutdown)
                         f.write(cmd)
         f.close()
         return
@@ -363,6 +443,40 @@ def create_config_worker():
                         #print(conf)
                         f.close()
 
+def create_node_start_worker(node):
+        global map_worker_file, PORT_SSH, dict_node_worker_start_file
+        if node not in dict_node_worker_start_file:
+                return
+        start_file = dict_node_worker_start_file[node]
+        dict_map = read_map(map_worker_file)
+        f = open(start_file, 'w')
+        f.write(make_sh_head())
+        if node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_start)
+                        f.write(cmd)
+        f.close()
+        return
+
+def create_node_stop_worker(node):
+        global map_worker_file, PORT_SSH, dict_node_worker_stop_file
+        if node not in dict_node_worker_stop_file:
+                return
+        stop_file = dict_node_worker_stop_file[node]
+        dict_map = read_map(map_worker_file)
+        f = open(stop_file, 'w')
+        f.write(make_sh_head())
+        if node in dict_map:
+                for worker in dict_map[node]:
+                        ip      = worker['ip']
+                        port    = PORT_SSH
+                        cmd     = make_ssh_cmd(ip, port, cmd_worker_stop)
+                        f.write(cmd)
+        f.close()
+        return
+
 def main():
         create_config_worker()
         create_deploy_worker_clean(deploy_worker_file)
@@ -376,6 +490,8 @@ def main():
 
         create_deploy_ctrl(deploy_ctrl_file)
 
+        create_deploy_ac(deploy_ac_file)
+
         create_start_udp(start_udp_file)
         create_start_worker(start_worker_file)
 
@@ -387,6 +503,15 @@ def main():
 
         create_reboot_udp(reboot_udp_file)
         create_reboot_worker(reboot_worker_file)
+
+        create_shutdown_udp(shutdown_udp_file)
+        create_shutdown_worker(shutdown_worker_file)
+
+        for node in list_node:
+                create_node_start_worker(node)
+
+        for node in list_node:
+                create_node_stop_worker(node)
 
 #=================================================
 
