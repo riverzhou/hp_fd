@@ -391,9 +391,13 @@ class fd_bid():
 
                 pp_global_info.event_image[self.count].wait()
                 self.price = pp_global_info.trigger_price[self.count]
+
                 if self.price == None:
                         printer.warning('client %s bid %s price is None , should be too high' % (self.client.bidno, self.count))
                         return False
+
+                if self.count != 0 and self.price < pp_global_info.max_price:
+                        self.price = pp_global_info.max_price
 
                 if self.count == 2 and str(self.client.check_price_bid(1)) == str(self.price):
                         printer.warning('client %s bid 2 price as same as bid 1 , cancel ' % self.client.bidno)
@@ -407,6 +411,10 @@ class fd_bid():
                                 max_image_timeout = int(pp_global_info.timeout_image[self.count])
                         except:
                                 max_image_timeout = self.max_image_timeout
+
+                        if self.count != 0 and self.price < pp_global_info.max_price:
+                                self.price = pp_global_info.max_price
+
                         thread_image = fd_image(self.client, self.count, self.price, max_image_timeout)
                         thread_image.start()
                         if thread_image.wait_for_finish() != True :
@@ -436,6 +444,7 @@ class fd_bid():
                 global pp_global_info
 
                 pp_global_info.event_price[self.count].wait()
+
                 if self.count == 1 and pp_global_info.flag_bid1_cancel == True:
                         printer.warning('client %s bid 1 cancel' % self.client.bidno)
                         return False

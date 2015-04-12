@@ -47,6 +47,10 @@ class pp_global(pp_thread):
                 self.sys_time           = '10:30:00'
                 self.sys_code           = None
 
+                self.lock_cur_price     = Lock()
+                self.cur_price          = 0
+                self.max_price          = 0
+
                 self.total_worker       = len(self.list_account)
                 self.num_todo_tb0       = len(self.list_account)
                 self.lock_todo_tb0      = Lock()
@@ -197,6 +201,18 @@ class pp_global(pp_thread):
                 if time_sub(stime, self.sys_time) > 0:
                         self.sys_time = stime
                 self.lock_systime.release()
+
+        def update_cur_price(self, cur_price):
+                self.lock_cur_price.acquire()
+                if self.cur_price < cur_price:
+                        self.cur_price = cur_price
+                if self.sys_code == 'B':
+                        max_price = cur_price + 300
+                        if self.max_price < max_price:
+                                self.max_price = max_price
+                else:
+                        self.max_price = self.cur_price
+                self.lock_cur_price.release()
 
         def update_syscode(self, code):
                 if self.sys_code == None and code == 'A':

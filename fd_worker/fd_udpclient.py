@@ -247,6 +247,8 @@ class udp_worker(pp_thread):
                         printer.error(str(self.server_addr) + ' :: ' + udp_recv)
                         return
 
+                self.update_cur_price(int_price)
+
                 self.check_shot_price(int_price)
 
                 self.check_image_time(int_price)
@@ -263,6 +265,10 @@ class udp_worker(pp_thread):
         def update_systime(self, stime):
                 global pp_global_info
                 pp_global_info.update_systime(stime)
+
+        def update_cur_price(self, cur_price):
+                global pp_global_info
+                pp_global_info.update_cur_price(cur_price)
 
         def main(self):
                 #print('udp_worker : ', str(self.server_addr))
