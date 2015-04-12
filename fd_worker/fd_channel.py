@@ -44,6 +44,9 @@ class fd_channel():
                 self.lock_login_request     = Lock()
                 self.lock_get_channel       = Lock()
 
+                self.lock_get_group         = Lock()
+                self.last_get_group         = 0
+
         def check_channel(self, channel_handle_tuple):
                 global pp_global_info
                 cur_time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
@@ -55,9 +58,20 @@ class fd_channel():
                         self.close_handle(handle)
                         return False
 
+        def get_channel_group(self):
+                self.lock_get_group.acquire()
+                if self.last_get_group == 0 :
+                        group = 1
+                        self.last_get_group = group
+                else:
+                        group = 0
+                        self.last_get_group = group
+                self.lock_get_group.release()
+                return  group
+
         def find_channel(self, channel, group):
                 if group == -1:
-                        channel_group = 1 if self.queue[0][channel].qsize() <= self.queue[1][channel].qsize() else 0
+                        channel_group = self.get_channel_group()
                 else:
                         channel_group = group
                 channel_handle_tuple = None

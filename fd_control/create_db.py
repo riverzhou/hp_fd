@@ -39,6 +39,7 @@ decode_deadline = common_policy.decode_deadline
 htmludp_addr    = common_policy.htmludp_addr
 bid0_maxretry   = common_policy.bid0_maxretry
 
+image_balance   = policy.image_balance
 image_trigger   = policy.image_trigger
 decode_type     = policy.decode_type
 decode_timeout  = policy.decode_timeout

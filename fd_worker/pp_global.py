@@ -29,6 +29,8 @@ class pp_global(pp_thread):
                 self.event_config_init  = Event()
 
         def init_local_config(self):
+                self.balance_image      = False
+
                 self.flag_create_login  = True
                 self.flag_create_toubiao= [False, False]
 
@@ -62,6 +64,7 @@ class pp_global(pp_thread):
                 return True
 
         def init_dynamic_config(self, key_val):
+                self.balance_image      = key_val['image_balance']
                 self.trigger_image      = key_val['image_trigger']
                 self.trigger_channel    = key_val['channel_trigger']
                 self.timeout_channel    = key_val['channel_timeout']
@@ -88,6 +91,8 @@ class pp_global(pp_thread):
                 if key_val == None:
                         return False
                 try:
+                        if 'image_balance'   not in key_val:
+                                return False
                         if 'image_trigger'   not in key_val:
                                 return False
                         if 'channel_trigger' not in key_val:

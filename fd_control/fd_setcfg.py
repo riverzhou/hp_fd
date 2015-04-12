@@ -51,6 +51,7 @@ class set_config():
                 key_val['channel_trigger']      = db_config[self.dbid].channel_trigger
                 key_val['channel_timeout']      = db_config[self.dbid].channel_timeout
                 key_val['image_trigger']        = db_config[self.dbid].image_trigger
+                key_val['image_balance']        = db_config[self.dbid].image_balance
                 key_val['decode_deadline']      = db_config[self.dbid].decode_deadline
                 key_val['decode_type']          = db_config[self.dbid].decode_type
                 key_val['decode_timeout']       = db_config[self.dbid].decode_timeout

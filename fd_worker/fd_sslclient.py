@@ -118,7 +118,7 @@ class fd_image(pp_thread):
                         printer.critical(format_exc())
 
         def do_image(self):
-                global  channel_center
+                global  channel_center, pp_global_info
                 proto   = self.client.proto
                 req     = proto.make_image_req(self.price)
                 if self.count == 0:
@@ -129,8 +129,11 @@ class fd_image(pp_thread):
                 while True:
                         if self.flag_timeout == True:
                                 break
+                        if pp_global_info.balance_image == True:
+                                group, handle = channel_center.get_channel(channel, self.timeout_find_channel, -1)
+                        else:
+                                group, handle = channel_center.get_channel(channel, self.timeout_find_channel, self.default_channel_group)
 
-                        group, handle = channel_center.get_channel(channel, self.timeout_find_channel, self.default_channel_group)
                         if handle == None :
                                 printer.error('client %s bid %d fd_image get channel Failed' % (self.client.bidno, self.count))
                                 sleep(0.1)
