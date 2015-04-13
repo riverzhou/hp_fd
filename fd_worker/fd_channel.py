@@ -89,6 +89,7 @@ class fd_channel():
                 return  channel_group, channel_handle_tuple
 
         def get_channel(self, channel, timeout, group = -1):
+                global dict_channel_time
                 channel_group  = None
                 channel_handle = None
                 start = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
@@ -108,6 +109,7 @@ class fd_channel():
                                 continue
                         break
 
+                printer.debug('get_channel: %s : %d ' % (dict_channel_time[channel_handle], channel_group) )
                 printer.debug(
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
                         % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['tb0'].qsize(), self.queue[1]['tb0'].qsize(), self.queue[0]['tb1'].qsize(), self.queue[1]['tb1'].qsize())
