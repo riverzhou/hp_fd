@@ -15,6 +15,8 @@ from pp_baseclass           import pp_thread
 
 #=============================================================================
 
+dict_channel_time = {}
+
 def time_sub(end, begin):
         try:
                 e = datetime.timestamp(datetime.strptime(end,   '%Y-%m-%d %H:%M:%S.%f'))
@@ -114,9 +116,11 @@ class fd_channel():
                 return  channel_group, channel_handle
 
         def put_channel(self, channel, group, handle):
+                global dict_channel_time
                 time = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                 channel_handle_tuple = (time, handle)
-                printer.debug('put_channel : channel %s, group %d, time %s' % (channel, group, time))
+                dict_channel_time[handle] = time
+                printer.debug('put_channel : %s : channel %s, group %d' % (time, channel, group))
                 return  self.queue[group][channel].put(channel_handle_tuple)
 
         def login_request_increase(self):
@@ -132,16 +136,22 @@ class fd_channel():
                 self.lock_login_request.release()
 
         def close_handle(self, handle):
+                global dict_channel_time
                 try:
+                        printer.debug('close_channel : %s' % dict_channel_time[handle])
                         handle.close()
+                        #del(dict_channel_time[handle])
                         del(handle)
                 except:
                         printer.critical(format_exc())
 
         def pyget(self, handle, req, headers = {}):
-                time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                global dict_channel_time
 
-                printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req)
+                time_req = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+                time_channel = dict_channel_time[handle]
+
+                printer.info(time_req + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + time_channel)
 
                 ack = None
 
@@ -151,6 +161,7 @@ class fd_channel():
                         self.close_handle(handle)
                         return False
                 except:
+                        printer.error('handle.request' + ' :: ' + time_req + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + time_channel)
                         printer.critical(format_exc())
                         self.close_handle(handle)
                         return False
@@ -160,6 +171,7 @@ class fd_channel():
                         self.close_handle(handle)
                         return False
                 except:
+                        printer.error('handle.getresponse' + ' :: ' + time_req + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + time_channel)
                         printer.critical(format_exc())
                         self.close_handle(handle)
                         return False
@@ -172,6 +184,7 @@ class fd_channel():
                         del(ack)
                         return None
                 except:
+                        printer.error('ack.read' + ' :: ' + time_req + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + time_channel)
                         printer.critical(format_exc())
                         del(ack)
                         return None
@@ -187,9 +200,9 @@ class fd_channel():
 
                 time_ack = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
 
-                printer.info(time_ack + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
+                printer.info(time_ack + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']) + ' :: ' + time_channel )
 
-                printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']))
+                printer.time(time_req + ' --- ' + time_ack + ' :: ' + str(headers) + ' :: ' + req + ' :: ' + str(key_val['head']) + ' :: ' + str(key_val['body']) + ' :: ' + time_channel)
 
                 del(ack)
                 return key_val
