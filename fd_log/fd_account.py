@@ -7,7 +7,7 @@ from fd_group import group
 
 ac_file = '../fd_control/ac_file.txt'
 
-ac_group = [1, 2, 3, 5, 6]
+ac_group = [1, 2, 3, 4, 5, 6, 7]
 
 def read_ac():
         global ac_file

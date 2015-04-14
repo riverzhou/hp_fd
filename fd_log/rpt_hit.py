@@ -36,7 +36,10 @@ def check_result():
                         if price not in dict_result:
                                 dict_result[price] = {}
                         dict_result[price][bidno] = (bidno, price, first, second, third, dict_ac_group[bidno][3])
-                        del(dict_ac_group[bidno])
+                        try:
+                                del(dict_ac_group[bidno])
+                        except:
+                                pass
         f.close()
 
 def main():
