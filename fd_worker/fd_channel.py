@@ -15,7 +15,7 @@ from pp_baseclass           import pp_thread
 
 #=============================================================================
 
-dict_channel_time = {}
+dict_channel_time = { None: None }
 
 def time_sub(end, begin):
         try:
