@@ -2,7 +2,7 @@
 
 from fd_group import group
 
-policy  = 1     # 1/2:    DLL 良好 / DLL 糟糕
+policy  = 1     # 1/2: DLL OK,  偏重价格 / 偏重时间. 3/4: DLL not OK,  偏重价格 / 偏重时间.
 
 #=============================================
 
@@ -21,9 +21,9 @@ g7_list = ['71','72','73','74','75','76','77','78','79']
 group_list = [ None, g1_list, g2_list, g3_list, g4_list, g5_list, g6_list, g7_list]
 
 p1_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_g','policy_h','policy_i']
-p2_list = ['policy_d', 'policy_e','policy_f','policy_d','policy_e','policy_f','policy_d','policy_e','policy_f']
-p3_list = ['policy_g', 'policy_h','policy_h','policy_g','policy_h','policy_h','policy_g','policy_h','policy_h']
-p4_list = ['policy_g', 'policy_h','policy_h','policy_g','policy_h','policy_h','policy_g','policy_h','policy_h']
+p2_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_j','policy_k','policy_l']
+p3_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_g','policy_h','policy_i']
+p4_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_j','policy_k','policy_l']
 
 policy_list = [ None, p1_list, p2_list, p3_list, p4_list ]
 
