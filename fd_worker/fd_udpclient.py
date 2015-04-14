@@ -152,7 +152,7 @@ class udp_worker(pp_thread):
                 time, delta_price = pp_global_info.trigger_image[2]
                 if time != None and delta_price != None and time_sub(cur_time, time) >= 0:
                         try:
-                                if pp_global_info.trigger_price[1] == None or pp_global_info.trigger_price[1] > cur_price + delta_price :
+                                if pp_global_info.trigger_price[1] == None or pp_global_info.trigger_price[1] >= cur_price + delta_price + 300:
                                         pp_global_info.flag_bid1_cancel = True
                                         pp_global_info.event_price[1].set()
                         except:
