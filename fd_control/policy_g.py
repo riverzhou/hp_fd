@@ -4,10 +4,11 @@
 
 image_trigger   = [('10:34:00', 75200), ('11:29:35', 600), ('11:29:55', 300)]
 
-decode_type     = ['A', 'C', 'C']
-decode_timeout  = [30, 8, 2]
+decode_type     = ['A', 'B', 'C']
+decode_timeout  = [30, 20, 2]
 image_timeout   = [30, 7, 7]
 price_timeout   = [30, 2, 10]
 
-image_balance   = False
+image_balance   = True
+
 
