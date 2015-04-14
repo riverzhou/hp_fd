@@ -13,16 +13,19 @@ db_file = ['db01.py','db02.py','db03.py','db04.py','db05.py','db06.py','db07.py'
 g1_list = ['11','12','13','14','15','16','17','18','19']
 g2_list = ['21','22','23','24','25','26','27','28','29']
 g3_list = ['31','32','33','34','35','36','37','38','39']
+g4_list = ['41','42','43','44','45','46','47','48','49']
 g5_list = ['51','52','53','54','55','56','57','58','59']
 g6_list = ['61','62','63','64','65','66','67','68','69']
+g7_list = ['71','72','73','74','75','76','77','78','79']
 
-group_list = [ None, g1_list, g2_list, g3_list, None, g5_list, g6_list]
+group_list = [ None, g1_list, g2_list, g3_list, g4_list, g5_list, g6_list, g7_list]
 
-p1_list = ['policy_a', 'policy_b','policy_c','policy_a','policy_b','policy_c','policy_a','policy_b','policy_c']
+p1_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_g','policy_h','policy_i']
 p2_list = ['policy_d', 'policy_e','policy_f','policy_d','policy_e','policy_f','policy_d','policy_e','policy_f']
 p3_list = ['policy_g', 'policy_h','policy_h','policy_g','policy_h','policy_h','policy_g','policy_h','policy_h']
+p4_list = ['policy_g', 'policy_h','policy_h','policy_g','policy_h','policy_h','policy_g','policy_h','policy_h']
 
-policy_list = [ None, p1_list, p2_list, p3_list ]
+policy_list = [ None, p1_list, p2_list, p3_list, p4_list ]
 
 head_0 = '''\
 #!/usr/bin/env python3
