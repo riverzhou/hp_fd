@@ -108,8 +108,10 @@ class fd_channel():
                                 sleep(0)
                                 continue
                         break
-
-                printer.debug('get_channel: %s : %d ' % (dict_channel_time[channel_handle], channel_group) )
+                if channel_handle == None:
+                        printer.debug('get_channel: None ')
+                else:
+                        printer.debug('get_channel: %s : %d ' % (dict_channel_time[channel_handle], channel_group) )
                 printer.debug(
                         'fd_channel : login[0] %d login[1] %d , tb0[0] %d tb0[1] %d , tb1[0] %d tb1[1] %d'
                         % (self.queue[0]['login'].qsize(), self.queue[1]['login'].qsize(), self.queue[0]['tb0'].qsize(), self.queue[1]['tb0'].qsize(), self.queue[0]['tb1'].qsize(), self.queue[1]['tb1'].qsize())
