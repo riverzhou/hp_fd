@@ -20,7 +20,10 @@ def check_bid112():
                         break
                 bidno = line.split('::')[2].split('BIDNUMBER=')[1].split('&')[0].strip()
                 dict_bid112[bidno] = line.strip()
-                del(dict_ac_group[bidno])
+                try:
+                        del(dict_ac_group[bidno])
+                except:
+                        pass
         f.close()
 
 
