@@ -22,8 +22,8 @@ group_list = [ None, g1_list, g2_list, g3_list, g4_list, g5_list, g6_list, g7_li
 
 p1_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_g','policy_h','policy_i']
 p2_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_j','policy_k','policy_l']
-p3_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_g','policy_h','policy_i']
-p4_list = ['policy_a', 'policy_b','policy_c','policy_d','policy_e','policy_f','policy_j','policy_k','policy_l']
+p3_list = ['policy_A', 'policy_B','policy_C','policy_D','policy_E','policy_F','policy_G','policy_H','policy_I']
+p4_list = ['policy_A', 'policy_B','policy_C','policy_D','policy_E','policy_F','policy_J','policy_K','policy_L']
 
 policy_list = [ None, p1_list, p2_list, p3_list, p4_list ]
 
